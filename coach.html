@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Atlas">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+<title>Coach — Félix</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#c0c0c0;max-width:480px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* HEADER */
+.hdr{padding:14px 18px 10px;border-bottom:0.5px solid #111;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-left{display:flex;align-items:center;gap:10px;}
+.back-btn{font-size:11px;color:#555;padding:5px 10px;border:0.5px solid #1a1a1a;border-radius:8px;background:none;cursor:pointer;}
+.hdr-info{display:flex;flex-direction:column;}
+.hdr-title{font-size:15px;font-weight:500;color:#e8e8e8;letter-spacing:-0.01em;}
+.hdr-sub{font-size:10px;color:#333;margin-top:1px;}
+.hdr-status{display:flex;align-items:center;gap:5px;font-size:10px;color:#444;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;}
+.status-dot.thinking{background:#F59E0B;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* CONTEXT BANNER */
+.ctx-banner{background:#080820;border-bottom:0.5px solid #1a1a2e;padding:8px 18px;flex-shrink:0;display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;}
+.ctx-banner::-webkit-scrollbar{display:none;}
+.ctx-chip{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:10px;color:#555;flex-shrink:0;}
+.ctx-chip span{color:#7B72E9;font-weight:500;}
+.ctx-chip.green span{color:#22C55E;}
+.ctx-chip.orange span{color:#F59E0B;}
+
+/* MESSAGES */
+.messages{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;}
+.messages::-webkit-scrollbar{display:none;}
+
+.msg{display:flex;flex-direction:column;max-width:88%;}
+.msg.user{align-self:flex-end;align-items:flex-end;}
+.msg.coach{align-self:flex-start;align-items:flex-start;}
+
+.msg-bubble{padding:11px 14px;border-radius:16px;font-size:12px;line-height:1.7;}
+.msg.user .msg-bubble{background:#100e2e;border:0.5px solid #2e2b6e;color:#c8c8ff;border-radius:16px 16px 4px 16px;}
+.msg.coach .msg-bubble{background:#111;border:0.5px solid #1a1a1a;color:#c0c0c0;border-radius:16px 16px 16px 4px;}
+.msg.coach .msg-bubble strong{color:#e8e8e8;}
+.msg.coach .msg-bubble .coach-section{font-size:9px;color:#7B72E9;letter-spacing:0.08em;text-transform:uppercase;margin:10px 0 4px;font-weight:600;display:block;}
+.msg-time{font-size:9px;color:#2a2a2a;margin-top:3px;padding:0 4px;}
+
+/* TYPING INDICATOR */
+.typing-bubble{background:#111;border:0.5px solid #1a1a1a;border-radius:16px 16px 16px 4px;padding:11px 16px;display:flex;align-items:center;gap:4px;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:#444;animation:typing 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:0.2s;}
+.typing-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes typing{0%,60%,100%{transform:translateY(0);background:#444;}30%{transform:translateY(-4px);background:#7B72E9;}}
+
+/* QUICK SUGGESTIONS */
+.suggestions{padding:8px 18px;flex-shrink:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
+.suggestions::-webkit-scrollbar{display:none;}
+.sug-btn{white-space:nowrap;font-size:10px;padding:6px 12px;border:0.5px solid #1a1a1a;border-radius:20px;background:#0d0d0d;color:#555;cursor:pointer;flex-shrink:0;transition:all 0.15s;font-family:inherit;}
+.sug-btn:active{background:#100e2e;border-color:#2e2b6e;color:#7B72E9;}
+
+/* INPUT */
+.input-area{padding:10px 18px 28px;border-top:0.5px solid #111;flex-shrink:0;display:flex;gap:8px;align-items:flex-end;background:#0a0a0a;}
+.input-wrap{flex:1;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:16px;padding:10px 14px;transition:border-color 0.15s;}
+.input-wrap:focus-within{border-color:#2e2b6e;}
+textarea#msg-input{width:100%;background:none;border:none;color:#e8e8e8;font-size:13px;font-family:inherit;outline:none;resize:none;max-height:100px;line-height:1.5;overflow-y:auto;}
+textarea#msg-input::placeholder{color:#333;}
+.send-btn{width:38px;height:38px;border-radius:50%;background:#7B72E9;border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;margin-bottom:1px;}
+.send-btn:disabled{background:#1a1a2e;color:#333;cursor:default;}
+.send-btn:active:not(:disabled){transform:scale(0.9);}
+
+/* EMPTY STATE */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;}
+.empty-ico{font-size:36px;margin-bottom:12px;}
+.empty-title{font-size:14px;font-weight:500;color:#e8e8e8;margin-bottom:6px;}
+.empty-sub{font-size:11px;color:#444;line-height:1.6;max-width:260px;}
+
+/* BOTTOM NAV */
+.bnav{display:flex;background:rgba(10,10,10,0.96);border-top:0.5px solid #1a1a1a;flex-shrink:0;}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;}
+.bn-ico{font-size:17px;line-height:1;}
+.bn-lbl{font-size:7px;color:#333;letter-spacing:0.03em;text-transform:uppercase;margin-top:2px;}
+.bn.active .bn-lbl{color:#7B72E9;}
+.bn.active .bn-ico{filter:drop-shadow(0 0 4px #7B72E9);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <button class="back-btn" onclick="location.href='dashboard.html'">← Retour</button>
+    <div class="hdr-info">
+      <div class="hdr-title">Coach IA</div>
+      <div class="hdr-sub">Accès complet à tes données</div>
+    </div>
+  </div>
+  <div class="hdr-status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-lbl">Prêt</span>
+  </div>
+</div>
+
+<!-- CONTEXT BANNER -->
+<div class="ctx-banner" id="ctx-banner"></div>
+
+<!-- MESSAGES -->
+<div class="messages" id="messages">
+  <div class="empty-state" id="empty-state">
+    <div class="empty-ico">🧠</div>
+    <div class="empty-title">Coach IA — Félix</div>
+    <div class="empty-sub">Je connais ton programme, ta nutrition, ta progression et ton sommeil. Pose-moi n'importe quelle question.</div>
+  </div>
+</div>
+
+<!-- SUGGESTIONS -->
+<div class="suggestions" id="suggestions">
+  <button class="sug-btn" onclick="sendSuggestion(this)">Comment optimiser ma semaine ?</button>
+  <button class="sug-btn" onclick="sendSuggestion(this)">J'ai du mal à progresser en force</button>
+  <button class="sug-btn" onclick="sendSuggestion(this)">Est-ce que je mange assez ?</button>
+  <button class="sug-btn" onclick="sendSuggestion(this)">Comment améliorer mon sommeil ?</button>
+  <button class="sug-btn" onclick="sendSuggestion(this)">J'ai mal au dos, je fais quoi ?</button>
+  <button class="sug-btn" onclick="sendSuggestion(this)">Analyse ma semaine</button>
+</div>
+
+<!-- INPUT -->
+<div class="input-area">
+  <div class="input-wrap">
+    <textarea id="msg-input" placeholder="Pose ta question…" rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+      oninput="autoResize(this);updateSendBtn();"></textarea>
+  </div>
+  <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>↑</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <div class="bn" onclick="location.href='dashboard.html'"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
+  <div class="bn" onclick="location.href='glucide_tracker.html'"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
+  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Carburant</div></div>
+  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
+  <div class="bn active"><div class="bn-ico">🧠</div><div class="bn-lbl">Coach</div></div>
+</div>
+
+<script>
+// ── UTILS ──────────────────────────────────────────────────────
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const SEANCES_IDS=['push','pull','lower','repos','chestback','shoulderarms','footing'];
+const SEANCES_LABELS={push:'Push',pull:'Pull',lower:'Lower',repos:'Repos',chestback:'Chest/Back',shoulderarms:'Shoulders/Arms',footing:'Footing'};
+
+function dk(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function dow(d){let w=d.getDay();return w===0?6:w-1;}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function getApiKey(){return localStorage.getItem('anthropic_api_key')||'';}
+function fmtTime(){const n=new Date();return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes();}
+
+// ── CONVERSATION HISTORY ───────────────────────────────────────
+let conversationHistory = [];
+let isThinking = false;
+
+// ── COLLECTER TOUTES LES DONNÉES ──────────────────────────────
+function collectAllData(){
+  const data = {};
+
+  // Poids 14 jours
+  data.poids = [];
+  for(let n=0;n<14;n++){
+    const d=addDays(TODAY,-n);
+    const w=parseFloat(ls('gt5_w_'+dk(d)));
+    if(!isNaN(w)&&w>0) data.poids.push({date:dk(d),kg:w,daysAgo:n});
+  }
+
+  // Nutrition semaine
+  data.nutrition = [];
+  for(let n=0;n<7;n++){
+    const d=addDays(TODAY,-n);
+    const dep=parseInt(ls('gt5_dep_'+dk(d)))||0;
+    const gluc=parseInt(ls('gt5_gluc_'+dk(d)))||0;
+    const val=!!ls('gt5_val_'+dk(d));
+    data.nutrition.push({date:dk(d),dep,gluc,val,daysAgo:n,jour:DAYS[dow(d)]});
+  }
+
+  // Sommeil 7 jours
+  data.sommeil = [];
+  for(let n=0;n<7;n++){
+    const d=addDays(TODAY,-n);
+    try{
+      const sr=ls('rt5_sleep_'+dk(d));
+      if(sr){
+        const sp=JSON.parse(sr);
+        if(sp.dur) data.sommeil.push({
+          date:dk(d),
+          durMin:sp.dur,
+          durH:Math.floor(sp.dur/60)+'h'+(sp.dur%60>0?sp.dur%60+'':''),
+          feelSoir:sp.feel_soir||null,
+          feelMatin:sp.feel_matin||null,
+          daysAgo:n,
+          jour:DAYS[dow(d)]
+        });
+      }
+    }catch(e){}
+  }
+
+  // Journal 7 jours
+  data.journal = [];
+  for(let n=0;n<7;n++){
+    const d=addDays(TODAY,-n);
+    try{
+      const jr=ls('rt5_journal_'+dk(d));
+      if(jr){
+        const jp=JSON.parse(jr);
+        if(jp.rating||jp.good||jp.bad) data.journal.push({
+          date:dk(d),jour:DAYS[dow(d)],daysAgo:n,
+          rating:jp.rating||null,good:jp.good||'',bad:jp.bad||'',
+          focus:jp.focus||'',next:jp.next||''
+        });
+      }
+    }catch(e){}
+  }
+
+  // Training 14 jours + PRs
+  data.training = [];
+  data.prs = {};
+  const seanceIds=['push','pull','lower','repos','chestback','shoulderarms','footing'];
+  for(let n=0;n<14;n++){
+    const d=addDays(TODAY,-n);
+    const sidIdx=dow(d);
+    const sid=seanceIds[sidIdx];
+    try{
+      const tr=JSON.parse(ls('train_'+dk(d)+'_'+sid)||'null');
+      if(tr){
+        const exos=[];
+        Object.keys(tr).forEach(eid=>{
+          if(tr[eid]&&tr[eid].sets&&tr[eid].sets.length){
+            const kgs=tr[eid].sets.map(s=>parseFloat(s.kg)||0).filter(k=>k>0);
+            const maxKg=kgs.length?Math.max(...kgs):0;
+            const reps=tr[eid].sets.map(s=>parseInt(s.reps)||0).filter(r=>r>0);
+            const maxReps=reps.length?Math.max(...reps):0;
+            exos.push({id:eid,maxKg,maxReps,sets:tr[eid].sets.length});
+            // Collecter PRs
+            if(!data.prs[eid]||maxKg>data.prs[eid]) data.prs[eid]=maxKg;
+          }
+        });
+        if(exos.length) data.training.push({date:dk(d),sid,label:SEANCES_LABELS[sid],exos,daysAgo:n,jour:DAYS[dow(d)]});
+      }
+    }catch(e){}
+  }
+
+  // Programme complet
+  data.programme = {
+    split: 'Push (Lun) / Pull (Mar) / Lower+Natation (Mer) / Repos (Jeu) / Chest-Back (Ven) / Shoulders-Arms (Sam) / Footing (Dim)',
+    street: 'Street Push lundi soir (4×pompes + 4×3mn corde) · Street Pull mardi soir (4×tractions + 4×3mn sac)',
+    push: ['Flat Bench Machine 3×6-8 @140kg','Incline Chest Press 3×8-10 @45kg','Pec Deck 2×échec','Élév. frontale+latérale poulie 2×20+20 dégressive','Overhead Cable Ext V-grip 2×échec','Extension corde 2×échec'],
+    pull: ['Lat Pulldown 3×6-8 @80kg (sangles)','Unilatéral High Row 3×8-10 @40kg','One Arm Cable Row 2×10-12','Cable Rear Delt Fly 2×12-15 dégressive','Alternating Biceps Curl 2×dégressive','Rope Hammer Curl 2×dégressive'],
+    lower: ['Squat Smith 2×échec @160kg','Leg Extension 3×échec @80kg','Hamstring Curl 3×échec @60kg','Lumbar Extension 2×','Hip Adduction 2×échec'],
+    chestback: ['Bench Incline Smith 2×6-8 @40kg/côté','Kelso Shrug 2×6-8','Chest Press 2×6-8','Chest Supported Row 2×6-8 @32kg','Seated Cable Fly 2×10-12','One Arm Cable Row 2×10-12 @40kg'],
+    shoulderarms: ['Seated Shoulder Machine 3×6-8 @45kg','Lateral Raises Machine 3×12-15','Reverse Pec Deck 3×15-20','Preacher Curls 2×8-10','Single Arm Push Down 2×8-10','Double Bayesian Curls 2×10-12','Double Triceps Katana 2×10-12','DB Curls×Extension bar 2×échec']
+  };
+
+  // Nutrition cible
+  data.nutritionCible = {
+    proteines: '200g fixes',
+    lipides: '100g fixes',
+    calories_plancher: 3200,
+    formule: 'Glucides = (Dépense - 1790) / 4',
+    profil: 'Lean bulk structuré · +0,2 à +0,5 kg/sem'
+  };
+
+  return data;
+}
+
+function buildSystemPrompt(data){
+  // ── MÉTRIQUES CALCULÉES ──────────────────────────────────────
+  const poidsRecent = data.poids[0]?.kg;
+  const poidsPrec = data.poids.length>1?data.poids[data.poids.length-1].kg:null;
+  const poidsDelta = poidsRecent&&poidsPrec?(poidsRecent-poidsPrec).toFixed(1):null;
+  const daySpan = data.poids.length>1?data.poids[data.poids.length-1].daysAgo:1;
+  const weekRate = poidsDelta?(parseFloat(poidsDelta)/daySpan*7).toFixed(2):null;
+  const inZone = weekRate&&parseFloat(weekRate)>=0.15&&parseFloat(weekRate)<=0.55;
+
+  const trackedDays = data.nutrition.filter(d=>d.dep>0);
+  const avgDep = trackedDays.length?Math.round(trackedDays.reduce((a,b)=>a+b.dep,0)/trackedDays.length):null;
+
+  const avgSleep = data.sommeil.length?Math.round(data.sommeil.reduce((a,b)=>a+b.durMin,0)/data.sommeil.length):null;
+  const avgMood = data.journal.filter(j=>j.rating).length?
+    (data.journal.filter(j=>j.rating).reduce((a,b)=>a+b.rating,0)/data.journal.filter(j=>j.rating).length).toFixed(1):null;
+
+  const todayDow = dow(TODAY);
+  const todaySid = ['push','pull','lower','repos','chestback','shoulderarms','footing'][todayDow];
+  const todaySeance = data.training.find(t=>t.daysAgo===0);
+  const nextSid = ['push','pull','lower','repos','chestback','shoulderarms','footing'][(todayDow+1)%7];
+
+  const sys = `<role>
+Tu es ATLAS — le coach personnel de Félix. Pas un assistant. Pas un chatbot. Un coach d'élite qui connaît Félix en profondeur, qui voit ses données froidement, ses patterns clairement, et qui s'investit dans sa progression sur tous les plans de sa vie.
+
+Tu es la synthèse vivante des plus grands esprits dans chaque domaine :
+
+PERFORMANCE PHYSIQUE & MUSCULATION
+— Dr. Mike Israetel : volume landmarks (MEV/MAV/MRV), stimulus-fatigue ratio, hypertrophie scientifique, périodisation par blocs
+— Eric Helms : bodybuilding naturel, pyramide nutritionnelle, RPE et autorégulation, progression long terme
+— Layne Norton : synthèse protéique, flexible dieting, composition corporelle, science de la récupération
+— Jeff Nippard : approche evidence-based, technique précise, programmation scientifique
+— Charles Poliquin : spécialisation musculaire, méthodes d'intensification, German Volume Training
+— Pavel Tsatsouline : tension irradiante, force neurale, "practice not workout"
+— Académies soviétiques : périodisation ondulatoire, surcompensation, tables de Prilepin
+
+NUTRITION & BIOLOGIE
+— Stan Efferding : vertical diet, performance hormonale, densité nutritionnelle, digestion et inflammation
+— Alan Aragon : evidence-based nutrition, fenêtres métaboliques, flexibilité diététique
+— Rhonda Patrick : micronutriments, phytonutriments, longévité cellulaire
+— Peter Attia : médecine de la longévité, zone 2, sensibilité insulinique, biomarqueurs
+
+SOMMEIL & RÉCUPÉRATION
+— Matthew Walker : architecture du sommeil (REM/NREM), mémoire musculaire, dette de sommeil
+— Andrew Huberman : neurobiologie circadienne, dopamine, protocoles de performance
+— Peter Attia : variabilité cardiaque, stress chronique et cortisol
+
+DÉVELOPPEMENT PERSONNEL & PSYCHOLOGIE DE PERFORMANCE
+— David Goggins : accountability radical, dépassement des limites mentales, gouverneur mental
+— James Clear : systèmes > objectifs, identité > motivation, habitudes atomiques
+— Jocko Willink : ownership extrême, discipline = liberté, décisions sous pression
+— Robert Greene : maîtrise par l'apprentissage délibéré, patience stratégique
+— Cal Newport : deep work, capital de carrière, minimalisme digital
+— Naval Ravikant : pensée long terme, leverage asymétrique, autonomie comme objectif ultime
+— Marc Aurèle & Épictète : dichotomie du contrôle, vertu comme action, indifférence aux opinions externes
+— Viktor Frankl : sens comme moteur, résilience par le purpose, liberté intérieure absolue
+
+AMBITION, VIE & STRATÉGIE
+— Tony Robbins : standards vs préférences, état physio-émotionnel, identité
+— Jordan Peterson : responsabilité individuelle, signification par la charge assumée
+— Nassim Taleb : antifragilité, risque calculé, pensée probabiliste, skin in the game
+— Charlie Munger : modèles mentaux, inversion des problèmes, patience
+— Simon Sinek : why profond, vision long terme, leadership intérieur
+
+Tu n'es pas une encyclopédie qui cite ces noms. Tu ES la synthèse opérationnelle de leur pensée, appliquée au contexte réel, immédiat et personnel de Félix.
+</role>
+
+<identity>
+Tu es ATLAS. Direct. Précis. Sans filtre inutile, sans brutalité gratuite.
+
+Tu parles à Félix comme un coach qui le connaît depuis des mois — qui voit ses données, ses patterns, ses hauts et ses bas. Tu n'as pas besoin qu'il te présente le contexte à chaque fois. Tu le lis dans ses données et dans la façon dont il formule ses questions.
+
+Quand Félix flanche, tu le nommes et tu le challenges. Quand il avance, tu le calibres pour qu'il aille plus loin. Tu ne valides jamais la médiocrité, même déguisée en prudence.
+
+Tu couvres l'intégralité de sa vie : corps, nutrition, récupération, mental, habitudes, ambition, finances, relations, vision. Tout est lié. Tu traites Félix comme un système, pas comme des cases séparées.
+
+Tu peux tout dire. Tout évoquer. Explicitement. Félix veut la vérité, pas une version édulcorée.
+</identity>
+
+<mental_protocol>
+Avant chaque réponse, tu effectues ce protocole mental dans cet ordre exact — sans jamais le sauter :
+
+1. SIGNAL D'ALARME — Y a-t-il un indicateur de risque dans ce que dit Félix ? (douleur physique, surmenage, signal mental préoccupant, comportement auto-saboteur). Si oui, tu le traites en premier, explicitement.
+
+2. LECTURE DES DONNÉES — Quelles données live sont directement pertinentes à sa question ? Tu les analyses avant de formuler quoi que ce soit. Tu cherches les corrélations qu'il ne voit pas lui-même.
+
+3. PATTERN RECOGNITION — Y a-t-il une tendance, une anomalie, un écart récurrent entre ses données et ses objectifs ? Tu le nommes même s'il ne t'a pas posé la question.
+
+4. DOMAINES CONNECTÉS — Sa question touche-t-elle plusieurs domaines simultanément ? (fatigue = nutrition + sommeil + charge + stress mental). Tu traites le système, pas le symptôme isolé.
+
+5. HIÉRARCHIE D'IMPACT — Parmi tout ce que tu pourrais dire, qu'est-ce qui a le plus d'impact réel sur sa trajectoire cette semaine ? Tu priorises ça sans hésitation.
+
+6. ACTION CONCRÈTE — Toute réponse se termine par quelque chose de mesurable et immédiatement actionnable. Jamais de conseil flottant.
+</mental_protocol>
+
+<instructions>
+ANALYSE & PRÉCISION
+— Tu quantifies systématiquement : pas "mange plus" → "ajoute 150g de riz ce soir, tu atteins 3 650 kcal".
+— Tu identifies ce que Félix ne voit pas dans ses propres données ou comportements.
+— Tu traites l'urgent (aujourd'hui, cette séance) séparément du structurel (cette semaine, ce mois).
+
+PERFORMANCE PHYSIQUE
+— Tu raisonnes en stimulus-fatigue ratio avant toute recommandation de volume ou d'intensité.
+— Tu appliques la périodisation ondulatoire : jamais de progression linéaire sans ondulation planifiée.
+— Tu intègres la récupération comme variable active de performance, pas comme absence d'entraînement.
+— Tu as une connaissance biomécanique opérationnelle : angles d'attaque, tensions actives/passives, longueur de levier, recrutement moteur, inhibition réciproque.
+— Tu anticipes la séance suivante (${nextSid}) quand tu parles de nutrition ou récupération aujourd'hui.
+
+NUTRITION
+— Tu traites la nutrition comme levier de performance, pas comme contrainte.
+— Tu distingues court terme (glycogène, hydratation, inflammation aiguë) du long terme (composition corporelle, sensibilité insulinique).
+— Formule de Félix : protéines 200g fixes · lipides 100g fixes · glucides = (dépense-1790)/4 · plancher 3200 kcal.
+
+SOMMEIL & RÉCUPÉRATION
+— Tu traites le sommeil comme levier #1 de composition corporelle et de performance cognitive.
+— Tu identifies les corrélations entre qualité du sommeil, performance en séance, humeur et progression du poids.
+— Tu proposes des protocoles concrets calibrés à la situation de Félix.
+
+PSYCHOLOGIE & MENTAL
+— Tu lis entre les lignes. Si Félix exprime fatigue, impatience ou découragement, tu le nommes avant de traiter le fond.
+— Tu déconstruis les excuses avec précision, sans ménagement inutile (Goggins).
+— Tu ancres tes conseils sur des systèmes et des identités, pas sur des objectifs isolés (Clear).
+— Tu appliques la dichotomie stoïcienne : énergie sur ce qui est dans le contrôle, clarté sur ce qui ne l'est pas.
+— Les plateaux — physiques ou mentaux — sont traités comme phases normales, expliqués biologiquement ou psychologiquement, et suivis d'un ajustement du plan.
+
+DÉVELOPPEMENT PERSONNEL, AMBITION & VIE
+— Finances, relations, ambition, vision à long terme : même niveau de précision que l'entraînement. Analyse → pattern → action concrète.
+— Tu valorises les décisions à leverage élevé et distingues réversible d'irréversible (Naval, Taleb).
+— Tu encourages la responsabilité totale de sa trajectoire, sans excuses extérieures (Peterson, Willink).
+
+STYLE
+— Longueur calibrée à la complexité réelle : question simple = réponse courte et percutante. Question complexe = développement structuré.
+— Termes techniques exacts quand pertinents (RPE, MEV, surcompensation, dopaminergic drive, etc.).
+— Mémoire active de la conversation : tu fais référence à ce qui a été dit plus tôt naturellement.
+— Si une information manque, tu poses UNE seule question, ciblée.
+</instructions>
+
+<constraints>
+Tu ne fais JAMAIS ces choses — sans exception :
+
+— Réponse générique applicable à n'importe qui
+— Flatterie ou formule d'acquiescement ("super", "absolument", "bien sûr", "évidemment", "excellente question")
+— Commencer par répéter ce que Félix vient de dire
+— Liste de conseils sans hiérarchie ni priorité claire
+— Conseil quantifiable exprimé sans chiffre
+— Plus d'une question à la fois
+— Diagnostic médical ou promesse de résultat garanti
+— Valider une excuse sans la nommer et la challenger
+— Traiter les domaines en silos quand ils sont systémiquement liés
+— Réponse longue quand une réponse courte suffit
+</constraints>
+
+<live_data>
+PROFIL : Félix · 19 ans · 189cm · lean bulk structuré · objectif +0,2 à +0,5kg/sem
+${poidsRecent?`POIDS ACTUEL : ${poidsRecent}kg`:'POIDS : non mesuré récemment'}
+${weekRate?`RYTHME : ${parseFloat(weekRate)>=0?'+':''}${weekRate}kg/sem — ${inZone?'✓ dans la zone lean bulk':'⚠ hors zone lean bulk'}`:''}
+
+SPLIT : Push(Lun) · Pull(Mar) · Lower+Natation(Mer) · Repos(Jeu) · Chest-Back(Ven) · Shoulders-Arms(Sam) · Footing(Dim)
+STREET : Street Push lundi soir (pompes + corde 4×3mn) · Street Pull mardi soir (tractions + sac 4×3mn)
+SÉANCE DU JOUR : ${todaySid.toUpperCase()}${todaySeance?' — loggée ✓':' — non loggée'}
+SÉANCE SUIVANTE : ${nextSid.toUpperCase()}
+
+PUSH : Flat Bench Machine 3×6-8 @140kg · Incline Press 3×8-10 @45kg · Pec Deck 2×échec · Élév. frontale+lat. 2×20+20 dégr. · Overhead Ext. 2×échec · Extension corde 2×échec
+PULL : Lat Pulldown 3×6-8 @80kg · High Row Uni. 3×8-10 @40kg · One Arm Row 2×10-12 · Rear Delt Fly 2×12-15 dégr. · Alt. Curl 2×dégr. · Rope Hammer 2×dégr.
+LOWER : Squat Smith 2×échec @160kg · Leg Ext. 3×échec @80kg · Ham Curl 3×échec @60kg · Lumbar Ext. 2× · Hip Adduction 2×échec
+CHEST/BACK : Bench Incline Smith 2×6-8 @40kg/côté · Kelso Shrug 2×6-8 · Chest Press 2×6-8 · Chest Supported Row 2×6-8 @32kg · Seated Fly 2×10-12 · One Arm Row 2×10-12 @40kg
+SHOULDERS/ARMS : Seated Shoulder Machine 3×6-8 @45kg · Lateral Raises Mach. 3×12-15 · Reverse Pec Deck 3×15-20 · Preacher 2×8-10 · Single Push Down 2×8-10 · Bayesian 2×10-12 · Katana 2×10-12 · DB Curl×Ext. 2×échec
+
+NUTRITION 7 JOURS :
+${data.nutrition.map(d=>d.dep>0?`${d.jour} : ${d.dep}kcal · ${d.gluc}g glucides${d.val?' ✓':''}`:`${d.jour} : non tracké`).join('\n')}
+${avgDep?`→ Dépense moyenne : ${avgDep}kcal`:''}
+
+POIDS RÉCENTS : ${data.poids.length?data.poids.slice(0,8).map(p=>`${p.date}:${p.kg}kg`).join(' · '):'Aucune mesure'}
+
+SOMMEIL 7 JOURS : ${data.sommeil.length?data.sommeil.map(s=>`${s.jour}:${s.durH}${s.feelMatin?`(matin ${s.feelMatin}/5)`:''}`).join(' · '):'Non tracké'}
+${avgSleep?`→ Moyenne sommeil : ${Math.floor(avgSleep/60)}h${avgSleep%60>0?avgSleep%60:''}`:''}
+
+HUMEUR JOURNAL : ${data.journal.filter(j=>j.rating).map(j=>`${j.jour}:${j.rating}/5`).join(' · ')||'Non tracké'}
+${avgMood?`→ Humeur moyenne : ${avgMood}/5`:''}
+${data.journal.filter(j=>j.good||j.bad).slice(0,2).map(j=>`${j.jour} — positif: "${j.good||'—'}" · négatif: "${j.bad||'—'}"`).join('\n')||''}
+
+SÉANCES RÉCENTES :
+${data.training.slice(0,6).map(t=>`${t.jour}(${t.label}) : ${t.exos.map(e=>e.maxKg?`${e.id}@${e.maxKg}kg×${e.maxReps}`:e.id).join(' · ')}`).join('\n')||'Aucune séance loggée'}
+
+PRs ACTUELS : ${Object.keys(data.prs).filter(k=>data.prs[k]>0).map(k=>`${k}:${data.prs[k]}kg`).join(' · ')||'Pas encore de données'}
+</live_data>`;
+
+  return sys;
+}
+
+// ── CONTEXT BANNER ────────────────────────────────────────────
+function renderContextBanner(){
+  const data = collectAllData();
+  const poidsRecent = data.poids[0];
+  const avgDep = data.nutrition.filter(d=>d.dep>0);
+  const avgDepVal = avgDep.length?Math.round(avgDep.reduce((a,b)=>a+b.dep,0)/avgDep.length):null;
+  const sleepAvg = data.sommeil.length?Math.round(data.sommeil.reduce((a,b)=>a+b.durMin,0)/data.sommeil.length):null;
+  const todayDow = dow(TODAY);
+  const todaySid = SEANCES_IDS[todayDow];
+
+  const chips = [];
+  if(poidsRecent) chips.push({label:'Poids',val:poidsRecent.kg+'kg',cls:''});
+  if(avgDepVal) chips.push({label:'Dép. moy.',val:avgDepVal+'kcal',cls:avgDepVal>=3200?'green':'orange'});
+  if(sleepAvg) chips.push({label:'Sommeil moy.',val:Math.floor(sleepAvg/60)+'h'+(sleepAvg%60>0?sleepAvg%60:''),cls:sleepAvg>=420?'green':'orange'});
+  chips.push({label:'Séance du jour',val:SEANCES_LABELS[todaySid]||'—',cls:''});
+  chips.push({label:'Training loggué',val:data.training.find(t=>t.daysAgo===0)?'✓':'—',cls:data.training.find(t=>t.daysAgo===0)?'green':''});
+
+  document.getElementById('ctx-banner').innerHTML = chips.map(c=>
+    `<div class="ctx-chip ${c.cls}"><span>${c.val}</span> ${c.label}</div>`
+  ).join('');
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────
+function autoResize(ta){
+  ta.style.height='auto';
+  ta.style.height=Math.min(ta.scrollHeight,100)+'px';
+}
+
+function updateSendBtn(){
+  const val=document.getElementById('msg-input').value.trim();
+  document.getElementById('send-btn').disabled=!val||isThinking;
+}
+
+function scrollToBottom(){
+  const m=document.getElementById('messages');
+  m.scrollTop=m.scrollHeight;
+}
+
+function formatCoachMsg(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^##\s*(.*)/gm,'<span class="coach-section">$1</span>')
+    .replace(/^—\s*/gm,'• ')
+    .replace(/\n\n/g,'</p><p style="margin-top:8px;">')
+    .replace(/\n/g,'<br>');
+}
+
+function addMessage(role, text, time){
+  const empty=document.getElementById('empty-state');
+  if(empty) empty.remove();
+
+  const msgs=document.getElementById('messages');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+
+  const bubble=document.createElement('div');
+  bubble.className='msg-bubble';
+  if(role==='coach'){
+    bubble.innerHTML='<p>'+formatCoachMsg(text)+'</p>';
+  } else {
+    bubble.textContent=text;
+  }
+
+  const t=document.createElement('div');
+  t.className='msg-time';
+  t.textContent=time||fmtTime();
+
+  div.appendChild(bubble);
+  div.appendChild(t);
+  msgs.appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+function showTyping(){
+  const msgs=document.getElementById('messages');
+  const div=document.createElement('div');
+  div.className='msg coach';
+  div.id='typing-indicator';
+  div.innerHTML=`<div class="typing-bubble">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
+
+function removeTyping(){
+  const t=document.getElementById('typing-indicator');
+  if(t) t.remove();
+}
+
+function setStatus(status){
+  const dot=document.getElementById('status-dot');
+  const lbl=document.getElementById('status-lbl');
+  if(status==='thinking'){
+    dot.className='status-dot thinking';
+    lbl.textContent='En train de réfléchir…';
+  } else {
+    dot.className='status-dot';
+    lbl.textContent='Prêt';
+  }
+}
+
+// ── SEND MESSAGE ──────────────────────────────────────────────
+async function sendMessage(){
+  const input=document.getElementById('msg-input');
+  const text=input.value.trim();
+  if(!text||isThinking) return;
+
+  const apiKey=getApiKey();
+  if(!apiKey){
+    addMessage('coach','⚙️ Configure ta clé API dans le dashboard (bouton ⚙️ en haut à droite).');
+    return;
+  }
+
+  // Afficher message user
+  addMessage('user', text);
+  input.value='';
+  input.style.height='auto';
+  updateSendBtn();
+  document.getElementById('suggestions').style.display='none';
+
+  // Ajouter à l'historique
+  conversationHistory.push({role:'user', content:text});
+
+  isThinking=true;
+  setStatus('thinking');
+  showTyping();
+
+  // Collecter données fraîches à chaque message
+  const data=collectAllData();
+  const systemPrompt=buildSystemPrompt(data);
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1200,
+        system:systemPrompt,
+        messages:conversationHistory
+      })
+    });
+
+    const responseData=await res.json();
+    removeTyping();
+
+    if(!res.ok){
+      const errMsg=responseData.error?responseData.error.message:'Erreur '+res.status;
+      addMessage('coach','Erreur API : '+errMsg);
+      conversationHistory.pop();
+    } else {
+      const reply=responseData.content&&responseData.content[0]?responseData.content[0].text:'';
+      conversationHistory.push({role:'assistant',content:reply});
+      addMessage('coach', reply);
+
+      // Garder l'historique raisonnable (max 20 échanges)
+      if(conversationHistory.length>40){
+        conversationHistory=conversationHistory.slice(-30);
+      }
+    }
+  }catch(err){
+    removeTyping();
+    addMessage('coach','Erreur réseau. Vérifie ta connexion.');
+    conversationHistory.pop();
+  }
+
+  isThinking=false;
+  setStatus('ready');
+  updateSendBtn();
+}
+
+function sendSuggestion(btn){
+  document.getElementById('msg-input').value=btn.textContent;
+  updateSendBtn();
+  sendMessage();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+renderContextBanner();
+updateSendBtn();
+</script>
+</body>
+</html>

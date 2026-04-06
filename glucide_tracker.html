@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Atlas">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+<title>Glucide Tracker — Félix</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#c0c0c0;max-width:480px;margin:0 auto;line-height:1.5;font-size:14px;overscroll-behavior:none;padding-bottom:72px;}
+button{cursor:pointer;font-family:inherit;}input,textarea{font-family:inherit;}
+
+.nav{border-bottom:0.5px solid #1a1a1a;}
+.nav-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;}
+.nav-left .title{font-size:15px;font-weight:500;color:#e8e8e8;}
+.nav-left .sub{font-size:10px;color:#333;margin-top:1px;}
+.nav-right{display:flex;align-items:center;}
+.nav-actions{display:flex;gap:5px;padding:6px 16px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.nav-actions::-webkit-scrollbar{display:none;}
+.streak-badge{font-size:10px;padding:3px 9px;border-radius:20px;background:#1c1400;color:#F59E0B;border:0.5px solid #3a2800;display:none;}
+.btn{font-size:11px;padding:5px 12px;border:0.5px solid #242424;border-radius:20px;background:transparent;color:#555;transition:background 0.15s,color 0.15s,border-color 0.15s;white-space:nowrap;flex-shrink:0;}
+.btn:hover{background:#181818;color:#c0c0c0;border-color:#333;}
+.btn.acc{border-color:#2e2b6e;color:#7B72E9;}
+.btn.acc:hover{background:#14123a;}
+.btn.red{border-color:#2a1010;color:#664444;}
+.btn.red:hover{background:#160a0a;color:#cc4444;}
+.btn-menu{font-size:11px;padding:5px 11px;border:0.5px solid #242424;border-radius:20px;background:transparent;color:#555;cursor:pointer;transition:color 0.15s,border-color 0.15s;flex-shrink:0;white-space:nowrap;}
+.btn-menu:hover{color:#c0c0c0;border-color:#333;}
+/* BOTTOM NAV */
+.bnav{position:fixed!important;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;background:rgba(10,10,10,0.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:0.5px solid #1a1a1a;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bn{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;min-width:0;}
+.bn-ico{font-size:17px;line-height:1;}
+.bn-lbl{font-size:7px;color:#333;letter-spacing:0.03em;text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48px;text-align:center;}
+.bn.active .bn-lbl{color:#7B72E9;}
+.bn.active .bn-ico{filter:drop-shadow(0 0 4px #7B72E9);}
+
+.view{display:none;padding:16px;}
+.view.active{display:block;}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.cal-nav .arrow{width:28px;height:28px;border:0.5px solid #1e1e1e;border-radius:50%;background:transparent;color:#555;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s;}
+.cal-nav .arrow:hover{background:#181818;color:#c0c0c0;}
+.cal-month-label{font-size:15px;font-weight:500;color:#e8e8e8;flex:1;}
+.cal-today-btn{font-size:10px;padding:4px 11px;border:0.5px solid #222;border-radius:20px;background:transparent;color:#555;}
+.cal-today-btn:hover{color:#c0c0c0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;}
+.cal-head{text-align:center;font-size:9px;color:#333;padding:5px 0;letter-spacing:0.06em;text-transform:uppercase;}
+.cal-cell{border:0.5px solid #141414;border-radius:8px;padding:5px 6px;cursor:pointer;transition:border-color 0.15s,background 0.15s;min-height:52px;display:flex;flex-direction:column;}
+.cal-cell:hover{border-color:#2a2a2a;background:#0d0d0d;}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default;}
+.cal-cell.past{opacity:0.3;cursor:default;}
+.cal-cell.missed{border-color:#1e1410;}
+.cal-cell.today{border-color:#3a3880;}
+.cal-cell.sel{background:#100e2e;border-color:#7B72E9;}
+.cal-cell.has{border-color:#1c1a42;}
+.cal-num{font-size:10px;font-weight:500;color:#555;}
+.cal-cell.today .cal-num{color:#7B72E9;}
+.cal-cell.sel .cal-num{color:#b0adee;}
+.cal-cell.missed .cal-num{color:#3a2a1a;}
+.cal-preset{font-size:8px;color:#252525;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-cell.has .cal-preset{color:#2e2c60;}
+.cal-gval{font-size:9px;color:#7B72E9;margin-top:auto;font-weight:500;}
+.cal-dots{display:flex;gap:2px;margin-top:3px;}
+.cdot{width:4px;height:4px;border-radius:50%;}
+.cdot.g{background:#7B72E9;}.cdot.w{background:#22C55E;}.cdot.n{background:#F59E0B;}.cdot.v{background:#22C55E;}.cdot.m{background:#2a1e10;}
+.cal-monthly-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:14px;}
+.cms{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;padding:10px 12px;}
+.cms-label{font-size:10px;color:#333;margin-bottom:4px;}
+.cms-val{font-size:14px;font-weight:500;color:#e8e8e8;}
+
+/* DAY TOPBAR */
+.day-topbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.back-btn{font-size:11px;padding:6px 11px;border:0.5px solid #1e1e1e;border-radius:20px;background:transparent;color:#555;white-space:nowrap;transition:background 0.15s,color 0.15s;}
+.back-btn:hover{background:#141414;color:#c0c0c0;}
+.day-nav-arrows{display:flex;gap:4px;}
+.day-nav-arrows button{width:28px;height:28px;border:0.5px solid #1e1e1e;border-radius:50%;background:transparent;color:#444;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s;}
+.day-nav-arrows button:hover{background:#141414;color:#c0c0c0;}
+.day-info{flex:1;min-width:0;}
+.day-title{font-size:16px;font-weight:500;color:#e8e8e8;letter-spacing:-0.01em;}
+.day-sub{font-size:11px;color:#444;margin-top:2px;}
+.day-acts-summary{font-size:10px;color:#7B72E9;margin-top:3px;}
+
+/* VALIDATE */
+.validate-btn-wrap{margin-bottom:14px;}
+.validate-btn-top{width:100%;padding:13px 16px;border:0.5px solid #166534;border-radius:10px;background:#071a0a;color:#22C55E;font-size:13px;font-weight:500;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;}
+.validate-btn-top:active{transform:scale(0.99);}
+.validate-btn-top.done{display:none;}
+
+.validated-banner{display:none;background:#071a0e;border:0.5px solid #166334;border-radius:10px;padding:12px 14px;margin-bottom:14px;position:relative;overflow:hidden;}
+.validated-banner::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#22C55E;}
+.vb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.vb-title{font-size:13px;font-weight:500;color:#22C55E;display:flex;align-items:center;gap:7px;}
+.vb-check{width:18px;height:18px;border-radius:50%;background:#14532d;display:flex;align-items:center;justify-content:center;font-size:10px;color:#22C55E;flex-shrink:0;}
+.vb-time{font-size:10px;color:#166534;}
+.vb-macros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+.vbm{background:#071a0a;border-radius:8px;padding:8px 10px;text-align:center;}
+.vbm-label{font-size:9px;color:#166534;margin-bottom:3px;letter-spacing:0.04em;}
+.vbm-val{font-size:14px;font-weight:500;color:#4ade80;}
+.unvalidate-btn{font-size:10px;padding:4px 10px;border:0.5px solid #166534;border-radius:20px;background:transparent;color:#166534;transition:color 0.15s;}
+.unvalidate-btn:hover{color:#22C55E;}
+
+/* ALERTS */
+.alert-strip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:11px;}
+.alert-floor{background:#1a0e00;border:0.5px solid #3a2200;color:#F59E0B;display:none;}
+.alert-gluc{background:#1a0a00;border:0.5px solid #3a1500;color:#EF4444;display:none;}
+.sec-div{height:1px;background:#141414;margin:14px 0;}
+
+/* HERO GLUCIDES */
+.gluc-hero{background:#0f0e1e;border:0.5px solid #2a2660;border-radius:14px;padding:18px 20px;margin-bottom:8px;transition:border-color 0.2s;}
+.gluc-hero.flash{border-color:#7B72E9;}
+.gluc-hero-label{font-size:10px;color:#555;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+.gluc-hero-top{display:flex;align-items:flex-start;justify-content:space-between;}
+.gluc-hero-val{font-size:38px;font-weight:500;color:#7B72E9;line-height:1;letter-spacing:-0.02em;}
+.gluc-hero-range{font-size:12px;color:#3d3a80;margin-top:6px;}
+.gluc-hero-right{text-align:right;}
+.status-badge{display:inline-block;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;margin-top:4px;}
+.status-badge.surplus{background:#071a0a;color:#22C55E;border:0.5px solid #166534;}
+.status-badge.equil{background:#100e2e;color:#7B72E9;border:0.5px solid #2e2b6e;}
+.status-badge.deficit-light{background:#1a0e00;color:#F59E0B;border:0.5px solid #3a2200;}
+.status-badge.deficit-hard{background:#1a0808;color:#EF4444;border:0.5px solid #3a1010;}
+.gluc-hero-kcal{font-size:11px;color:#444;margin-top:8px;}
+/* #16 — comparaison glucides vs hier */
+.gluc-hero-vs{font-size:10px;color:#333;margin-top:4px;}
+
+/* SECONDARY METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:14px;}
+.mc{background:#111;border:0.5px solid #1c1c1c;border-radius:10px;padding:10px 12px;}
+.mc-label{font-size:10px;color:#444;margin-bottom:4px;letter-spacing:0.03em;}
+.mc-val{font-size:17px;font-weight:500;color:#e8e8e8;line-height:1.1;}
+.mc-val-sm{font-size:16px;font-weight:500;color:#e8e8e8;line-height:1.1;}
+.mc-sub{font-size:10px;color:#333;margin-top:3px;}
+
+/* CHIPS */
+.prog-chips-wrap{margin-bottom:14px;}
+.prog-chips-label{font-size:10px;color:#444;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;}
+.prog-chips-outer{position:relative;}
+.prog-chips-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.prog-chips-scroll::-webkit-scrollbar{display:none;}
+.prog-chips-outer::after{content:"";position:absolute;right:0;top:0;bottom:4px;width:32px;background:linear-gradient(to right,transparent,#0a0a0a);pointer-events:none;}
+/* #15 — chips cliquables */
+.prog-chip{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:20px;border:0.5px solid #1e1e1e;background:#0d0d0d;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:border-color 0.15s,background 0.15s;}
+.prog-chip:hover{background:#111;border-color:#2a2a2a;}
+.prog-chip.active-chip{border-color:#3d3880;background:#0e0c22;}
+.prog-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.prog-chip-dot.blue{background:#185FA5;}.prog-chip-dot.green{background:#0F6E56;}
+.prog-chip-dot.amber{background:#854F0B;}.prog-chip-dot.coral{background:#993C1D;}
+.prog-chip-dot.purple{background:#7B72E9;}.prog-chip-dot.gray{background:#3a3a3a;}.prog-chip-dot.orange{background:#BA7517;}
+.prog-chip-name{font-size:11px;color:#c0c0c0;}
+.prog-chip-val{font-size:10px;color:#555;margin-left:2px;}
+.prog-chips-empty{font-size:11px;color:#2a2a2a;font-style:italic;}
+
+/* MAIN GRID */
+.main-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.card{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;}
+.card-title{font-size:10px;font-weight:500;color:#444;margin-bottom:10px;letter-spacing:0.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.card-title .accent{color:#7B72E9;font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;}
+
+/* ACTS */
+.acts-group-header{font-size:9px;color:#2a2a2a;letter-spacing:0.08em;padding:6px 4px 3px;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.acts-group-header::after{content:"";flex:1;height:0.5px;background:#141414;}
+.arow{display:flex;align-items:center;background:#0a0a0a;border:0.5px solid #141414;border-radius:8px;transition:border-color 0.15s,background 0.15s;min-height:44px;overflow:hidden;margin-bottom:2px;}
+.arow.on{border-color:#3d3880;background:#0e0c22;}
+.arow-chk-wrap{width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.arow .chk{width:16px;height:16px;accent-color:#7B72E9;cursor:pointer;}
+.arow .aname{flex:1;font-size:12px;color:#444;transition:color 0.15s;padding:0 4px;}
+.arow.on .aname{color:#d0cef8;}
+.arow-num-wrap{display:flex;align-items:center;gap:4px;padding:0 10px 0 4px;}
+.arow .anum{width:46px;font-size:12px;padding:4px 6px;border:0.5px solid #1e1e1e;border-radius:6px;background:#141414;color:#e0e0e0;text-align:center;height:32px;}
+.arow .aunit{font-size:9px;color:#333;width:28px;}
+.arow .akcal{font-size:10px;color:#252525;width:52px;text-align:right;padding-right:10px;transition:color 0.15s;}
+.arow.on .akcal{color:#7B72E9;}
+.arow .aname-input{flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #1e1e1e;border-radius:6px;background:#141414;color:#e0e0e0;margin:0 4px;}
+.add-more-btn{width:100%;padding:8px;margin-top:6px;border:0.5px dashed #1e1e1e;border-radius:8px;background:transparent;color:#333;font-size:11px;transition:border-color 0.15s,color 0.15s;}
+.add-more-btn:hover{border-color:#333;color:#666;}
+.acts-hidden{display:none;flex-direction:column;}
+.acts-hidden.open{display:flex;}
+
+/* RIGHT COL */
+.right-col{display:flex;flex-direction:column;gap:12px;}
+.w-error{font-size:10px;color:#EF4444;margin-top:4px;min-height:14px;display:none;}
+.w-inp-row{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px;}
+.w-stepper{display:flex;align-items:center;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;background:#0d0d0d;}
+.w-step-btn{width:48px;height:52px;background:transparent;border:none;color:#555;font-size:22px;transition:background 0.15s,color 0.15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.w-step-btn:hover{background:#161616;color:#c0c0c0;}
+.w-step-btn:active{background:#1e1e1e;}
+.w-inp{flex:1;font-size:22px;font-weight:500;padding:6px 4px;border:none;border-left:0.5px solid #1a1a1a;border-right:0.5px solid #1a1a1a;background:transparent;color:#e8e8e8;text-align:center;height:52px;-moz-appearance:textfield;}
+.w-inp::-webkit-outer-spin-button,.w-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.w-inp:focus{outline:none;background:#111;}
+.w-unit-label{font-size:10px;color:#444;text-align:center;}
+.w-actions{display:flex;gap:6px;}
+.w-save-btn{flex:1;font-size:12px;padding:11px 14px;border:0.5px solid #2e2b6e;border-radius:8px;background:#0e0c22;color:#7B72E9;font-weight:500;transition:background 0.15s,border-color 0.15s;}
+.w-save-btn:hover{background:#14123a;border-color:#7B72E9;}
+.w-del-btn{font-size:11px;padding:11px 12px;border:0.5px solid #2a1010;border-radius:8px;background:transparent;color:#664444;transition:background 0.15s,color 0.15s;}
+.w-del-btn:hover{background:#160a0a;color:#EF4444;}
+.w-save-status{font-size:10px;color:#22C55E;margin-top:4px;min-height:14px;display:flex;align-items:center;gap:5px;}
+.w-save-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;display:none;flex-shrink:0;}
+.w-hist{margin-top:6px;}
+.w-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid #111;font-size:10px;}
+.w-row:last-child{border-bottom:none;}
+.w-date{color:#333;}.w-val{color:#c0c0c0;font-weight:500;}
+.w-delta{font-size:9px;padding:1px 5px;border-radius:6px;margin-left:4px;}
+.w-delta.up{background:#1e0808;color:#EF4444;}.w-delta.dn{background:#071a0a;color:#22C55E;}
+.wchart-wrap{position:relative;height:64px;margin-top:8px;}
+.trend-row{display:flex;align-items:center;gap:6px;font-size:10px;color:#333;margin-top:5px;}
+.w-link{font-size:10px;color:#7B72E9;cursor:pointer;margin-top:5px;display:none;transition:color 0.15s;}
+.w-link:hover{color:#b0adee;}
+
+.note-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.note-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;opacity:0;transition:opacity 0.3s;}
+.note-ta{width:100%;background:#0a0a0a;border:0.5px solid #1a1a1a;border-radius:8px;color:#888;font-size:11px;padding:8px 10px;resize:vertical;min-height:52px;font-family:inherit;transition:border-color 0.15s;}
+.note-ta:focus{outline:none;border-color:#2a2a2a;color:#c0c0c0;}
+.note-footer{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.saved-lbl{font-size:10px;color:#22C55E;opacity:0;transition:opacity 0.3s;}
+
+/* DETAIL */
+.det-card{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.det-card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;transition:background 0.15s;}
+.det-card-header:hover{background:#111;}
+.det-card-header span{font-size:10px;color:#444;letter-spacing:0.04em;text-transform:uppercase;}
+.det-arrow{font-size:10px;color:#2a2a2a;transition:transform 0.2s;}
+.det-body{display:none;border-top:0.5px solid #141414;}
+.det-body.open{display:block;}
+.det-row{display:flex;justify-content:space-between;padding:7px 14px;border-bottom:0.5px solid #0f0f0f;font-size:11px;}
+.det-row:last-child{border-bottom:none;}
+.det-l{color:#444;}.det-v{font-weight:500;color:#c0c0c0;}
+
+/* WEEK */
+.week-card{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.week-card-title{font-size:10px;font-weight:500;color:#444;margin-bottom:10px;letter-spacing:0.06em;text-transform:uppercase;display:flex;justify-content:space-between;}
+.week-avg{font-size:10px;color:#7B72E9;font-weight:400;text-transform:none;letter-spacing:0;}
+.wbars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;align-items:end;height:75px;margin-bottom:8px;}
+.wb-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;cursor:pointer;}
+.wb-bg{flex:1;width:100%;background:#0a0a0a;border-radius:3px;display:flex;align-items:flex-end;}
+.wb-fill{width:100%;border-radius:3px;background:#1e1c42;min-height:2px;transition:height 0.3s;}
+.wb-fill.cur{background:#7B72E9;}.wb-fill.tod{background:#9d99f0;}
+.wb-day{font-size:9px;color:#2a2a2a;text-align:center;}
+.wb-g{font-size:9px;color:#7B72E9;min-height:10px;text-align:center;}
+.week-stats-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;}
+.wstat{background:#0a0a0a;border-radius:8px;padding:8px 10px;}
+.wstat-l{font-size:9px;color:#2a2a2a;margin-bottom:3px;}
+.wstat-v{font-size:13px;font-weight:500;}
+.week-vs{font-size:10px;color:#333;margin-top:10px;padding-top:10px;border-top:0.5px solid #141414;line-height:1.6;}
+.week-vs span{color:#7B72E9;}
+
+/* WEIGHT FULL */
+.weight-stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:14px;}
+.wsc{background:#111;border:0.5px solid #1c1c1c;border-radius:12px;padding:11px 13px;}
+.wsc-label{font-size:10px;color:#444;margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase;}
+.wsc-val{font-size:18px;font-weight:500;color:#e8e8e8;}
+.wsc-sub{font-size:10px;color:#333;margin-top:3px;}
+.weight-chart-full{position:relative;width:100%;height:260px;margin-bottom:14px;}
+.weight-hist-full{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;}
+.weight-hist-title{font-size:10px;font-weight:500;color:#444;margin-bottom:10px;letter-spacing:0.06em;text-transform:uppercase;}
+.wh-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #111;font-size:11px;}
+.wh-row:last-child{border-bottom:none;}
+.wh-date{color:#444;}.wh-val{color:#c0c0c0;font-weight:500;}
+
+/* EXPORT */
+.export-btn{width:100%;padding:10px;border:0.5px solid #1e1e1e;border-radius:8px;background:transparent;color:#333;font-size:11px;margin-top:12px;transition:border-color 0.15s,color 0.15s;}
+.export-btn:hover{border-color:#444;color:#666;}
+
+.ctxt{font-size:10px;color:#22C55E;opacity:0;transition:opacity 0.3s;margin-left:3px;}
+
+
+
+.arow{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#0d0d0d;border:0.5px solid #141414;margin-bottom:4px;}
+.arow.on{border-color:#1a1a2e;background:#080810;}
+.arow-lbl{flex:1;font-size:12px;color:#888;}
+.arow.on .arow-lbl{color:#c0c0c0;}
+.arow-inp-wrap{display:flex;align-items:center;gap:3px;}
+.arow-inp{width:52px;text-align:right;background:#0a0a0a;border:0.5px solid #222;border-radius:5px;padding:3px 5px;font-size:11px;color:#c0c0c0;}
+.arow-unit{font-size:10px;color:#555;white-space:nowrap;}
+.arow-kcal{font-size:10px;color:#7B72E9;white-space:nowrap;min-width:50px;text-align:right;}
+</style>
+</head>
+<body>
+
+<div class="nav" id="main-nav">
+  <div class="nav-top">
+    <div class="nav-left">
+      <div class="title">⚡ Énergie</div>
+      <div class="sub" id="nav-preset-sub">200g prot · 100g lip · glucides adaptatifs</div>
+    </div>
+    <div class="nav-right">
+      <div class="streak-badge" id="streak-badge"></div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-menu" onclick="location.href='dashboard.html'">⊞ Menu</button>
+    <button class="btn" onclick="showCal()">📅 Agenda</button>
+    <button class="btn" onclick="showWeightView()">⚖️ Poids</button>
+    <button class="btn acc" onclick="copyDay()">Copier <span class="ctxt" id="ctxt">✓</span></button>
+    <button class="btn acc" onclick="exportWeek()">Semaine</button>
+    <button class="btn red" onclick="resetCurDay()">Reset</button>
+  </div>
+</div>
+
+<div class="view active" id="view-cal">
+  <div class="cal-nav">
+    <button class="arrow" onclick="prevMonth()">‹</button>
+    <div class="cal-month-label" id="cal-month-lbl"></div>
+    <button class="arrow" onclick="nextMonth()">›</button>
+    <button class="cal-today-btn" onclick="goToday()">Aujourd'hui</button>
+  </div>
+  <div class="cal-grid" id="cal-heads"></div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="cal-monthly-stats" id="cal-monthly-stats"></div>
+  <button class="export-btn" onclick="exportAllData()">↓ Exporter toutes mes données (JSON)</button>
+</div>
+
+<div class="view" id="view-day">
+  <div class="day-topbar">
+    <button class="back-btn" onclick="showCal()">← Agenda</button>
+    <div class="day-nav-arrows">
+      <button onclick="shiftDay(-1)">‹</button>
+      <button onclick="shiftDay(1)">›</button>
+    </div>
+    <div class="day-info">
+      <div class="day-title" id="day-title"></div>
+      <div class="day-sub" id="day-sub"></div>
+      <div class="day-acts-summary" id="day-acts-summary"></div>
+    </div>
+    <button class="btn" onclick="resetCurDay()">Reset</button>
+  </div>
+
+  <div class="validated-banner" id="validated-banner">
+    <div class="vb-header">
+      <span class="vb-title"><span class="vb-check">✓</span>Journée validée</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="vb-time" id="vb-time"></span>
+        <button class="unvalidate-btn" onclick="unvalidateDay()">Modifier</button>
+      </div>
+    </div>
+    <div class="vb-macros">
+      <div class="vbm"><div class="vbm-label">GLUCIDES</div><div class="vbm-val" id="vb-gluc">—g</div></div>
+      <div class="vbm"><div class="vbm-label">PROTÉINES</div><div class="vbm-val">200g</div></div>
+      <div class="vbm"><div class="vbm-label">LIPIDES</div><div class="vbm-val" id="vbm-lip">100g</div></div>
+      <div class="vbm"><div class="vbm-label">TOTAL</div><div class="vbm-val" id="vb-total">—</div></div>
+    </div>
+  </div>
+
+  <div class="validate-btn-wrap">
+    <button class="validate-btn-top" id="validate-btn" onclick="validateDay()">
+      <span id="validate-icon">○</span>
+      <span id="validate-text">Valider la journée</span>
+    </button>
+    <div id="plan-link-wrap" style="display:none;margin-top:6px;text-align:center;">
+      <button onclick="location.href='carburant.html#plan'" style="font-size:11px;color:#22C55E;background:transparent;border:0.5px solid #166534;border-radius:20px;padding:6px 16px;cursor:pointer;width:100%;">🌿 Voir mon plan alimentaire adapté →</button>
+    </div>
+  </div>
+
+  <div class="alert-strip alert-floor" id="alert-floor">
+    <svg width="12" height="12" viewBox="0 0 16 16" style="flex-shrink:0"><path d="M8 1L1 14h14L8 1zm0 3l4.5 9H3.5L8 4z" fill="#F59E0B"/><rect x="7.5" y="7" width="1" height="3.5" fill="#F59E0B"/><circle cx="8" cy="12" r="0.8" fill="#F59E0B"/></svg>
+    Plancher appliqué — minimum 3 200 kcal
+  </div>
+  <div class="alert-strip alert-gluc" id="alert-gluc">
+    <svg width="12" height="12" viewBox="0 0 16 16" style="flex-shrink:0"><path d="M8 1L1 14h14L8 1zm0 3l4.5 9H3.5L8 4z" fill="#EF4444"/><rect x="7.5" y="7" width="1" height="3.5" fill="#EF4444"/><circle cx="8" cy="12" r="0.8" fill="#EF4444"/></svg>
+    Glucides bas — vérifie tes activités
+  </div>
+
+  <div class="gluc-hero" id="gluc-hero">
+    <div class="gluc-hero-label">Glucides cible</div>
+    <div class="gluc-hero-top">
+      <div>
+        <div class="gluc-hero-val" id="s-gluc">—</div>
+        <div class="gluc-hero-range" id="s-range">—</div>
+      </div>
+      <div class="gluc-hero-right">
+        <span class="status-badge equil" id="status-badge">—</span>
+      </div>
+    </div>
+    <div class="gluc-hero-kcal" id="gluc-hero-kcal"></div>
+    <div class="gluc-hero-vs" id="gluc-hero-vs"></div>
+  </div>
+
+  <!-- DÉPENSE TOTALE -->
+  <div style="margin:0 0 8px;background:#0d0d0d;border:0.5px solid #141414;border-radius:14px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Dépense totale</div>
+      <div style="display:flex;align-items:baseline;gap:5px;">
+        <span style="font-size:32px;font-weight:600;letter-spacing:-0.02em;line-height:1;" id="dep-big">—</span>
+        <span style="font-size:13px;color:#444;">kcal</span>
+      </div>
+      <div id="dep-ref-lbl" style="display:none;font-size:9px;color:#3a3a3a;margin-top:3px;font-style:italic;">estimation preset · non tracké</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:9px;color:#444;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;">Apport cible</div>
+      <div style="font-size:22px;font-weight:600;line-height:1;" id="apport-big">—</div>
+      <div style="font-size:9px;color:#333;margin-top:2px;">kcal</div>
+    </div>
+  </div>
+
+  <div class="sec-div"></div>
+
+  <div class="prog-chips-wrap">
+    <div class="prog-chips-label">Programme — <span style="color:#7B72E9;font-weight:400;text-transform:none;letter-spacing:0;" id="prog-lbl"></span></div>
+    <div class="prog-chips-outer">
+      <div class="prog-chips-scroll" id="prog-chips-scroll"></div>
+    </div>
+  </div>
+
+  <div class="sec-div"></div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Activités <span class="accent" id="preset-lbl"></span></span>
+        <button onclick="openDefaults()" style="font-size:10px;color:#444;border:0.5px solid #1a1a1a;border-radius:8px;padding:3px 9px;background:none;cursor:pointer;">⚙️ Défauts</button>
+      </div>
+      <div id="acts-checked"></div>
+      <button class="add-more-btn" id="add-more-btn" onclick="toggleHiddenActs()">+ Ajouter une activité</button>
+      <div class="acts-hidden" id="acts-hidden"></div>
+    </div>
+    <div class="right-col">
+      <div class="card">
+        <div class="card-title">Poids du jour</div>
+        <div class="w-inp-row">
+          <div class="w-stepper">
+            <button class="w-step-btn" onclick="stepWeight(-0.1)">−</button>
+            <input type="text" inputmode="decimal" class="w-inp" id="w-input" placeholder="84,5"/>
+            <button class="w-step-btn" onclick="stepWeight(0.1)">+</button>
+          </div>
+          <div class="w-unit-label">kg — + / − ou saisie directe</div>
+          <div class="w-error" id="w-error">Poids invalide (40–200 kg)</div>
+          <div class="w-actions">
+            <button class="w-save-btn" onclick="saveWeight()">Enregistrer</button>
+            <button class="w-del-btn" id="w-del-btn" onclick="deleteWeight()" style="display:none;">✕</button>
+          </div>
+        </div>
+        <div class="w-save-status"><span class="w-save-dot" id="w-save-dot"></span><span id="w-save-text"></span></div>
+        <div class="w-hist" id="w-hist"></div>
+        <div class="wchart-wrap"><canvas id="wchart"></canvas></div>
+        <div class="trend-row" id="trend-row"></div>
+        <div class="w-link" id="w-link" onclick="showWeightView()">Voir la courbe →</div>
+      </div>
+      <div class="card" style="margin-bottom:8px;background:#0d0d0d;border:0.5px solid #141414;border-radius:12px;padding:12px 14px;">
+        <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Dépense moy. 7 jours</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;">
+          <span style="font-size:24px;font-weight:600;color:#e8e8e8;letter-spacing:-0.02em;line-height:1;" id="week-avg-dep">—</span>
+          <span style="font-size:11px;color:#444;">kcal / jour</span>
+        </div>
+        <div style="font-size:10px;color:#333;" id="week-avg-sub">— jours trackés cette semaine</div>
+      </div>
+      <div class="card">
+        <div class="note-header">
+          <div class="card-title" style="margin-bottom:0;">Note du jour</div>
+          <div class="note-dot" id="note-dot"></div>
+        </div>
+        <textarea class="note-ta" id="note-ta" placeholder="Ressenti, récup, qualité séance..."></textarea>
+        <div class="note-footer">
+          <button class="btn" onclick="saveNote()">Sauvegarder</button>
+          <span class="saved-lbl" id="note-saved">Sauvegardé ✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-div"></div>
+
+  <div class="det-card">
+    <div class="det-card-header" id="det-header" onclick="toggleDetail()">
+      <span>Détail du calcul</span>
+      <span class="det-arrow" id="det-arrow">▼</span>
+    </div>
+    <div class="det-body" id="det-body">
+      <div class="det-row"><span class="det-l">BMR</span><span class="det-v" id="d-bmr">2 200 kcal</span></div>
+      <div class="det-row"><span class="det-l">Activité</span><span class="det-v" id="d-act">—</span></div>
+      <div class="det-row"><span class="det-l">Dépense totale</span><span class="det-v" id="d-dep">—</span></div>
+      <div class="det-row"><span class="det-l">Protéines</span><span class="det-v" style="color:#22C55E;">200g · 800 kcal</span></div>
+      <div class="det-row"><span class="det-l">Lipides</span><span class="det-v" style="color:#F59E0B;" id="d-lip-det">100g · 900 kcal</span></div>
+      <div class="det-row"><span class="det-l">Glucides calculés</span><span class="det-v" id="d-gluc">—</span></div>
+      <div class="det-row"><span class="det-l">Apport total</span><span class="det-v" id="d-apport">—</span></div>
+      <div class="det-row"><span class="det-l">Plancher</span><span class="det-v" style="color:#F59E0B;">3 200 kcal</span></div>
+    </div>
+  </div>
+
+  <div class="week-card">
+    <div class="week-card-title">Semaine <span class="week-avg" id="week-avg"></span></div>
+    <div class="wbars" id="wbars"></div>
+    <div class="week-stats-row" id="week-stats"></div>
+    <div class="week-vs" id="week-vs"></div>
+  </div>
+</div>
+
+<div class="view" id="view-weight">
+  <div class="day-topbar">
+    <button class="back-btn" onclick="showCal()">← Agenda</button>
+    <div class="day-info"><div class="day-title">Évolution du poids</div></div>
+    <button onclick="clearWeightHistory()" style="font-size:10px;color:#444;border:0.5px solid #1a1a1a;border-radius:8px;padding:4px 10px;background:none;cursor:pointer;">🗑 Effacer</button>
+  </div>
+  <div class="weight-stats-grid" id="wstats-grid"></div>
+  <div class="weight-chart-full"><canvas id="wchart-full"></canvas></div>
+  <div class="weight-hist-full">
+    <div class="weight-hist-title">Historique complet</div>
+    <div id="whist-full"></div>
+  </div>
+</div>
+
+<!-- MODAL DÉFAUTS -->
+<div id="modal-defaults" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;padding:20px;overflow-y:auto;">
+  <div style="background:#111;border:0.5px solid #2a2a2a;border-radius:16px;max-width:440px;margin:0 auto;padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#e8e8e8;">⚙️ Valeurs par défaut</div>
+        <div id="defaults-preset-name" style="font-size:10px;color:#7B72E9;margin-top:2px;"></div>
+      </div>
+      <button onclick="closeDefaults()" style="color:#555;font-size:20px;background:none;border:none;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:10px;color:#444;margin-bottom:14px;">Modifie les valeurs de ce preset — tous les futurs jours du même type utiliseront ces valeurs.</div>
+    <div id="defaults-list"></div>
+    <button onclick="saveAndCloseDefaults()" style="width:100%;margin-top:16px;padding:12px;background:#7B72E9;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Enregistrer</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// BMR dynamique — lit le dernier poids enregistré (lean bulk)
+// Mifflin-St Jeor : 10×poids + 6.25×189 - 5×19 + 5 + NEAT 15%
+let _cachedBMR=null;
+function getBMR(){
+  if(_cachedBMR!==null) return _cachedBMR;
+  const ref=curDate||new Date();
+  for(let n=0;n<=7;n++){
+    const d=new Date(ref);d.setDate(d.getDate()-n);
+    const key="gt5_w_"+d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+    const w=parseFloat(localStorage.getItem(key));
+    if(!isNaN(w)&&w>40&&w<200){
+      _cachedBMR=Math.round((10*w+6.25*189-5*19+5)*1.15);
+      return _cachedBMR;
+    }
+  }
+  _cachedBMR=2200;
+  return _cachedBMR;
+}
+function updateBMRDisplay(){
+  var bmr=getBMR(); var _pw=null;
+  for(var _n=0;_n<=7;_n++){var _dd=new Date(curDate);_dd.setDate(_dd.getDate()-_n);var _kk='gt5_w_'+_dd.getFullYear()+'-'+(_dd.getMonth()+1)+'-'+_dd.getDate();var _ww=parseFloat(localStorage.getItem(_kk));if(!isNaN(_ww)&&_ww>40&&_ww<200){_pw=_ww;break;}}
+  const bmrEl=document.getElementById('d-bmr');
+  if(bmrEl)bmrEl.textContent=bmr.toLocaleString('fr-FR')+' kcal'+(_pw?' · '+_pw+'kg':' · poids non renseigné');
+}
+function invalidateBMRCache(){_cachedBMR=null;}
+const FIXED=1790,FLOOR=3200;
+function getLip(dep){return 100;}
+const START=new Date(2026,2,28);
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const MAX_FUTURE=30;
+const MFR=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const SFR=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+const DFR=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+
+const ACTS=[
+  {id:"mobility",    name:"Mobility",            unit:"mn",   kpu:4,    def:20, dot:"gray",   group:"matin"},
+  {id:"street",      name:"Street workout",       unit:"mn",   kpu:10,   def:40, dot:"blue",   group:"matin"},
+  {id:"corde",       name:"Corde à sauter",       unit:"mn",   kpu:12,   def:10, dot:"green",  group:"matin"},
+  {id:"sac",         name:"Boxe",        unit:"mn",   kpu:12,   def:10, dot:"coral",  group:"matin"},
+  {id:"plio",        name:"Pliométrie",           unit:"mn",   kpu:8,    def:20, dot:"amber",  group:"matin"},
+  {id:"sprint",      name:"Sprint",               unit:"mn",   kpu:13.3, def:30, dot:"amber",  group:"matin"},
+  {id:"natation",    name:"Natation",             unit:"mn",   kpu:8.33, def:60, dot:"blue",   group:"matin"},
+  {id:"footing",     name:"Footing",              unit:"km",   kpu:75,   def:8, dot:"green",  group:"matin"},
+  {id:"walkstep",    name:"Walkstep tapis 3km/h", unit:"h",    kpu:200,  def:1,  dot:"gray",   group:"matin"},
+  {id:"muscu",       name:"Musculation",          unit:"mn",   kpu:8.33, def:90, dot:"purple", group:"seance"},
+  {id:"marche_incl", name:"Marche inclinée 15%",  unit:"mn",   kpu:9,    def:20, dot:"orange", group:"seance"},
+  {id:"sport_collect",name:"Sport collectif",     unit:"mn",   kpu:6.67, def:60, dot:"green",  group:"seance"},
+  {id:"steps_neat",  name:"Steps NEAT total",     unit:"k pas",kpu:45,   def:6,  dot:"gray",   group:"seance"},
+  {id:"gestes_quotidien", name:"Gestes quotidiens", unit:"kcal", kpu:1, def:100, dot:"#9CA3AF", group:"autre"},
+];
+
+const PRESETS=[
+  {name:"Push",           acts:{mobility:{c:1,v:20},street:{c:1,v:30},corde:{c:1,v:15},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
+  {name:"Pull",           acts:{mobility:{c:1,v:20},street:{c:1,v:30},sac:{c:1,v:15},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
+  {name:"Lower",          acts:{mobility:{c:1,v:20},natation:{c:1,v:60},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
+  {name:"Repos",          acts:{mobility:{c:1,v:20},steps_neat:{c:1,v:20},walkstep:{c:1,v:1},gestes_quotidien:{c:1,v:100}}},
+  {name:"Chest / Back",   acts:{mobility:{c:1,v:20},footing:{c:1,v:5},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
+  {name:"Shoulders / Arms",acts:{mobility:{c:1,v:20},plio:{c:1,v:20},sprint:{c:1,v:30},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
+  {name:"Footing",        acts:{mobility:{c:1,v:20},footing:{c:1,v:10},steps_neat:{c:1,v:10},gestes_quotidien:{c:1,v:100}}},
+];
+
+// UTILS
+function getPresetRefDep(date){
+  var d2 = dow(date||curDate);
+  var presetName = getCurrentPresetName(date||curDate);
+  var preset = PRESETS[d2];
+  if(!preset) return getBMR();
+  var actK = 0;
+  ACTS.forEach(function(a){
+    if(preset.acts[a.id]&&preset.acts[a.id].c){
+      var v = getPresetActVal(presetName, a);
+      var k = Math.round((parseFloat(v)||0)*a.kpu);
+      if(!isNaN(k)) actK+=k;
+    }
+  });
+  return getBMR()+actK;
+}
+function loadDefaults(){try{return JSON.parse(localStorage.getItem('gt5_custom_defaults')||'{}');}catch(e){return{};}}
+function saveDefaults(obj){localStorage.setItem('gt5_custom_defaults',JSON.stringify(obj));}
+function getActDef(a){var d=loadDefaults();return d[a.id]!=null?d[a.id]:a.def;}
+
+// ── DÉFAUTS PAR PRESET ──────────────────────────────────────────
+function loadPresetDefaults(){try{return JSON.parse(localStorage.getItem('gt5_preset_defs_v2')||'{}');}catch(e){return{};}}
+function savePresetDefaults(obj){localStorage.setItem('gt5_preset_defs_v2',JSON.stringify(obj));}
+
+function getCurrentPresetName(date){
+  var d2=dow(date||curDate);
+  try{
+    var wk=JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');
+    if(wk[d2]) return typeof wk[d2]==='object'?wk[d2].label:wk[d2];
+  }catch(e){}
+  return PRESETS[d2]?PRESETS[d2].name:null;
+}
+
+function getPresetActVal(presetName, act){
+  var pd=loadPresetDefaults();
+  if(pd[presetName]&&pd[presetName][act.id]!=null) return pd[presetName][act.id];
+  // Fallback : valeur codée dans le preset
+  var preset=PRESETS.find(function(p){return p.name===presetName;});
+  if(preset&&preset.acts[act.id]) return preset.acts[act.id].v;
+  return getActDef(act);
+}
+
+function openDefaults(){
+  var presetName=getCurrentPresetName(curDate);
+  if(!presetName){alert('Aucun preset pour ce jour.');return;}
+  var preset=PRESETS.find(function(p){return p.name===presetName;});
+  if(!preset){alert('Preset introuvable.');return;}
+  var pd=loadPresetDefaults();
+  var saved=pd[presetName]||{};
+  var html='<div style="font-size:11px;color:#7B72E9;margin-bottom:12px;font-weight:600;">'+presetName+'</div>';
+  // N'afficher que les activités cochées dans ce preset (sauf gestes_quotidien)
+  ACTS.filter(function(a){return preset.acts[a.id]&&preset.acts[a.id].c&&a.id!=='gestes_quotidien';}).forEach(function(a){
+    var val=saved[a.id]!=null?saved[a.id]:(preset.acts[a.id]?preset.acts[a.id].v:a.def);
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid #1a1a1a;">
+      <div style="font-size:12px;color:#c0c0c0;">${a.name}</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="number" id="def_${a.id}" value="${val}" min="0" step="${a.unit==='h'?'0.5':'1'}" style="width:62px;background:#0d0d0d;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:12px;padding:5px 8px;text-align:right;">
+        <span style="font-size:10px;color:#444;min-width:38px;">${a.unit}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('defaults-preset-name').textContent=presetName;
+  document.getElementById('defaults-list').innerHTML=html;
+  document.getElementById('modal-defaults').style.display='block';
+}
+
+function saveAndCloseDefaults(){
+  var presetName=getCurrentPresetName(curDate);
+  if(!presetName) return;
+  var preset=PRESETS.find(function(p){return p.name===presetName;});
+  if(!preset) return;
+  var pd=loadPresetDefaults();
+  if(!pd[presetName]) pd[presetName]={};
+  ACTS.filter(function(a){return preset.acts[a.id]&&preset.acts[a.id].c&&a.id!=='gestes_quotidien';}).forEach(function(a){
+    var el=document.getElementById('def_'+a.id);
+    if(el){var v=parseFloat(el.value);if(!isNaN(v))pd[presetName][a.id]=v;}
+  });
+  savePresetDefaults(pd);
+  document.getElementById('modal-defaults').style.display='none';
+  buildActs();compute();
+}
+
+function closeDefaults(){
+  document.getElementById('modal-defaults').style.display='none';
+}
+function dk(d){return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function dow(d){let w=d.getDay();return w===0?6:w-1;}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmt(n){return Math.round(n).toLocaleString("fr-FR");}
+// #5 — addDays2 supprimé, on utilise addDays partout
+function maxDate(){return addDays(TODAY,MAX_FUTURE);}
+
+// #7 — debounce global unique, pas recréé dans buildActs
+const debouncedCompute=debounce(()=>compute(),150);
+function debounce(fn,ms){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms);};}
+
+// STORAGE
+function loadState(date){
+  try{
+    const r=localStorage.getItem("gt5_"+dk(date));
+    if(r){
+      const st=JSON.parse(r);
+      if(!st.gestes_quotidien||!st.gestes_quotidien.c){
+        st.gestes_quotidien={c:true,v:100};
+      }
+      return st;
+    }
+  }catch(e){console.warn("loadState parse error",e);}
+  // Lire le custom week (drag & drop routine)
+  let d2=dow(date);
+  try{
+    const wk=JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');
+    if(wk[d2]){
+      // Trouver le preset correspondant à la séance déplacée
+      const movedLabel=typeof wk[d2]==='object'?wk[d2].label:wk[d2];
+      const PRESET_NAMES={
+        'Push':'Push','Pull':'Pull','Lower':'Lower','Repos':'Repos',
+        'Chest / Back':'Chest / Back','Shoulders / Arms':'Shoulders / Arms','Footing':'Footing'
+      };
+      const matchPreset=PRESETS.find(p=>p.name===movedLabel||p.name===PRESET_NAMES[movedLabel]);
+      if(matchPreset){
+        const s={};
+        ACTS.forEach(a=>{s[a.id]=matchPreset.acts[a.id]?{c:!!matchPreset.acts[a.id].c,v:getPresetActVal(matchPreset.name,a)}:{c:false,v:getActDef(a)};});
+        if(!s.gestes_quotidien||!s.gestes_quotidien.c) s.gestes_quotidien={c:true,v:100};
+        return s;
+      }
+    }
+  }catch(e){}
+  const p=PRESETS[d2];const s={};
+  ACTS.forEach(a=>{s[a.id]=p.acts[a.id]?{c:!!p.acts[a.id].c,v:getPresetActVal(p.name,a)}:{c:false,v:getActDef(a)};});
+  if(!s.gestes_quotidien||!s.gestes_quotidien.c) s.gestes_quotidien={c:true,v:100};
+  return s;
+}
+function saveState(d,s){localStorage.setItem("gt5_"+dk(d),JSON.stringify(s));}
+function hasData(d){return!!localStorage.getItem("gt5_dep_"+dk(d));}
+function loadCustom(d){
+  try{const r=localStorage.getItem("gt5_custom_"+dk(d));return r?JSON.parse(r):{name:"",kcal:0,active:false};}
+  catch(e){return{name:"",kcal:0,active:false};}
+}
+function saveCustom(d,o){localStorage.setItem("gt5_custom_"+dk(d),JSON.stringify(o));}
+
+// #11 — cache calendrier pour éviter calcDay() répété
+const _calCache={};
+function calcDayCached(date){
+  const key=dk(date);
+  if(_calCache[key])return _calCache[key];
+  const r=calcDay(date);
+  _calCache[key]=r;
+  return r;
+}
+function invalidateCache(date){delete _calCache[dk(date)];}
+
+function calcDay(date){
+  const s=loadState(date);let actK=0;
+  ACTS.forEach(a=>{
+    if(s[a.id]&&s[a.id].c){const _sv=s[a.id].v!=null&&s[a.id].v!==''?s[a.id].v:a.def;const v=parseFloat(_sv)||getActDef(a);const k=Math.round(v*a.kpu);if(!isNaN(k))actK+=k;}
+  });
+  const cust=loadCustom(date);if(cust.active&&cust.kcal>0)actK+=cust.kcal;
+    const BMR=getBMR();
+  const dep=BMR+actK;
+  const glucG=Math.max(0,Math.round(Math.max(0,dep-FIXED)/4));
+  const apport=Math.max(FLOOR,(glucG*4)+FIXED);
+  return{actK,dep,glucG,apport,bilan:apport-dep};
+}
+
+// #31 — streak validations + indicateur aujourd'hui non validé
+function computeStreak(){
+  let s=0,d=new Date(TODAY);
+  while(true){
+    if(!!localStorage.getItem("gt5_val_"+dk(d)))s++;
+    else if(!sameDay(d,TODAY))break;
+    d=addDays(d,-1);
+    if(d<START)break;
+  }
+  return s;
+}
+function updateStreak(){
+  const s=computeStreak();const el=document.getElementById("streak-badge");
+  const todayValidated=!!localStorage.getItem("gt5_val_"+dk(TODAY));
+  if(s>0){
+    // #7 — indicateur clair si aujourd'hui pas encore validé
+    const suffix=todayValidated?"":` (+auj.)`;
+    el.textContent=s+"j 🔥"+suffix;el.style.display="";
+  } else el.style.display="none";
+}
+
+let calY=TODAY.getFullYear(),calM=TODAY.getMonth();
+let curDate=new Date(TODAY);
+let wChart=null,wChartFull=null;
+let hiddenActsOpen=true;
+// #1 — référence unique au listener blur note pour le retirer
+let _noteBlurHandler=null;
+
+// #2 — autoSaveNote prend toujours une date explicite
+function autoSaveNote(date){
+  const ta=document.getElementById("note-ta");
+  if(ta&&ta.value.trim()&&date){
+    localStorage.setItem("rt5_note_"+dk(date),ta.value);
+    const dot=document.getElementById("note-dot");if(dot)dot.style.opacity="1";
+  }
+}
+
+function showCal(){
+  autoSaveNote(curDate);// #2 — date explicite
+  ["view-cal","view-day","view-weight"].forEach(id=>document.getElementById(id).classList.remove("active"));
+  document.getElementById("view-cal").classList.add("active");
+  document.getElementById("main-nav").classList.remove("validated");
+  renderCal();updateStreak();
+}
+function showWeightView(){
+  autoSaveNote(curDate);
+  ["view-cal","view-day","view-weight"].forEach(id=>document.getElementById(id).classList.remove("active"));
+  document.getElementById("view-weight").classList.add("active");
+  renderWeightFull();
+}
+function prevMonth(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
+function nextMonth(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
+function goToday(){calY=TODAY.getFullYear();calM=TODAY.getMonth();renderCal();}
+
+function renderCal(){
+  document.getElementById("cal-month-lbl").textContent=MFR[calM]+" "+calY;
+  const heads=document.getElementById("cal-heads");heads.innerHTML="";
+  SFR.forEach(s=>{const d=document.createElement("div");d.className="cal-head";d.textContent=s;heads.appendChild(d);});
+  const grid=document.getElementById("cal-grid");grid.innerHTML="";
+  const first=new Date(calY,calM,1);const startDow=dow(first);const dim=new Date(calY,calM+1,0).getDate();
+  for(let i=0;i<startDow;i++){const c=document.createElement("div");c.className="cal-cell empty";grid.appendChild(c);}
+  let tracked=0,depSum=0,wSum=0,wCnt=0;
+  for(let d=1;d<=dim;d++){
+    const date=new Date(calY,calM,d);
+    const isPast=date<START&&!sameDay(date,START);
+    const isToday=sameDay(date,TODAY),isSel=sameDay(date,curDate),hasDat=hasData(date);
+    const isMissed=!hasDat&&date<TODAY&&!isPast&&!isToday;
+    let cls="cal-cell";
+    if(isPast)cls+=" past";else if(isMissed)cls+=" missed";
+    if(isToday)cls+=" today";if(isSel)cls+=" sel";if(hasDat)cls+=" has";
+    const cell=document.createElement("div");cell.className=cls;
+    const num=document.createElement("div");num.className="cal-num";num.textContent=d;cell.appendChild(num);
+    const badge=document.createElement("div");badge.className="cal-preset";badge.textContent=PRESETS[dow(date)].name;cell.appendChild(badge);
+    if(hasDat){
+      // #11 — utiliser le cache
+      const r=calcDayCached(date);tracked++;depSum+=r.dep;
+      const gv=document.createElement("div");gv.className="cal-gval";gv.textContent=r.glucG+"g";cell.appendChild(gv);
+      const dots=document.createElement("div");dots.className="cal-dots";
+      dots.innerHTML='<div class="cdot g"></div>';
+      const wv=localStorage.getItem("gt5_w_"+dk(date));
+      if(wv){dots.innerHTML+='<div class="cdot w"></div>';wSum+=parseFloat(wv);wCnt++;}
+      if(localStorage.getItem("rt5_note_"+dk(date)))dots.innerHTML+='<div class="cdot n"></div>';
+      if(localStorage.getItem("gt5_val_"+dk(date)))dots.innerHTML+='<div class="cdot v"></div>';
+      cell.appendChild(dots);
+    } else if(isMissed){
+      const dots=document.createElement("div");dots.className="cal-dots";
+      dots.innerHTML='<div class="cdot m"></div>';cell.appendChild(dots);
+    }
+    if(!isPast){
+      // #2 — sauvegarder date courante avant de changer curDate
+      cell.onclick=()=>{
+        autoSaveNote(curDate);
+        curDate=new Date(date);
+        openDay();
+      };
+    }
+    grid.appendChild(cell);
+  }
+  const ms=document.getElementById("cal-monthly-stats");
+  ms.innerHTML=[
+    {l:"Jours trackés",v:tracked+"/"+dim},
+    {l:"Dépense moy.",v:tracked>0?fmt(depSum/tracked)+" kcal":"—"},
+    {l:"Poids moy.",v:wCnt>0?(wSum/wCnt).toFixed(1)+"kg":"—"},
+  ].map(it=>`<div class="cms"><div class="cms-label">${it.l}</div><div class="cms-val">${it.v}</div></div>`).join("");
+}
+
+function openDay(){
+  // Masquer le lien plan — ne s'affiche que si dépense saisie
+  const _plwReset=document.getElementById("plan-link-wrap");if(_plwReset){const _hasDep=localStorage.getItem("gt5_dep_"+dk(curDate));_plwReset.style.display=_hasDep?"block":"none";}
+  hiddenActsOpen=false;
+  ["view-cal","view-day","view-weight"].forEach(id=>document.getElementById(id).classList.remove("active"));
+  document.getElementById("view-day").classList.add("active");
+  const opts={weekday:"long",day:"numeric",month:"long",year:"numeric"};
+  const ds=curDate.toLocaleDateString("fr-FR",opts);
+  document.getElementById("day-title").textContent=ds.charAt(0).toUpperCase()+ds.slice(1);
+  document.getElementById("day-sub").textContent=PRESETS[dow(curDate)].name+" · "+DFR[dow(curDate)];
+  document.getElementById("preset-lbl").textContent=PRESETS[dow(curDate)].name;
+  const plbl=document.getElementById("prog-lbl");if(plbl)plbl.textContent=PRESETS[dow(curDate)].name;
+  buildActs();loadNote();renderWeightHist();compute();renderValidationState();updateWeightSummaryCard();
+  // Ouvrir la liste des activités par défaut
+  hiddenActsOpen=true;
+  const _hidEl=document.getElementById("acts-hidden");
+  if(_hidEl)_hidEl.classList.add("open");
+  const _addBtn=document.getElementById("add-more-btn");
+  if(_addBtn)_addBtn.textContent="− Réduire";
+  const existingW=localStorage.getItem("gt5_w_"+dk(curDate));
+  const wInp=document.getElementById("w-input");if(wInp)wInp.value=existingW?parseFloat(existingW).toString().replace(".",","):"";
+  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display=existingW?"block":"none";
+  const delBtn=document.getElementById("w-del-btn");if(delBtn)delBtn.style.display=existingW?"block":"none";
+  updateWeightSaveStatus();
+  // #14 — restaurer position scroll
+  const saved=sessionStorage.getItem("scrollPos_"+dk(curDate));
+  window.scrollTo(0,saved?parseInt(saved):0);
+}
+
+function shiftDay(n){
+  // #14 — sauvegarder position scroll avant de partir
+  sessionStorage.setItem("scrollPos_"+dk(curDate),window.scrollY);
+  // #2 — capturer date avant changement
+  const prevDate=new Date(curDate);
+  autoSaveNote(prevDate);
+  const nd=addDays(curDate,n);
+  if(nd<START&&!sameDay(nd,START))return;
+  if(nd>maxDate())return;
+  curDate=nd;
+  const v=document.getElementById("view-day");
+  openDay();
+}
+
+function buildActs(){
+  const checkedEl=document.getElementById("acts-checked");
+  const hiddenEl=document.getElementById("acts-hidden");
+  const addBtn=document.getElementById("add-more-btn");
+  checkedEl.innerHTML="";hiddenEl.innerHTML="";
+  const state=loadState(curDate);
+  const cust=loadCustom(curDate);
+  const onActs=ACTS.filter(a=>state[a.id]?.c);
+  const offActs=ACTS.filter(a=>!state[a.id]?.c);
+
+  function makeRow(a,container){
+    const s=state[a.id]||{c:false,v:getActDef(a)};
+    const row=document.createElement("div");
+    row.className="arow"+(s.c?" on":"");row.id="arow_"+a.id;
+    const _v=s.v!=null&&s.v!==''?s.v:getActDef(a);
+    const isGestes=a.id==="gestes_quotidien";
+    const dispUnit=isGestes?"kcal":a.unit;
+    row.innerHTML=`<div class="arow-chk-wrap"><input type="checkbox" class="chk" id="chk_${a.id}" ${s.c?"checked":""}></div><span class="aname">${a.name}</span><div class="arow-num-wrap"><input type="number" class="anum" id="val_${a.id}" value="${_v}" min="0" step="${a.unit==='h'?'0.5':'1'}"><span class="aunit"> ${dispUnit}</span></div>${isGestes?"":"<span class=\"akcal\" id=\"kcal_"+a.id+"\"></span>"}`;
+    container.appendChild(row);
+    row.querySelector("#chk_"+a.id).addEventListener("change",e=>{
+      const st=loadState(curDate);st[a.id].c=e.target.checked;saveState(curDate,st);
+      invalidateCache(curDate);
+      buildActs();compute();
+    });
+    row.querySelector("#val_"+a.id).addEventListener("input",e=>{
+      const st=loadState(curDate);
+      const v=parseFloat(e.target.value);
+      st[a.id].v=isNaN(v)?0:v;
+      saveState(curDate,st);invalidateCache(curDate);debouncedCompute();
+    });
+  }
+
+  // Tout à la suite sans distinction de groupe
+  onActs.forEach(a=>makeRow(a,checkedEl));
+
+  if(cust.active){
+    const custRow=document.createElement("div");custRow.className="arow on";custRow.id="arow_custom";
+    custRow.innerHTML=`<div class="arow-chk-wrap"><input type="checkbox" class="chk" id="chk_custom" checked></div><input type="text" class="aname-input" id="name_custom" placeholder="Nom..." value="${cust.name||""}"><div class="arow-num-wrap"><input type="number" class="anum" id="val_custom" value="${cust.kcal||0}" min="0" step="10" style="width:56px;"></div><span class="aunit"> kcal</span><span class="akcal" id="kcal_custom">${cust.kcal||0} kcal</span>`;
+    checkedEl.appendChild(custRow);
+    custRow.querySelector("#chk_custom").addEventListener("change",e=>{const c=loadCustom(curDate);c.active=false;saveCustom(curDate,c);invalidateCache(curDate);buildActs();compute();});
+    custRow.querySelector("#val_custom").addEventListener("input",e=>{const c=loadCustom(curDate);c.kcal=parseInt(e.target.value)||0;saveCustom(curDate,c);invalidateCache(curDate);debouncedCompute();});
+    custRow.querySelector("#name_custom").addEventListener("input",e=>{const c=loadCustom(curDate);c.name=e.target.value;saveCustom(curDate,c);});
+  }
+
+  offActs.forEach(a=>makeRow(a,hiddenEl));
+
+  if(!cust.active){
+    const custRow=document.createElement("div");custRow.className="arow";custRow.id="arow_custom_off";
+    custRow.innerHTML=`<div class="arow-chk-wrap"><input type="checkbox" class="chk" id="chk_custom_off"></div><input type="text" class="aname-input" id="name_custom_off" placeholder="Activité libre..." value="${cust.name||""}"><div class="arow-num-wrap"><input type="number" class="anum" id="val_custom_off" value="${cust.kcal||0}" min="0" step="10" style="width:56px;"></div><span class="aunit"> kcal</span><span class="akcal" id="kcal_custom_off">0 kcal</span>`;
+    hiddenEl.appendChild(custRow);
+    custRow.querySelector("#chk_custom_off").addEventListener("change",e=>{const c=loadCustom(curDate);c.active=e.target.checked;c.kcal=parseInt(document.getElementById("val_custom_off").value)||0;c.name=document.getElementById("name_custom_off").value;saveCustom(curDate,c);invalidateCache(curDate);buildActs();compute();});
+    custRow.querySelector("#val_custom_off").addEventListener("input",e=>{const c=loadCustom(curDate);c.kcal=parseInt(e.target.value)||0;saveCustom(curDate,c);});
+    custRow.querySelector("#name_custom_off").addEventListener("input",e=>{const c=loadCustom(curDate);c.name=e.target.value;saveCustom(curDate,c);});
+  }
+
+  if(hiddenActsOpen)hiddenEl.classList.add("open");
+  const count=offActs.length+(cust.active?0:1);
+  if(addBtn)addBtn.textContent=hiddenActsOpen?`− Réduire`:`+ Ajouter (${count})`;
+}
+
+function toggleHiddenActs(){
+  hiddenActsOpen=!hiddenActsOpen;
+  document.getElementById("acts-hidden").classList.toggle("open",hiddenActsOpen);
+  const count=document.getElementById("acts-hidden").children.length;
+  document.getElementById("add-more-btn").textContent=hiddenActsOpen?`− Réduire`:`+ Ajouter une activité (${count})`;
+}
+
+// #6 — renderChips reçoit state, pas de double loadState
+function renderChips(state,cust){
+  const scroll=document.getElementById("prog-chips-scroll");if(!scroll)return;
+  const activeActs=ACTS.filter(a=>state[a.id]&&state[a.id].c);
+  if(!activeActs.length&&!cust.active){
+    const p=PRESETS[dow(curDate)];
+    if(p&&p.acts){
+      scroll.innerHTML=Object.keys(p.acts).map(function(id){
+        const act=ACTS.find(a=>a.id===id);if(!act)return '';
+        const v=p.acts[id].v;
+        const label=act.name+(v?' · '+v+(act.unit==='mn'?'mn':act.unit==='km'?' km':''):'');
+        return '<span class="prog-chip" style="opacity:0.3;background:#111;border-color:#222;color:#555;">'+label+'</span>';
+      }).filter(Boolean).join('');
+    }else{scroll.innerHTML='<span class="prog-chips-empty">Coche tes activités ci-dessous</span>';}
+    return;
+  }
+  scroll.innerHTML="";
+  activeActs.forEach(a=>{
+    const s=state[a.id];const val=s.v||getActDef(a);
+    const unit=a.unit==="h"?`${val}h`:a.unit==="km"?`${val}km`:a.unit==="k pas"?`${val}k pas`:`${val}mn`;
+    const chip=document.createElement("div");
+    chip.className="prog-chip active-chip";
+    chip.innerHTML=`<div class="prog-chip-dot ${a.dot}"></div><span class="prog-chip-name">${a.name}</span><span class="prog-chip-val">${unit}</span>`;
+    // #15 — chip cliquable pour décocher
+    chip.onclick=()=>{
+      const st=loadState(curDate);st[a.id].c=false;saveState(curDate,st);
+      invalidateCache(curDate);buildActs();compute();
+    };
+    scroll.appendChild(chip);
+  });
+  if(cust.active&&cust.kcal>0){
+    const chip=document.createElement("div");chip.className="prog-chip active-chip";
+    chip.innerHTML=`<div class="prog-chip-dot gray"></div><span class="prog-chip-name">${cust.name||"Libre"}</span><span class="prog-chip-val">${cust.kcal} kcal</span>`;
+    chip.onclick=()=>{const c=loadCustom(curDate);c.active=false;saveCustom(curDate,c);invalidateCache(curDate);buildActs();compute();};
+    scroll.appendChild(chip);
+  }
+}
+
+function compute(){
+  const state=loadState(curDate);
+  const cust=loadCustom(curDate);
+  let actK=0;
+  ACTS.forEach(a=>{
+    const s=state[a.id];
+    const v=s&&s.c?parseFloat(s.v)||0:0;
+    const k=s&&s.c?Math.round(v*a.kpu):0;
+    const el=document.getElementById("kcal_"+a.id);if(el)el.textContent=(isNaN(k)?0:k)+" kcal";
+    if(!isNaN(k))actK+=k;
+  });
+  if(cust.active&&cust.kcal>0){actK+=cust.kcal;const el=document.getElementById("kcal_custom");if(el)el.textContent=cust.kcal+" kcal";}
+  
+    const BMR=getBMR();
+  const dep=BMR+actK;
+  const glucG=Math.max(0,Math.round(Math.max(0,dep-FIXED)/4));
+  const rawApport=(glucG*4)+FIXED;
+  const apport=Math.max(FLOOR,rawApport);
+  const bilan=apport-dep;
+  const showFloor=rawApport<FLOOR;
+
+  document.getElementById("alert-floor").style.display=showFloor?"flex":"none";
+  document.getElementById("alert-gluc").style.display=glucG<200?"flex":"none";
+  document.getElementById("s-gluc").textContent=glucG;
+  document.getElementById("s-range").textContent=Math.max(0,glucG-30)+" — "+(glucG+30)+"g";
+  document.getElementById("gluc-hero-kcal").textContent="≈ "+fmt(glucG*4)+" kcal · Apport total "+fmt(apport)+" kcal";
+
+  // #16 — glucides vs hier
+  const hierKey="gt5_gluc_"+dk(addDays(curDate,-1));
+  const hierGluc=localStorage.getItem(hierKey);
+  const vsEl=document.getElementById("gluc-hero-vs");
+  if(vsEl&&hierGluc){
+    const diff=glucG-parseInt(hierGluc);
+    const sign=diff>=0?"+":"";
+    const col=diff>=0?"#7B72E9":"#555";
+    vsEl.innerHTML=`<span style="color:${col}">${sign}${diff}g vs hier</span>`;
+  } else if(vsEl)vsEl.innerHTML="";
+
+  const hero=document.getElementById("gluc-hero");
+  if(hero){hero.classList.add("flash");setTimeout(()=>hero.classList.remove("flash"),250);}
+
+  const badge=document.getElementById("status-badge");
+  if(badge){
+    badge.className="status-badge";
+    // Badge basé sur la dépense réelle (plus pertinent que le bilan apport-dep)
+    if(dep>4200){badge.textContent="Jour chargé";badge.classList.add("surplus");}
+    else if(dep>3600){badge.textContent="Actif";badge.classList.add("equil");}
+    else if(dep>3000){badge.textContent="Standard";badge.classList.add("equil");}
+    else{badge.textContent="Récupération";badge.classList.add("deficit-light");}
+  }
+
+  
+  document.getElementById("s-dep").textContent=fmt(dep);
+  document.getElementById("s-bilan").textContent=fmt(apport);
+  var depBigEl=document.getElementById("dep-big");
+  var apportBigEl=document.getElementById("apport-big");
+  var depRefEl=document.getElementById("dep-ref-lbl");
+  var isTracked=hasData(curDate);
+  if(depBigEl){
+    if(isTracked){
+      depBigEl.textContent=fmt(dep);
+      depBigEl.style.color='#e8e8e8';
+      if(depRefEl) depRefEl.style.display='none';
+    } else {
+      var refDep=getPresetRefDep(curDate);
+      var refGluc=Math.max(0,Math.round(Math.max(0,refDep-FIXED)/4));
+      var refApport=Math.max(FLOOR,(refGluc*4)+FIXED);
+      depBigEl.textContent=fmt(refDep);
+      depBigEl.style.color='#555';
+      if(apportBigEl){apportBigEl.textContent=fmt(refApport);apportBigEl.style.color='#3d3a80';}
+      if(depRefEl) depRefEl.style.display='block';
+    }
+  }
+  if(isTracked&&apportBigEl){apportBigEl.textContent=fmt(apport);apportBigEl.style.color='#7B72E9';}
+
+  const morningIds=["street","corde","sac","sprint","plio","footing","natation","walkstep"];
+  const mLbl={"street":"Street","corde":"Corde","sac":"Sac","sprint":"Sprint","plio":"Plio","footing":"Footing","natation":"Natation","walkstep":"Walkstep"};
+  const activeMorn=morningIds.filter(id=>state[id]&&state[id].c).map(id=>mLbl[id]);
+  const sumEl=document.getElementById("day-acts-summary");
+  if(sumEl)sumEl.textContent=activeMorn.length>0?activeMorn.join(" · "):"";
+
+  updateBMRDisplay();
+  document.getElementById("d-act").textContent=fmt(actK)+" kcal"+(activeMorn.length?" ("+activeMorn.join(", ")+")":"");
+  document.getElementById("d-dep").textContent=fmt(dep)+" kcal";
+  const lipDyn=100; // 100g fixe
+  const dlip=document.getElementById("d-lip");if(dlip)dlip.textContent=lipDyn+"g · "+Math.round(lipDyn*9)+" kcal";
+  // Barre apport vs dépense
+  const _sDep=getDep()||0;const _sBilan=parseInt(localStorage.getItem("gt5_apport_"+dk(curDate))||0);const _barPct=_sDep>0?Math.min(100,Math.round(_sBilan/_sDep*100)):0;const _barColor=_barPct>=98&&_barPct<=102?"#22C55E":_barPct>102?"#EF4444":"#7B72E9";const _barEl=document.getElementById("kcal-bar");const _barLbl=document.getElementById("kcal-bar-lbl");if(_barEl){_barEl.style.width=_barPct+"%";_barEl.style.background=_barColor;}if(_barLbl){const _delta=_sBilan-_sDep;_barLbl.textContent=_sDep>0?(_delta===0?"= dépense":(_delta>0?"+":"")+_delta+" kcal vs dép."):"";_barLbl.style.color=_barColor;}
+  document.getElementById("d-gluc").textContent=glucG+"g · "+fmt(glucG*4)+" kcal";
+  document.getElementById("d-apport").textContent=fmt(apport)+" kcal"+(showFloor?" (plancher)":"");
+
+  const plw2=document.getElementById('plan-link-wrap');if(plw2)plw2.style.display='block';
+  // Ne pas écraser si journée déjà validée (garder les valeurs validées)
+  const _val=loadValidation(curDate);
+  if(!_val){
+    localStorage.setItem("gt5_gluc_"+dk(curDate),glucG);
+    localStorage.setItem("gt5_dep_"+dk(curDate),dep);
+    localStorage.setItem("gt5_apport_"+dk(curDate),apport);
+    localStorage.setItem("gt5_bilan_"+dk(curDate),bilan);
+  } // Journée validée → ne jamais écraser les valeurs validées
+  invalidateCache(curDate);
+
+  // #6 — passer state et cust à renderChips, pas de loadState supplémentaire
+  renderChips(state,cust);
+  // #13 — renderWeekBars uniquement si la semaine card est visible dans le viewport
+  renderWeekBars();
+  updateStreak();
+  renderWeekAvgDep();
+}
+
+function renderWeekAvgDep(){
+  const mon=addDays(curDate,-dow(curDate));
+  let total=0,count=0;
+  for(let i=0;i<7;i++){
+    const d=addDays(mon,i);
+    const dep=parseInt(localStorage.getItem("gt5_dep_"+dk(d)))||0;
+    if(dep>0){total+=dep;count++;}
+  }
+  const el=document.getElementById("week-avg-dep");
+  const sub=document.getElementById("week-avg-sub");
+  if(el) el.textContent=count>0?fmt(Math.round(total/count)):"—";
+  if(sub) sub.textContent=count>0?count+" jour"+(count>1?"s":"")+" tracké"+(count>1?"s":"")+" cette semaine":"Aucune donnée cette semaine";
+}
+
+function renderWeekBars(){
+  const mon=addDays(curDate,-dow(curDate));const bars=document.getElementById("wbars");bars.innerHTML="";
+  let vals=[],glucSum=0,glucCnt=0;
+  for(let i=0;i<7;i++){const d=addDays(mon,i);const g=parseInt(localStorage.getItem("gt5_gluc_"+dk(d)))||0;vals.push({d,g});if(g>0){glucSum+=g;glucCnt++;}}
+  const mx=Math.max(...vals.map(v=>v.g),200);
+  vals.forEach((v,i)=>{
+    const pct=Math.round((v.g/mx)*100);const isCur=sameDay(v.d,curDate),isTod=sameDay(v.d,TODAY)&&!isCur;
+    const w=document.createElement("div");w.className="wb-wrap";
+    w.innerHTML=`<div class="wb-g">${v.g>0?v.g+"g":""}</div><div class="wb-bg"><div class="wb-fill${isCur?" cur":""}${isTod?" tod":""}" style="height:${Math.max(2,pct)}%"></div></div><div class="wb-day">${SFR[i]}</div>`;
+    w.onclick=()=>{if(v.d>=START||sameDay(v.d,START)){autoSaveNote(curDate);curDate=new Date(v.d);openDay();}};
+    bars.appendChild(w);
+  });
+  const avg=glucCnt>0?Math.round(glucSum/glucCnt):0;
+  document.getElementById("week-avg").textContent=avg>0?"· moy "+avg+"g":"";
+  const bilanW=vals.reduce((s,v)=>s+(parseInt(localStorage.getItem("gt5_bilan_"+dk(v.d)))||0),0);
+  const depW=vals.reduce((s,v)=>s+(parseInt(localStorage.getItem("gt5_dep_"+dk(v.d)))||0),0);
+  const t=vals.filter(v=>localStorage.getItem("gt5_gluc_"+dk(v.d))).length;
+  document.getElementById("week-stats").innerHTML=[
+    {l:"Bilan semaine",v:(bilanW>=0?"+":"")+fmt(bilanW)+" kcal",c:bilanW>0?"#22C55E":bilanW<-1500?"#EF4444":"#c0c0c0"},
+    {l:"Dépense moy.",v:t>0?fmt(depW/t)+" kcal":"—",c:"#c0c0c0"},
+    {l:"Jours trackés",v:t+"/7",c:"#7B72E9"},
+  ].map(it=>`<div class="wstat"><div class="wstat-l">${it.l}</div><div class="wstat-v" style="color:${it.c}">${it.v}</div></div>`).join("");
+  const prevMon=addDays(mon,-7);let prevDep=0,prevGluc=0,prevT=0;
+  for(let i=0;i<7;i++){
+    const d=addDays(prevMon,i);const dep=parseInt(localStorage.getItem("gt5_dep_"+dk(d)));const g=parseInt(localStorage.getItem("gt5_gluc_"+dk(d)));
+    if(!isNaN(dep)&&dep>0){prevDep+=dep;prevT++;}if(!isNaN(g)&&g>0)prevGluc+=g;
+  }
+  const vsEl=document.getElementById("week-vs");
+  if(vsEl&&prevT>0&&t>0){
+    const dd=Math.round(depW/t-prevDep/prevT);const gd=Math.round(glucSum/glucCnt-(prevGluc/prevT));
+    vsEl.innerHTML=`vs semaine précédente — Dépense <span>${(dd>=0?"+":"")+dd} kcal</span> · Glucides <span>${(gd>=0?"+":"")+gd}g</span>`;
+  } else if(vsEl)vsEl.innerHTML="";
+}
+
+// #16 — scan localStorage direct
+function getAllWeightEntries(){
+  const map={};
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith("gt5_w_")){
+      const s=k.replace("gt5_w_","");const p=s.split("-");
+      if(p.length===3){const d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));const kg=parseFloat(localStorage.getItem(k));if(!isNaN(kg)&&!isNaN(d.getTime()))map[s]={date:d,kg};}
+    }
+  });
+  return Object.values(map).sort((a,b)=>a.date-b.date);
+}
+
+function updateWeightSaveStatus(){
+  const w=localStorage.getItem("gt5_w_"+dk(curDate));
+  const dot=document.getElementById("w-save-dot"),txt=document.getElementById("w-save-text"),delBtn=document.getElementById("w-del-btn");
+  if(w){if(dot)dot.style.display="block";if(txt)txt.textContent=parseFloat(w).toString().replace(".",",")+"kg enregistré";if(delBtn)delBtn.style.display="block";}
+  else{if(dot)dot.style.display="none";if(txt)txt.textContent="";if(delBtn)delBtn.style.display="none";}
+}
+
+// #9 — stepWeight utilise la dernière valeur connue comme point de départ
+function stepWeight(delta){
+  const inp=document.getElementById("w-input");
+  let current;
+  if(inp.value){current=parseFloat(inp.value.replace(",","."))||null;}
+  if(!current){
+    // Utiliser dernière valeur enregistrée
+    const last=getAllWeightEntries();
+    current=last.length>0?last[last.length-1].kg:84;
+  }
+  const next=Math.round((current+delta)*10)/10;
+  if(next>=40&&next<=200)inp.value=next.toString().replace(".",",");
+  document.getElementById("w-error").style.display="none";
+}
+
+function deleteWeight(){
+  localStorage.removeItem("gt5_w_"+dk(curDate)); invalidateBMRCache();
+  const inp=document.getElementById("w-input");if(inp)inp.value="";
+  renderWeightHist();updateWeightSummaryCard();updateWeightSaveStatus();
+  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display="none";
+  if(document.getElementById("view-weight").classList.contains("active"))renderWeightFull();
+  renderCal();
+}
+
+function saveWeight(){
+  const raw=document.getElementById("w-input").value.replace(",",".");
+  const val=parseFloat(raw);
+  const errEl=document.getElementById("w-error");
+  if(!val||val<40||val>200){if(errEl)errEl.style.display="block";return;}
+  if(errEl)errEl.style.display="none";
+  localStorage.setItem("gt5_w_"+dk(curDate),val); invalidateBMRCache(); invalidateCache(curDate);
+  const saved=localStorage.getItem("gt5_w_"+dk(curDate));
+  if(!saved){if(errEl){errEl.textContent="Erreur : ouvre dans Safari.";errEl.style.display="block";}return;}
+  renderWeightHist();updateWeightSummaryCard();updateWeightSaveStatus();
+  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display="block";
+  const delBtn=document.getElementById("w-del-btn");if(delBtn)delBtn.style.display="block";
+  if(document.getElementById("view-weight").classList.contains("active"))renderWeightFull();
+  renderCal();
+  const b=document.getElementById("note-saved");b.textContent="Poids "+val.toString().replace(".",",")+"kg ✓";b.style.opacity="1";
+  setTimeout(()=>{b.style.opacity="0";b.textContent="Sauvegardé ✓";},2500);
+}
+
+function updateWeightSummaryCard(){
+  const w=localStorage.getItem("gt5_w_"+dk(curDate));
+  const el=document.getElementById("s-weight"),sub=document.getElementById("s-weight-sub");
+  if(w&&el){
+    el.textContent=parseFloat(w).toString().replace(".",",")+"kg";el.style.color="#e8e8e8";
+    const wy=localStorage.getItem("gt5_w_"+dk(addDays(curDate,-1)));
+    if(wy&&sub){
+      const diff=(parseFloat(w)-parseFloat(wy)).toFixed(1);
+      // #8 — sémantique lean bulk : + en VERT (gain = objectif), - en neutre
+      const col=parseFloat(diff)>0?"#22C55E":"#F59E0B";
+      const sign=parseFloat(diff)>0?"+":"";
+      sub.innerHTML=`enregistré <span style="color:${col};font-weight:500;">${sign}${diff} vs hier</span>`;
+    } else if(sub)sub.textContent="enregistré";
+  } else if(el){el.textContent="—";el.style.color="#2a2a2a";if(sub)sub.textContent="non enregistré";}
+}
+
+function renderWeightHist(){
+  const c=document.getElementById("w-hist");const entries=getAllWeightEntries();const lnk=document.getElementById("w-link");
+  if(entries.length===0){c.innerHTML='<div style="font-size:10px;color:#222;margin-top:4px;">Aucune entrée</div>';if(wChart){wChart.destroy();wChart=null;}if(lnk)lnk.style.display="none";return;}
+  if(lnk&&localStorage.getItem("gt5_w_"+dk(curDate)))lnk.style.display="block";
+  c.innerHTML=entries.slice(-4).reverse().map((e,i,arr)=>{
+    const prev=arr[i+1];let dt="";
+    if(prev){const df=(e.kg-prev.kg).toFixed(1);dt=`<span class="w-delta ${parseFloat(df)>0?"dn":"up"}">${parseFloat(df)>0?"+":""}${df}</span>`;}// #8 — dn=vert pour lean bulk
+    return`<div class="w-row"><span class="w-date">${e.date.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</span><span class="w-val">${e.kg.toString().replace(".",",")}kg${dt}</span></div>`;
+  }).join("");
+  if(entries.length>=2){
+    const first=entries[0].kg,last=entries[entries.length-1].kg;const diff=(last-first).toFixed(1);
+    // #8 — flèche verte si prise de masse (lean bulk)
+    const col=parseFloat(diff)>0?"#22C55E":"#F59E0B";
+    document.getElementById("trend-row").innerHTML=`<span style="font-size:13px;color:${col}">${parseFloat(diff)>0?"↗":"↘"}</span><span style="color:#444;">${parseFloat(diff)>0?"+":""}${diff}kg · ${entries.length} mesures</span>`;
+  }
+  if(typeof Chart!=="undefined")renderWeightChartSmall(entries);
+}
+
+function renderWeightChartSmall(entries){
+  const ctx=document.getElementById("wchart");if(!ctx)return;
+  if(wChart){wChart.destroy();wChart=null;}if(entries.length<2)return;
+  wChart=new Chart(ctx,{type:"line",data:{labels:entries.map(e=>e.date.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})),datasets:[{data:entries.map(e=>e.kg),borderColor:"#7B72E9",backgroundColor:"transparent",borderWidth:1.5,pointRadius:3,pointBackgroundColor:"#7B72E9",tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:"rgba(255,255,255,0.02)"},ticks:{font:{size:8},color:"#2a2a2a"}},y:{grid:{color:"rgba(255,255,255,0.02)"},ticks:{font:{size:8},color:"#2a2a2a",callback:v=>v+"kg"}}}}});
+}
+
+function renderWeightFull(){
+  const entries=getAllWeightEntries();
+  const grid=document.getElementById("wstats-grid");
+  const histEl=document.getElementById("whist-full");
+  if(entries.length===0){
+    grid.innerHTML='<div style="color:#333;font-size:11px;grid-column:1/-1;">Aucune donnée.</div>';
+    histEl.innerHTML='';
+    if(wChartFull){wChartFull.destroy();wChartFull=null;}
+    return;
+  }
+
+  const kgs=entries.map(e=>e.kg);
+  const first=entries[0], last=entries[entries.length-1];
+  const delta=parseFloat((last.kg-first.kg).toFixed(2));
+  const avg=(kgs.reduce((a,b)=>a+b,0)/kgs.length).toFixed(1);
+
+  // Rythme hebdomadaire réel
+  const daySpan=(last.date-first.date)/(1000*60*60*24)||1;
+  const weekRate=parseFloat((delta/daySpan*7).toFixed(2));
+  // Zone lean bulk : +0.2 à +0.5 kg/sem
+  const rateOk=weekRate>=0.15&&weekRate<=0.55;
+  const rateFast=weekRate>0.55;
+  const rateSlow=weekRate<0.15&&weekRate>-0.1;
+  const rateLoss=weekRate<=-0.1;
+  let rateColor=rateOk?'#22C55E':rateFast?'#EF4444':'#F59E0B';
+  let rateLabel=rateOk?'✓ Zone lean bulk':rateFast?'↑ Trop rapide':rateSlow?'↓ Trop lent':rateLoss?'↓ Perte de masse':'—';
+
+  // Projection à 8 semaines
+  const proj8=parseFloat((last.kg+weekRate*8).toFixed(1));
+
+  // Stats par semaine (grouper les entrées)
+  const weekGroups={};
+  entries.forEach(e=>{
+    const d=new Date(e.date);
+    const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));
+    const wk=mon.toISOString().slice(0,10);
+    if(!weekGroups[wk])weekGroups[wk]=[];
+    weekGroups[wk].push(e.kg);
+  });
+  const weeks=Object.keys(weekGroups).sort();
+  const weekAvgs=weeks.map(w=>parseFloat((weekGroups[w].reduce((a,b)=>a+b,0)/weekGroups[w].length).toFixed(2)));
+  const weekDeltas=weekAvgs.map((w,i)=>i===0?null:parseFloat((w-weekAvgs[i-1]).toFixed(2)));
+
+  // Stats grid
+  grid.innerHTML=[
+    {l:"Poids actuel",v:last.kg.toString().replace(".",",")+"kg",s:"dernière mesure",c:"#e8e8e8"},
+    {l:"Variation totale",v:(delta>=0?"+":"")+delta+"kg",s:first.date.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" → auj.",c:delta>0?"#22C55E":"#F59E0B"},
+    {l:"Rythme / semaine",v:(weekRate>=0?"+":"")+weekRate+"kg",s:rateLabel,c:rateColor},
+    {l:"Projection 8 sem.",v:proj8+"kg",s:"si rythme constant",c:"#7B72E9"},
+    {l:"Min / Max",v:Math.min(...kgs)+" — "+Math.max(...kgs)+"kg",s:"sur la période",c:"#e8e8e8"},
+    {l:"Moyenne",v:avg+"kg",s:entries.length+" mesures",c:"#e8e8e8"},
+  ].map(it=>`<div class="wsc"><div class="wsc-label">${it.l}</div><div class="wsc-val" style="color:${it.c}">${it.v}</div><div class="wsc-sub">${it.s||""}</div></div>`).join("");
+
+  // Zone lean bulk indicator
+  const zoneHtml=`<div style="margin:12px 0 16px;padding:10px 14px;border-radius:10px;background:${rateOk?'#071a0a':rateFast?'#1a0808':'#1c1400'};border:0.5px solid ${rateOk?'#166534':rateFast?'#3a1010':'#3a2800'};">
+    <div style="font-size:10px;color:${rateColor};font-weight:500;margin-bottom:4px;">${rateLabel}</div>
+    <div style="font-size:10px;color:#555;">Zone lean bulk optimale : +0,2 à +0,5 kg/semaine</div>
+    <div style="margin-top:8px;height:6px;background:#141414;border-radius:3px;position:relative;overflow:hidden;">
+      <div style="position:absolute;left:20%;width:30%;height:100%;background:#22C55E22;border-left:1px solid #22C55E44;border-right:1px solid #22C55E44;"></div>
+      ${weekRate>=-0.5&&weekRate<=1.5?`<div style="position:absolute;left:${Math.min(95,Math.max(2,((weekRate+0.5)/2)*100))}%;top:0;bottom:0;width:3px;background:${rateColor};border-radius:2px;transform:translateX(-50%);"></div>`:''}
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:8px;color:#333;"><span>−0,5</span><span>0</span><span style="color:#22C55E44;">+0,2</span><span style="color:#22C55E44;">+0,5</span><span>+1,0</span><span>+1,5</span></div>
+  </div>`;
+
+  // Graphique
+  const ctx=document.getElementById("wchart-full");
+  if(wChartFull){wChartFull.destroy();wChartFull=null;}
+  if(typeof Chart!=="undefined"){
+    const n=entries.length,xs=entries.map((_,i)=>i),ys=kgs;
+    const sX=xs.reduce((a,b)=>a+b,0),sY=ys.reduce((a,b)=>a+b,0),sXY=xs.reduce((s,x,i)=>s+x*ys[i],0),sX2=xs.reduce((s,x)=>s+x*x,0);
+    const slope=(n*sXY-sX*sY)/(n*sX2-sX*sX)||0, intercept=(sY-slope*sX)/n||ys[0];
+    wChartFull=new Chart(ctx,{
+      type:"line",
+      data:{
+        labels:entries.map(e=>e.date.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})),
+        datasets:[
+          {label:"Poids",data:kgs,borderColor:"#7B72E9",backgroundColor:"rgba(123,114,233,0.05)",borderWidth:2,pointRadius:3,pointBackgroundColor:"#7B72E9",tension:0.3,fill:true},
+          {label:"Tendance",data:xs.map(x=>parseFloat((intercept+slope*x).toFixed(2))),borderColor:"#22C55E",borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:0,fill:false}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:"#444",font:{size:10},boxWidth:12,padding:10}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw}kg`}}},scales:{x:{grid:{color:"rgba(255,255,255,0.03)"},ticks:{font:{size:9},color:"#333",maxTicksLimit:10}},y:{grid:{color:"rgba(255,255,255,0.03)"},ticks:{font:{size:9},color:"#333",callback:v=>v+"kg"}}}}
+    });
+  }
+
+  // Suivi hebdo
+  let weekHtml='';
+  if(weeks.length>=2){
+    weekHtml=`<div style="margin-top:16px;"><div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Suivi semaine par semaine</div>`;
+    weeks.slice(-8).forEach((w,i,arr)=>{
+      const delta_w=weekDeltas[weeks.indexOf(w)];
+      if(delta_w===null)return;
+      const inZone=delta_w>=0.15&&delta_w<=0.55;
+      const tooFast=delta_w>0.55;
+      const col=inZone?'#22C55E':tooFast?'#EF4444':'#F59E0B';
+      const mon=new Date(w);
+      const lbl=mon.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+      weekHtml+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid #111;">
+        <span style="font-size:10px;color:#555;">Sem. ${lbl}</span>
+        <span style="font-size:11px;font-weight:500;color:${col};">${delta_w>=0?'+':''}${delta_w}kg</span>
+        <span style="font-size:9px;color:${col};">${inZone?'✓ Zone':tooFast?'Trop rapide':delta_w<0?'Perte':'Trop lent'}</span>
+      </div>`;
+    });
+    weekHtml+='</div>';
+  }
+
+  // Historique
+  const histRows=entries.slice().reverse().map((e,i,arr)=>{
+    const prev=arr[i+1];let dt="";
+    if(prev){const df=(e.kg-prev.kg).toFixed(1);dt=`<span class="w-delta ${parseFloat(df)>0?"dn":"up"}">${parseFloat(df)>0?"+":""}${df}</span>`;}
+    return`<div class="wh-row"><span class="wh-date">${e.date.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"})}</span><span class="wh-val">${e.kg} kg${dt}</span></div>`;
+  }).join("");
+
+  histEl.innerHTML=zoneHtml+weekHtml+`<div style="margin-top:16px;"><div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Toutes les mesures</div>${histRows}</div>`;
+}
+
+function loadValidation(d){try{const r=localStorage.getItem("gt5_val_"+dk(d));return r?JSON.parse(r):null;}catch(e){return null;}}
+function saveValidation(d,o){localStorage.setItem("gt5_val_"+dk(d),JSON.stringify(o));}
+function removeValidation(d){localStorage.removeItem("gt5_val_"+dk(d));}
+
+function validateDay(){
+  // Recalculer dep directement depuis l'état des activités (même logique que compute())
+  const _state=loadState(curDate);
+  const _cust=loadCustom(curDate);
+  let _actK=0;
+  ACTS.forEach(function(a){
+    const s=_state[a.id];
+    const v=s&&s.c?parseFloat(s.v)||0:0;
+    const k=s&&s.c?Math.round(v*a.kpu):0;
+    if(!isNaN(k))_actK+=k;
+  });
+  if(_cust.active&&_cust.kcal>0) _actK+=_cust.kcal;
+  const _dep=getBMR()+_actK;
+  const glucG = Math.max(0,Math.round(Math.max(0,_dep-FIXED)/4));
+  const apport = Math.max(FLOOR,(glucG*4)+FIXED);
+  const now=new Date();
+  saveValidation(curDate,{glucG,apport,dep:_dep,time:now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})});
+  // Sauvegarder dep dans LS pour que carburant puisse le lire
+  localStorage.setItem("gt5_dep_"+dk(curDate), String(_dep));
+  localStorage.setItem("gt5_apport_"+dk(curDate), String(apport));
+  renderValidationState();
+}
+function unvalidateDay(){
+  removeValidation(curDate);
+  localStorage.removeItem("gt5_dep_"+dk(curDate));
+  localStorage.removeItem("gt5_gluc_"+dk(curDate));
+  localStorage.removeItem("gt5_apport_"+dk(curDate));
+  invalidateCache(curDate);
+  buildActs();compute();renderValidationState();
+}
+function renderValidationState(){
+  const val=loadValidation(curDate);
+  const banner=document.getElementById("validated-banner"),btn=document.getElementById("validate-btn");
+  const icon=document.getElementById("validate-icon"),text=document.getElementById("validate-text");
+  const nav=document.getElementById("main-nav");
+  if(val){
+    banner.style.display="block"; const _plw=document.getElementById("plan-link-wrap");if(_plw)_plw.style.display="block";btn.classList.add("done");
+    if(icon)icon.textContent="✓";if(text)text.textContent="Journée validée";
+        document.getElementById("vb-gluc").textContent=val.glucG+"g";
+    const _dep2v=parseInt(localStorage.getItem("gt5_dep_"+dk(curDate))||"0")||0;
+    const _vlipEl=document.getElementById("vb-lip");if(_vlipEl)_vlipEl.textContent=getLip(_dep2v)+"g";
+    const _vbmLip=document.getElementById("vbm-lip");if(_vbmLip)_vbmLip.textContent="100g";
+    const _vpEl2=document.getElementById("vb-poids");const _pw2=localStorage.getItem("gt5_w_"+dk(curDate));
+    if(_vpEl2)_vpEl2.textContent=_pw2?parseFloat(_pw2).toFixed(1)+"kg":"—";
+    document.getElementById("vb-total").textContent=fmt(val.apport||0)+" kcal";
+    document.getElementById("vb-time").textContent="Validée à "+val.time;
+  } else {
+    banner.style.display="none";btn.classList.remove("done");
+    if(icon)icon.textContent="○";if(text)text.textContent="Valider la journée";
+  }
+}
+
+function toggleDetail(){
+  const body=document.getElementById("det-body"),header=document.getElementById("det-header");
+  const open=body.classList.toggle("open");header.classList.toggle("open",open);
+  document.getElementById("det-arrow").style.transform=open?"rotate(180deg)":"";
+}
+
+function saveNote(){
+  localStorage.setItem("rt5_note_"+dk(curDate),document.getElementById("note-ta").value);
+  const s=document.getElementById("note-saved");s.style.opacity="1";
+  const dot=document.getElementById("note-dot");if(dot)dot.style.opacity="1";
+  setTimeout(()=>s.style.opacity="0",2000);
+}
+function loadNote(){
+  const ta=document.getElementById("note-ta");
+  const existing=localStorage.getItem("rt5_note_"+dk(curDate))||"";
+  ta.value=existing;
+  const dot=document.getElementById("note-dot");if(dot)dot.style.opacity=existing?"1":"0";
+  // #1 — retirer l'ancien listener avant d'en ajouter un nouveau
+  if(_noteBlurHandler)ta.removeEventListener("blur",_noteBlurHandler);
+  const capturedDate=new Date(curDate);// capturer la date au moment du chargement
+  _noteBlurHandler=()=>{
+    if(ta.value.trim()){
+      localStorage.setItem("rt5_note_"+dk(capturedDate),ta.value);// #1 — toujours écrire sous la bonne date
+      if(dot)dot.style.opacity="1";
+    }
+  };
+  ta.addEventListener("blur",_noteBlurHandler);
+}
+
+// CLIPBOARD
+function clipboardWrite(text){
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>{const t=document.getElementById("ctxt");t.style.opacity="1";setTimeout(()=>t.style.opacity="0",2000);}).catch(()=>fallbackClip(text));
+  } else fallbackClip(text);
+}
+function fallbackClip(text){
+  const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");const t=document.getElementById("ctxt");t.style.opacity="1";setTimeout(()=>t.style.opacity="0",2000);}
+  catch(e){prompt("Copier ce texte :",text);}
+  document.body.removeChild(ta);
+}
+function copyDay(){
+  const g=document.getElementById("s-gluc").textContent,dep=document.getElementById("s-dep").textContent,ap=document.getElementById("s-apport").textContent;
+  const ds=curDate.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
+  clipboardWrite(`${ds} — Dép: ${dep} kcal | Apport: ${ap} kcal | G:${g}g P:200g L:100g`);
+}
+function exportWeek(){
+  const mon=addDays(curDate,-dow(curDate));let lines=["── Résumé semaine ──"];
+  for(let i=0;i<7;i++){
+    const d=addDays(mon,i);const g=localStorage.getItem("gt5_gluc_"+dk(d));const depRaw=localStorage.getItem("gt5_dep_"+dk(d));
+    const dep=depRaw?parseInt(depRaw):null;const ds=d.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
+    if(g)lines.push(`${ds}: G${g}g | Dép:${dep!==null&&!isNaN(dep)?dep.toLocaleString("fr-FR"):"—"} kcal`);
+    else lines.push(`${ds}: non tracké`);
+  }
+  clipboardWrite(lines.join("\n"));
+}
+
+function exportAllData(){
+  const data={version:"gt5",exportDate:new Date().toISOString(),entries:{}};
+  Object.keys(localStorage).filter(k=>k.startsWith("gt5_")).forEach(k=>{
+    try{data.entries[k]=JSON.parse(localStorage.getItem(k));}
+    catch(e){data.entries[k]=localStorage.getItem(k);}
+  });
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="glucide_tracker_backup_"+dk(TODAY)+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function clearWeightHistory(){
+  if(!confirm("Supprimer tout l'historique de poids ?"))return;
+  Object.keys(localStorage).filter(k=>k.startsWith("gt5_w_")).forEach(k=>localStorage.removeItem(k));
+  renderWeightFull();
+}
+
+function resetCurDay(){
+  if(!confirm("Remettre à zéro les activités de cette journée ?\n(Poids et note conservés)"))return;
+  ["gt5_","gt5_gluc_","gt5_dep_","gt5_apport_","gt5_bilan_","gt5_custom_","gt5_val_"].forEach(k=>localStorage.removeItem(k+dk(curDate)));
+  invalidateCache(curDate);
+  buildActs();compute();renderValidationState();
+}
+
+function clearAll(){
+  if(!confirm("Supprimer TOUTES les données ?\nCette action est irréversible."))return;
+  if(!confirm("Confirmation finale : effacer définitivement toutes vos données ?"))return;
+  Object.keys(localStorage).filter(k=>k.startsWith("gt5_")).forEach(k=>localStorage.removeItem(k));
+  Object.keys(sessionStorage).filter(k=>k.startsWith("scrollPos_")).forEach(k=>sessionStorage.removeItem(k));
+  showCal();
+}
+
+// KEYBOARD + SWIPE
+document.addEventListener("keydown",e=>{
+  if(document.getElementById("view-day").classList.contains("active")){
+    if(e.key==="ArrowLeft")shiftDay(-1);if(e.key==="ArrowRight")shiftDay(1);if(e.key==="Escape")showCal();
+  }
+});
+let tx=0,ty=0;
+document.getElementById("view-day").addEventListener("touchstart",e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.getElementById("view-day").addEventListener("touchend",e=>{
+  const dx=e.changedTouches[0].clientX-tx;const dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>90&&Math.abs(dx)>Math.abs(dy)*1.5)shiftDay(dx<0?1:-1);
+},{passive:true});
+
+// INIT
+(function(){
+  try{localStorage.setItem("gt5_test","1");if(localStorage.getItem("gt5_test")==="1")localStorage.removeItem("gt5_test");}
+  catch(e){document.body.insertAdjacentHTML("afterbegin",'<div style="background:#3a0a0a;color:#ff8888;padding:12px;font-size:12px;text-align:center;">⚠️ localStorage indisponible — ouvre dans Safari</div>');}
+})();
+renderCal();updateStreak();curDate=new Date(TODAY);openDay();
+// Invalider le cache si la semaine est swappée depuis Routine
+window.addEventListener('storage', function(e){
+  if(e.key==='rt5_week_custom'||e.key==='rt5_week_swapped'){
+    Object.keys(_calCache).forEach(function(k){delete _calCache[k];});
+    if(document.getElementById('view-day')&&document.getElementById('view-day').classList.contains('active')){buildActs();compute();}
+  }
+});
+setInterval(function(){if(document.getElementById("view-day")&&document.getElementById("view-day").classList.contains("active")){invalidateBMRCache();compute();}},5*60*1000);
+// R4 — Afficher preset séance dans la nav
+(function(){
+  const sub=document.getElementById("nav-preset-sub");
+  if(!sub)return;
+  const preset=PRESETS[dow(TODAY)];
+  if(preset){sub.textContent=preset.name+" · 200g P · 100g L";}
+})();
+
+// Auto-refresh 5min
+setInterval(function(){
+  var vd=document.getElementById("view-day");
+  if(vd&&vd.classList.contains("active")){invalidateBMRCache();compute();}
+},5*60*1000);
+</script>
+
+<!-- BOTTOM NAV — navigation inter-modules -->
+<div class="bnav">
+  <div class="bn" onclick="location.href='dashboard.html'"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
+  <div class="bn active"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
+  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Carburant</div></div>
+  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
+  <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
+</div>
+</body>
+</html>

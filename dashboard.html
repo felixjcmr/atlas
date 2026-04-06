@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Atlas">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+<title>Félix — Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#c0c0c0;max-width:480px;margin:0 auto;min-height:100vh;overscroll-behavior:none;padding-bottom:72px;}
+button{cursor:pointer;font-family:inherit;border:none;background:none;}
+
+/* HEADER */
+.hdr{border-bottom:0.5px solid #111;padding:16px 18px 10px;display:flex;align-items:flex-start;justify-content:space-between;}
+.hdr-greeting{font-size:22px;font-weight:500;color:#e8e8e8;letter-spacing:-0.02em;line-height:1.1;}
+.hdr-date{font-size:11px;color:#444;margin-top:4px;}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.streak-chip{display:none;}
+.streak-chip.show{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:#1c1400;border:0.5px solid #3a2800;font-size:11px;color:#F59E0B;font-weight:500;}
+
+/* HERO CARD */
+.hero{margin:0 18px 10px;background:#0f0e1e;border:0.5px solid #2a2660;border-radius:16px;overflow:hidden;}
+.hero-top{padding:16px 18px 14px;display:flex;justify-content:space-between;align-items:flex-start;}
+.hero-session{font-size:10px;color:#555;letter-spacing:0.06em;text-transform:uppercase;}
+.hero-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:500;}
+.hero-badge.validated{background:#071a0a;color:#22C55E;border:0.5px solid #166534;}
+.hero-badge.pending{background:#111;color:#444;border:0.5px solid #1e1e1e;}
+.hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);padding:0 18px 16px;}
+.hm{text-align:center;padding:0 4px;}
+.hm:not(:last-child){border-right:0.5px solid #1e1e2e;}
+.hm-val{font-size:18px;font-weight:500;line-height:1;letter-spacing:-0.02em;}
+.hm-val.v{color:#7B72E9;}.hm-val.w{color:#e8e8e8;}.hm-val.g{color:#22C55E;}
+.hm-lbl{font-size:9px;color:#444;letter-spacing:0.04em;margin-top:4px;text-transform:uppercase;}
+.hm-sub{font-size:10px;color:#333;margin-top:2px;}
+.hero-bottom{border-top:0.5px solid #1a1a2e;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+.hero-acts{display:flex;gap:5px;flex-wrap:wrap;flex:1;}
+.chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:500;}
+.chip.v{background:#100e2e;color:#7B72E9;border:0.5px solid #2e2b6e;}
+.chip.g{background:#071a0a;color:#22C55E;border:0.5px solid #166534;}
+.chip.gr{background:#111;color:#444;border:0.5px solid #1e1e1e;}
+.hero-open-btn{font-size:10px;color:#534AB7;flex-shrink:0;margin-left:8px;background:transparent;cursor:pointer;padding:4px 8px;border-radius:20px;outline:none;box-shadow:inset 0 0 0 0.5px #2e2b6e;transition:background 0.15s,box-shadow 0.15s;}
+.hero-open-btn:hover{background:#100e2e;box-shadow:inset 0 0 0 0.5px #7B72E9;}
+
+
+/* POIDS 7J BLOCK */
+.wblock{margin:0 18px 10px;padding:12px 14px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;}
+.wblock-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.wblock-lbl{font-size:9px;color:#333;letter-spacing:0.06em;text-transform:uppercase;}
+.wblock-leg{font-size:9px;letter-spacing:0.03em;}
+
+/* MODULE LINKS */
+.modules{display:flex;flex-direction:column;gap:10px;margin:0 18px;}
+
+.mod{display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:68px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:13px;cursor:pointer;transition:border-color 0.15s,background 0.15s;position:relative;overflow:hidden;}
+.mod:hover{background:#111;border-color:#2a2a2a;}
+.mod::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px;}
+.mod.nutrition::before{background:linear-gradient(to bottom,#7B72E9,#22C55E);}
+.mod-sub-btns{display:flex;gap:8px;margin-top:10px;}
+.sub-btn{padding:9px 16px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;transition:opacity 0.15s;min-height:36px;}
+.sub-btn:hover{opacity:0.8;}
+.sub-btn.energie{background:#100e2e;color:#7B72E9;border:0.5px solid #2e2b6e;}
+.sub-btn.carburant{background:#071a0a;color:#22C55E;border:0.5px solid #166534;}
+.mod.seances::before{background:#F59E0B;}
+
+
+.mod.routine-mod::before{background:#F59E0B;}
+.mod-ico{font-size:20px;flex-shrink:0;width:36px;text-align:center;}
+.mod-body{flex:1;min-width:0;}
+.mod-title{font-size:13px;font-weight:500;color:#e8e8e8;margin-bottom:2px;}
+.mod-desc{font-size:11px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mod-stat{font-size:10px;margin-top:5px;}
+.mod-arrow{font-size:16px;color:#2a2a2a;flex-shrink:0;}
+
+/* STAT PILLS */
+.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;}
+.pill.green{background:#071a0a;color:#22C55E;border:0.5px solid #166534;}
+.pill.violet{background:#100e2e;color:#7B72E9;border:0.5px solid #2e2b6e;}
+.pill.amber{background:#1c1400;color:#F59E0B;border:0.5px solid #3a2800;}
+.pill.gray{background:#111;color:#444;border:0.5px solid #1e1e1e;}
+.pill.blue{background:#071428;color:#38BDF8;border:0.5px solid #0e2a4a;}
+
+.sec-title{font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;margin:18px 18px 10px;}
+
+/* DEP NUDGE */
+.dep-nudge{width:100%;padding:8px 18px;background:#1c1400;border-top:0.5px solid #3a2800;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#F59E0B;cursor:pointer;}
+.dep-nudge-cta{color:#7B72E9;font-size:10px;}
+.hero-note{font-size:10px;color:#3d3a70;margin-top:3px;font-style:italic;padding:0 18px 8px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;border:0.5px solid #2a2a2a;border-radius:12px;padding:10px 18px;font-size:12px;color:#c0c0c0;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:300;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* BOTTOM NAV */
+
+
+
+
+
+.bnav{position:fixed!important;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;background:rgba(10,10,10,0.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:0.5px solid #1a1a1a;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bn{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;min-width:0;}
+.bn-ico{font-size:17px;line-height:1;}
+.bn-lbl{font-size:7px;color:#333;letter-spacing:0.03em;text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48px;text-align:center;}
+.bn.active .bn-lbl{color:#7B72E9;}
+.bn.active .bn-ico{filter:drop-shadow(0 0 4px #7B72E9);}
+@keyframes bn-spin {0%{transform:rotate(0)}100%{transform:rotate(90deg)}}
+@keyframes bn-pulse{0%{transform:scale(1)}50%{transform:scale(1.3);filter:brightness(1.8)}100%{transform:scale(1)}}
+@keyframes bn-sway {0%{transform:rotate(0)}25%{transform:rotate(-15deg)}75%{transform:rotate(15deg)}100%{transform:rotate(0)}}
+@keyframes bn-cart {0%{transform:translateX(0)}25%{transform:translateX(3px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+@keyframes bn-flip {0%{transform:rotateX(0)}50%{transform:rotateX(180deg)}100%{transform:rotateX(360deg)}}
+.bn:hover .bn-ico{display:inline-block;}
+.bn:nth-child(1):hover .bn-ico{animation:bn-spin  0.3s ease-out forwards;}
+.bn:nth-child(2):hover .bn-ico{animation:bn-pulse 0.4s ease-in-out;}
+.bn:nth-child(3):hover .bn-ico{animation:bn-sway  0.5s ease-in-out;}
+.bn:nth-child(4):hover .bn-ico{animation:bn-cart  0.4s ease-in-out;}
+.bn:nth-child(5):hover .bn-ico{animation:bn-flip  0.4s ease-in-out;}
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="hdr-greeting" id="greeting">Bonjour, Félix</div>
+    <div class="hdr-date" id="hdr-date"></div>
+  </div>
+  <div class="hdr-right">
+    <div class="streak-chip" id="streak-chip">🔥 <span id="streak-n">0</span>j validés</div>
+    <button onclick="openApiModal()" style="background:none;border:0.5px solid #1a1a1a;color:#333;border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer;" title="Configuration API">⚙️</button>
+  </div>
+</div>
+
+<!-- HERO — AUJOURD'HUI -->
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="hero-session" id="hero-session">Chargement...</div>
+    </div>
+    <div class="hero-badge pending" id="hero-badge">En cours</div>
+  </div>
+  <div class="hero-metrics">
+    <div class="hm">
+      <div class="hm-val v" id="h-dep">—</div>
+      <div class="hm-lbl">kcal dép.</div>
+      <div class="hm-sub" id="h-dep-sub"></div>
+    </div>
+    <div class="hm">
+      <div class="hm-val w" id="h-gluc">—</div>
+      <div class="hm-lbl">g glucides</div>
+      <div class="hm-sub" id="h-gluc-sub"></div>
+    </div>
+    <div class="hm">
+      <div class="hm-val w" id="h-poids">—</div>
+      <div class="hm-lbl">kg poids</div>
+      <div class="hm-sub" id="h-poids-sub"></div>
+    </div>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="hero-acts" id="hero-acts"></div>
+    <button class="hero-open-btn" onclick="location.href='glucide_tracker.html'">Ouvrir →</button>
+  </div>
+</div>
+
+<!-- SEMAINE FUSIONNÉE : glucides + dépense -->
+
+<!-- POIDS 7J -->
+<div class="wblock" id="poids-7j-block" style="display:none;">
+  <div class="wblock-hdr">
+    <div class="wblock-lbl">Poids 7 jours</div>
+    <div class="wblock-leg" id="poids-7j-avg"></div>
+  </div>
+  <div style="display:flex;align-items:flex-end;gap:3px;height:32px;margin-top:6px;" id="poids-7j-chart"></div>
+  <div style="display:flex;gap:3px;margin-top:4px;" id="poids-7j-labels"></div>
+</div>
+
+<!-- MODULES -->
+<div class="sec-title">Modules</div>
+<div class="modules">
+
+  <div class="mod nutrition" style="cursor:default;">
+    <div class="mod-ico">🥗</div>
+    <div class="mod-body">
+      <div class="mod-title">Nutrition</div>
+      <div class="mod-desc">Dépense calorique · Plan alimentaire</div>
+      <div class="mod-stat" id="mm-nutrition"></div>
+      <div class="mod-sub-btns">
+        <button class="sub-btn energie" onclick="event.stopPropagation();location.href='glucide_tracker.html'">⚡ Dépense calorique →</button>
+        <button class="sub-btn carburant" onclick="event.stopPropagation();location.href='carburant.html'">🌿 Plan alimentaire →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mod seances" onclick="location.href='training.html'">
+    <div class="mod-ico">🏋️</div>
+    <div class="mod-body">
+      <div class="mod-title">Séances</div>
+      <div class="mod-desc">Training log · Charges · Progression</div>
+      <div class="mod-stat" id="mm-seances"></div>
+    </div>
+    <div class="mod-arrow">›</div>
+  </div>
+
+  <!-- MODULE ROUTINE -->
+  
+  <div class="mod routine-mod" onclick="location.href='routine.html'">
+    <div class="mod-ico">🗓</div>
+    <div class="mod-body">
+      <div class="mod-title">Routine</div>
+      <div class="mod-desc" id="mod-routine-desc">Aujourd'hui · Sommeil · Journal</div>
+      <div class="mod-stat" id="mod-routine-stat"></div>
+    </div>
+    <div class="mod-arrow">›</div>
+  </div>
+
+  <!-- MODULE COACH -->
+  <div class="mod" onclick="location.href='coach.html'" style="border-color:#2a2060;background:linear-gradient(135deg,#0d0d0d 0%,#0a0820 100%);">
+    <div class="mod-ico">🧠</div>
+    <div class="mod-body">
+      <div class="mod-title" style="color:#e8e8e8;">Coach IA</div>
+      <div class="mod-desc" style="color:#555;">Pose une question · Analyse · Conseil personnalisé</div>
+    </div>
+    <div class="mod-arrow" style="color:#7B72E9;">›</div>
+  </div>
+
+</div>
+
+<!-- BILAN SEMAINE -->
+<div style="margin:0 18px 10px;">
+  <div onclick="location.href='bilan.html'" style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:13px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+    <div>
+      <div style="font-size:13px;font-weight:500;color:#e8e8e8;margin-bottom:2px;">📊 Bilan de la semaine</div>
+      <div style="font-size:11px;color:#444;">Graphiques · Insights · Analyse Claude</div>
+    </div>
+    <div style="font-size:16px;color:#2a2a2a;">›</div>
+  </div>
+</div>
+
+<!-- MODAL CONFIG API -->
+<div id="api-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeApiModal()">
+  <div style="background:#111;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:24px 20px 40px;border-top:0.5px solid #2a2a2a;">
+    <div style="font-size:14px;font-weight:500;color:#e8e8e8;margin-bottom:6px;">Clé API Anthropic</div>
+    <div style="font-size:11px;color:#444;margin-bottom:16px;line-height:1.6;">Crée ton compte sur <span style="color:#7B72E9;">console.anthropic.com</span> → API Keys → Create Key. Colle ta clé ci-dessous.</div>
+    <input id="api-key-input" type="password" placeholder="sk-ant-..." style="width:100%;background:#0d0d0d;border:0.5px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#e8e8e8;font-size:13px;font-family:monospace;outline:none;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;">
+      <button onclick="saveApiKey()" style="flex:1;padding:13px;background:#7B72E9;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:500;cursor:pointer;">Enregistrer</button>
+      <button onclick="closeApiModal()" style="padding:13px 16px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;color:#555;font-size:13px;cursor:pointer;">Annuler</button>
+    </div>
+    <div id="api-key-status" style="margin-top:10px;font-size:11px;text-align:center;min-height:16px;"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <div class="bn active"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
+  <div class="bn" onclick="location.href='glucide_tracker.html'"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
+  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Carburant</div></div>
+  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
+  <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
+</div>
+<script>
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const START=new Date(2026,2,28);
+const SFR=["L","M","M","J","V","S","D"];
+const DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+const PRESETS=["Push","Pull","Lower","Repos","Chest / Back","Shoulders / Arms","Footing"];
+
+function dk(d){return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function dow(d){let w=d.getDay();return w===0?6:w-1;}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function ls(k){return localStorage.getItem(k);}
+function fmt(n){return Math.round(n).toLocaleString("fr-FR");}
+
+const _mcTimers=new WeakMap();
+let _toastTimer=null;
+
+function renderPoids7j(){
+  const block=document.getElementById('poids-7j-block');
+  const chart=document.getElementById('poids-7j-chart');
+  const labels=document.getElementById('poids-7j-labels');
+  const avgEl=document.getElementById('poids-7j-avg');
+  if(!block||!chart||!labels) return;
+  const vals=[];
+  for(let n=6;n>=0;n--){
+    const dd=new Date(TODAY);dd.setDate(dd.getDate()-n);
+    const w=parseFloat(ls('gt5_w_'+dk(dd)));
+    vals.push({w:isNaN(w)?null:w,d:dd});
+  }
+  const known=vals.filter(v=>v.w!==null);
+  if(known.length<2){block.style.display='none';return;}
+  block.style.display='block';
+  const mn=Math.min(...known.map(v=>v.w));
+  const mx=Math.max(...known.map(v=>v.w));
+  const range=mx-mn||0.5;
+  const avg=(known.reduce((a,b)=>a+b.w,0)/known.length).toFixed(1).replace('.',',');
+  const trend=known.length>=2?(known[known.length-1].w-known[0].w).toFixed(1):0;
+  const tSign=trend>0?'+':'';
+  const tCol=trend>0?'#22C55E':trend<0?'#EF4444':'#555';
+  if(avgEl){avgEl.textContent=avg+'kg moy · '+tSign+trend+'kg/sem';avgEl.style.color=tCol;}
+  chart.innerHTML=vals.map(v=>{
+    if(!v.w) return '<div style="flex:1;height:2px;background:#1a1a1a;border-radius:1px;align-self:center;"></div>';
+    const pct=Math.round((v.w-mn)/range*80)+10;
+    const isToday=dk(v.d)===dk(TODAY);
+    const col=isToday?'#22C55E':'#7B72E9';
+    return '<div style="flex:1;background:'+col+';border-radius:2px 2px 0 0;height:'+pct+'%;opacity:'+(isToday?1:0.6)+';"></div>';
+  }).join('');
+  labels.innerHTML=vals.map(v=>{
+    const isToday=dk(v.d)===dk(TODAY);
+    return '<div style="flex:1;text-align:center;font-size:7px;color:'+(isToday?'#e8e8e8':'#2a2a2a')+';">'+SFR[dow(v.d)]+'</div>';
+  }).join('');
+}
+function showToast(msg){
+  const t=document.getElementById("toast");
+  if(!t)return;
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function moduleEnCours(el){
+  const target=el.closest('.mod')||el;
+  if(_mcTimers.has(target))clearTimeout(_mcTimers.get(target));
+  target.style.opacity='0.4';
+  const t=setTimeout(()=>{target.style.opacity='';_mcTimers.delete(target);},300);
+  _mcTimers.set(target,t);
+  showToast("🚧 Module bientôt disponible");
+}
+
+renderPoids7j();
+// GREETING
+(function(){
+  const h=new Date().getHours();
+  const g=h<5?"Bonne nuit":h<12?"Bonjour":h<18?"Bonne après-midi":"Bonsoir";
+  document.getElementById("greeting").textContent=g+", Félix";
+  const ds=TODAY.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("hdr-date").textContent=ds.charAt(0).toUpperCase()+ds.slice(1);
+})();
+
+// STREAK
+(function(){
+  let s=0,d=new Date(TODAY);
+  while(true){
+    if(!!ls("gt5_val_"+dk(d)))s++;
+    else if(dk(d)!==dk(TODAY))break;
+    d=addDays(d,-1);if(d<START)break;
+  }
+  if(s>0){
+    document.getElementById("streak-chip").classList.add("show");
+    document.getElementById("streak-n").textContent=s;
+  }
+})();
+
+// HERO
+(function(){
+  const gluc=ls("gt5_gluc_"+dk(TODAY));
+  const dep=ls("gt5_dep_"+dk(TODAY));
+  const poids=ls("gt5_w_"+dk(TODAY));
+  const validated=!!ls("gt5_val_"+dk(TODAY));
+  const d=dow(TODAY);
+
+  const _wkCust0=(function(){try{return JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');}catch(e){return{};}})();
+  const _cust0=_wkCust0[d];
+  const _seanceLabel0=_cust0?(typeof _cust0==='object'?_cust0.label:_cust0):PRESETS[d];
+  document.getElementById("hero-session").textContent=_seanceLabel0+" · "+DAYS[d];
+  // R5 — Note du jour sous hero-session
+  (function(){
+    const today=new Date();today.setHours(0,0,0,0);
+    const noteKey="rt5_note_"+today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate();
+    const note=localStorage.getItem(noteKey);
+    if(note&&note.trim()){
+      let sesEl=document.getElementById("hero-session");
+      const notePreview=note.trim().split("\n")[0].substring(0,60)+(note.trim().length>60?"…":"");
+      const noteDiv=document.createElement("div");
+      noteDiv.className="hero-note";
+      noteDiv.textContent='"'+notePreview+'"';
+      sesEl.parentNode.appendChild(noteDiv);
+    }
+  })();
+
+  // Badge validation + journée complète
+  const badge=document.getElementById("hero-badge");
+  const _carbSnap=JSON.parse(ls("carb_"+dk(TODAY)+"_plan")||"null");
+  const _tDep2=parseInt(ls('gt5_dep_'+dk(TODAY)))||0;
+  const _depRef2=(_carbSnap&&_carbSnap.dep)||_tDep2;
+  const carbOk=_depRef2>0&&_carbSnap&&Math.abs(_carbSnap.k-_depRef2)<100;
+  const journeeComplete=validated&&carbOk;
+  if(journeeComplete){badge.className="hero-badge validated";badge.textContent="✓ Journée complète";}
+  else if(validated){badge.className="hero-badge validated";badge.textContent="✓ Validée";}
+  else{badge.className="hero-badge pending";badge.textContent="En cours";}
+
+  // Metriques
+  const _depN=dep?parseInt(dep):0;
+  // Glucides cibles calculés depuis la dépense (même formule que tracker + carburant)
+  const _glucCible=_depN>0?Math.max(0,Math.round(Math.max(0,_depN-1790)/4)):null;
+  document.getElementById("h-dep").textContent=_depN>0?(_depN>=1000?((_depN/1000).toFixed(1).replace(".",","))+"k":""+_depN):"—";
+  document.getElementById("h-gluc").textContent=_glucCible!==null?_glucCible+"g":"—";
+  const poidsEl=document.getElementById("h-poids");
+  if(poids){poidsEl.textContent=parseFloat(poids).toString().replace(".",",");poidsEl.className="hm-val g";}
+  else{poidsEl.textContent="—";poidsEl.className="hm-val w";}
+
+  if(dep){const dv=parseInt(dep);document.getElementById("h-dep-sub").textContent=dv>4200?"Jour chargé":dv>3600?"Actif":"Standard";}
+  if(_glucCible!==null){
+    document.getElementById("h-gluc-sub").textContent="cible · ±30g";
+  }
+
+  const hier=ls("gt5_w_"+dk(addDays(TODAY,-1)));
+  if(poids&&hier){
+    const diff=(parseFloat(poids)-parseFloat(hier)).toFixed(1);
+    const sign=parseFloat(diff)>0?"+":"";
+    document.getElementById("h-poids-sub").textContent=sign+diff+" vs hier";
+  }
+  // Tendance 7 jours lean bulk
+  (function(){
+    const sub=document.getElementById("h-poids-sub");
+    if(!poids||!sub)return;
+    // Trouver le poids d'il y a 7 jours
+    let w7=null;
+    for(let n=6;n<=10;n++){
+      const v=ls("gt5_w_"+dk(addDays(TODAY,-n)));
+      if(v){w7=parseFloat(v);break;}
+    }
+    if(!w7)return;
+    const trend=(parseFloat(poids)-w7).toFixed(1);
+    const tSign=parseFloat(trend)>0?"+":"";
+    // Lean bulk optimal : +0.2 à +0.5 kg/sem
+    const tv=parseFloat(trend);
+    const tCol=tv>0.6?"#F59E0B":tv>=-0.1?"#22C55E":"#EF4444"; // vert si ±0.1, rouge si perte franche
+    const existing=sub.textContent;
+    sub.innerHTML=(existing?existing+"<br>":"")+`<span style="color:${tCol};font-size:9px;">${tSign}${trend} kg / 7j</span>`;
+  })();
+
+  // Activites + aliments plan
+  const state=(function(){try{const r=ls("gt5_"+dk(TODAY));return r?JSON.parse(r):null;}catch(e){return null;}})();
+  const actsEl=document.getElementById("hero-acts");
+  const MORN=["street","corde","sac","sprint","plio","footing","natation","walkstep"];
+  const LBL={street:"Street",corde:"Corde",sac:"Sac",sprint:"Sprint",plio:"Plio",footing:"Footing",natation:"Natation",walkstep:"Walkstep"};
+  let html="";
+  if(state){
+    const actifs=MORN.filter(id=>state[id]&&state[id].c);
+    html=actifs.length>0?actifs.map(id=>`<span class="chip v">${LBL[id]}</span>`).join(""):`<span class="chip gr">Activités non cochées</span>`;
+  } else {
+    html=`<span class="chip gr">Activités non cochées</span>`;
+  }
+  let carbDone2=0,carbTotal=0;
+  try{
+    const snap=JSON.parse(ls("carb_"+dk(TODAY)+"_plan")||"null");
+    if(snap&&snap.chkCount!=null){carbDone2=snap.chkCount;carbTotal=snap.repasTotal||0;}
+    else{carbDone2=(JSON.parse(ls("carb_"+dk(TODAY)+"_chk"))||[]).length;}
+  }catch(e){}
+  if(carbDone2>0)html+=`<span class="chip g">${carbDone2}${carbTotal>0?'/'+carbTotal:''} 🌿</span>`;
+  actsEl.innerHTML=html;
+
+
+
+  // I3 — Suggestion proactive si après 12h et aucune dépense
+  if(!dep && new Date().getHours()>=12){
+    const heroBottom=document.querySelector('.hero-bottom');
+    if(heroBottom&&!document.getElementById('dep-nudge')){
+      const nudge=document.createElement('div');
+      nudge.id='dep-nudge';
+      nudge.className='dep-nudge';
+      nudge.innerHTML='⚡ Dépense non saisie <span class="dep-nudge-cta">Ouvrir Énergie →</span>';
+      nudge.onclick=()=>{location.href='glucide_tracker.html';};
+      heroBottom.parentNode.insertBefore(nudge,heroBottom.nextSibling);
+    }
+  }
+})();
+
+// MODULE STATS
+(function(){
+  const dep=ls("gt5_dep_"+dk(TODAY));
+  const gluc=ls("gt5_gluc_"+dk(TODAY));
+  const validated=!!ls("gt5_val_"+dk(TODAY));
+  let carbDone=0;
+  try{
+    const snap2=JSON.parse(ls("carb_"+dk(TODAY)+"_plan")||"null");
+    if(snap2&&snap2.chkCount!=null) carbDone=snap2.chkCount;
+    else carbDone=(JSON.parse(ls("carb_"+dk(TODAY)+"_chk"))||[]).length;
+  }catch(e){}
+  const el=document.getElementById("mm-nutrition");
+  let parts=[];
+  if(validated)parts.push('<span class="pill green">✓ Validée</span>');
+  else if(dep)parts.push(`<span class="pill violet">${fmt(parseInt(dep))} kcal · ${apportRaw?fmt(parseInt(apportRaw))+"kcal cible":"—"}</span>`);
+  
+  if(carbDone>0) parts.push(`<span class="pill green">${carbDone} repas validés</span>`);
+  
+  // Récap macro depuis plan carburant
+  try{
+    const pr=ls("carb_"+dk(TODAY)+"_plan");
+    if(pr){
+      const pl=JSON.parse(pr);
+      parts.push(`<span style="font-size:10px;color:#c0c0c0;margin-top:4px;display:block;padding-left:2px;">P <span style="color:#7B72E9">${pl.p}g</span> · L <span style="color:#F59E0B">${pl.l}g</span> · G <span style="color:#22C55E">${pl.g}g</span></span>`);
+    }
+  }catch(e){}
+  el.innerHTML=parts.join(" ");
+})();
+  // Module Training — stat séance du jour
+  (function(){
+    var trEl=document.getElementById('mod-training-stat');
+    if(!trEl)return;
+    var dow2=function(d){var w=d.getDay();return w===0?6:w-1;}
+    var seances2=['Push','Pull','Lower','Repos','Chest/Back','Shoulders/Arms','Footing'];
+    var seanceDay=seances2[dow2(TODAY)];
+    var trainKey='train_'+dk(TODAY)+'_';
+    var trainIds=['push','pull','lower','repos','chestback','shoulderarms','footing'];
+    var trainId=trainIds[dow2(TODAY)];
+    var saved2=null;try{saved2=JSON.parse(localStorage.getItem(trainKey+trainId)||'null');}catch(e){}
+    var parts2=[];
+    parts2.push('<span style="font-size:10px;color:#555;">'+seanceDay+'</span>');
+    if(saved2){
+      var exosCount=Object.keys(saved2).filter(function(k){return saved2[k]&&saved2[k].sets&&saved2[k].sets.some(function(s){return s.done;});}).length;
+      if(exosCount>0)parts2.push('<span class="chip g">'+exosCount+' exos cochés</span>');
+    }
+    trEl.innerHTML=parts2.join(' ');
+  })();
+  // Module Routine — stat sommeil + journal
+  (function(){
+    var statEl=document.getElementById('mod-routine-stat');
+    if(!statEl)return;
+    var today=new Date();today.setHours(0,0,0,0);
+    var _wkCustom=(function(){try{return JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');}catch(e){return{};}})();
+    var _todayDow=(function(d){var w=d.getDay();return w===0?6:w-1;})(today);
+    var sleepRaw=ls('rt5_sleep_'+dk(today));
+    var parts=[];
+    if(sleepRaw){try{var s=JSON.parse(sleepRaw);if(s.dur){var h=Math.floor(s.dur/60),m=s.dur%60;var col=s.dur>=480?'#22C55E':s.dur>=360?'#F59E0B':'#EF4444';parts.push('<span style="font-size:10px;color:'+col+'">💤 '+h+'h'+(m>0?m.toString().padStart(2,'0'):'')+' sommeil</span>');}}catch(e){}}
+    var jRaw=ls('rt5_journal_'+dk(today));
+    if(jRaw){try{var j=JSON.parse(jRaw);var emojis=['','😫','😕','😐','🙂','🤩'];if(j.rating)parts.push('<span style="font-size:13px;">'+emojis[j.rating]+'</span>');}catch(e){}}
+    // Séance du jour (avec swap éventuel depuis routine)
+    var _SEANCE_NAMES_DEF=['Push','Pull','Lower','Repos','Chest/Back','Shoulders/Arms','Footing'];
+    var _customSeance=_wkCustom[_todayDow];
+    var _seanceLabel=_customSeance?(typeof _customSeance==='object'?_customSeance.label:_customSeance):_SEANCE_NAMES_DEF[_todayDow];
+    if(_seanceLabel)parts.push('<span style="font-size:10px;color:#555;">'+_seanceLabel+'</span>');
+    // Macros depuis snap carburant
+    var snapRaw=ls('carb_'+dk(today)+'_plan');
+    if(snapRaw){try{var sn=JSON.parse(snapRaw);var mp=Math.round((sn.p||0)+(sn.man&&sn.man.p?sn.man.p:0)),ml=Math.round((sn.l||0)+(sn.man&&sn.man.l?sn.man.l:0)),mg=Math.round((sn.g||0)+(sn.man&&sn.man.g?sn.man.g:0));parts.push('<span style="font-size:9px;color:#444;">'+mp+'P·'+ml+'L·'+mg+'G</span>');}catch(e){}}
+    statEl.innerHTML=parts.length>0?parts.join(' '):'<span style="font-size:10px;color:#2a2a2a;">Ouvre la routine pour commencer</span>';
+  })();
+  // Module Courses — stat articles
+  (function(){
+    var statEl=document.getElementById('mod-courses-stat');
+    if(!statEl)return;
+    try{
+      var list=JSON.parse(localStorage.getItem('courses_list')||'[]');
+      var checked=JSON.parse(localStorage.getItem('courses_checked')||'{}');
+      var total=list.length;
+      var done=list.filter(function(i){return checked[i.id];}).length;
+      if(total>0){
+        var pct=Math.round(done/total*100);
+        statEl.innerHTML='<span class="chip '+(pct===100?'g':'a')+'">'+(pct===100?'✓ Liste complète':done+' / '+total+' cochés')+'</span>';
+      }
+    }catch(e){}
+  })();
+
+// Module Séances — séance du jour
+(function(){
+  var el=document.getElementById('mm-seances');
+  if(!el) return;
+  var SEANCES_NAMES=['Push','Pull','Lower','Repos','Chest/Back','Shoulders/Arms','Footing'];
+  var SEANCES_IDS=['push','pull','lower','repos','chestback','shoulderarms','footing'];
+  var SEANCES_COL=['#7B72E9','#22C55E','#F59E0B','#555','#EF4444','#E879F9','#555'];
+  function dow2(dt){var w=dt.getDay();return w===0?6:w-1;}
+  var d2=dow2(TODAY);
+  // Respect swap depuis routine
+  var _wkCust2=(function(){try{return JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');}catch(e){return{};}})();
+  var _cust2=_wkCust2[d2];
+  var name=_cust2?(typeof _cust2==='object'?_cust2.label:_cust2):SEANCES_NAMES[d2];
+  var col=SEANCES_COL[d2];
+  var seanceId=SEANCES_IDS[d2];
+  // Lire données training du jour
+  var trainKey='train_'+dk(TODAY)+'_'+seanceId;
+  var saved=null;try{saved=JSON.parse(localStorage.getItem(trainKey)||'null');}catch(e){}
+  var parts=[];
+  parts.push('<span class="pill" style="background:'+col+'22;color:'+col+';border:0.5px solid '+col+'44;">'+name+'</span>');
+  if(saved){
+    var exosDone=Object.keys(saved).filter(function(k){return saved[k]&&saved[k].sets&&saved[k].sets.some(function(s){return s.done;});}).length;
+    if(exosDone>0) parts.push('<span class="chip g">'+exosDone+' exos</span>');
+  }
+  el.innerHTML=parts.join(' ');
+})();
+// ── CLÉ API ─────────────────────────────────────────────────────
+function getApiKey(){return localStorage.getItem('anthropic_api_key')||'';}
+function openApiModal(){
+  document.getElementById('api-modal-overlay').style.display='flex';
+  const k=getApiKey();
+  document.getElementById('api-key-input').value=k?k:'';
+  document.getElementById('api-key-status').textContent=k?'✓ Clé enregistrée':'Aucune clé configurée';
+  document.getElementById('api-key-status').style.color=k?'#22C55E':'#555';
+}
+function closeApiModal(){document.getElementById('api-modal-overlay').style.display='none';}
+function saveApiKey(){
+  const k=document.getElementById('api-key-input').value.trim();
+  if(!k||!k.startsWith('sk-ant-')){
+    document.getElementById('api-key-status').textContent='Clé invalide — doit commencer par sk-ant-';
+    document.getElementById('api-key-status').style.color='#EF4444';
+    return;
+  }
+  localStorage.setItem('anthropic_api_key',k);
+  document.getElementById('api-key-status').textContent='✓ Clé enregistrée avec succès';
+  document.getElementById('api-key-status').style.color='#22C55E';
+  setTimeout(closeApiModal,1200);
+}
+
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      console.log("Atlas SW registered");
+    }).catch(function(e){console.log("SW error",e);});
+  });
+}
+</script>
+</body>
+</html>
