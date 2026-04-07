@@ -253,6 +253,16 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
       <button onclick="closeApiModal()" style="padding:13px 16px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;color:#555;font-size:13px;cursor:pointer;">Annuler</button>
     </div>
     <div id="api-key-status" style="margin-top:10px;font-size:11px;text-align:center;min-height:16px;"></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:0.5px solid #141414;">
+      <div style="font-size:11px;color:#444;margin-bottom:10px;">Sauvegarde & restauration</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="exportData()" style="flex:1;padding:10px;background:#071a0a;border:0.5px solid #166534;border-radius:10px;color:#22C55E;font-size:11px;cursor:pointer;">⬇ Exporter mes données</button>
+        <label style="flex:1;padding:10px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;color:#555;font-size:11px;cursor:pointer;text-align:center;">
+          ⬆ Importer
+          <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+        </label>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -334,6 +344,14 @@ function moduleEnCours(el){
 }
 
 renderPoids7j();
+
+// Rafraîchir les données à chaque retour sur la page (navigation iOS)
+window.addEventListener('pageshow', function(e){
+  if(e.persisted){ location.reload(); }
+});
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible'){ renderPoids7j(); }
+});
 // GREETING
 (function(){
   const h=new Date().getHours();
@@ -389,7 +407,7 @@ renderPoids7j();
   const _carbSnap=JSON.parse(ls("carb_"+dk(TODAY)+"_plan")||"null");
   const _tDep2=parseInt(ls('gt5_dep_'+dk(TODAY)))||0;
   const _depRef2=(_carbSnap&&_carbSnap.dep)||_tDep2;
-  const carbOk=_depRef2>0&&_carbSnap&&Math.abs(_carbSnap.k-_depRef2)<100;
+  const carbOk=_carbSnap&&_carbSnap.k>500; // au moins 500 kcal loggés
   const journeeComplete=validated&&carbOk;
   if(journeeComplete){badge.className="hero-badge validated";badge.textContent="✓ Journée complète";}
   else if(validated){badge.className="hero-badge validated";badge.textContent="✓ Validée";}
@@ -478,28 +496,49 @@ renderPoids7j();
   const dep=ls("gt5_dep_"+dk(TODAY));
   const gluc=ls("gt5_gluc_"+dk(TODAY));
   const validated=!!ls("gt5_val_"+dk(TODAY));
-  let carbDone=0;
-  try{
-    const snap2=JSON.parse(ls("carb_"+dk(TODAY)+"_plan")||"null");
-    if(snap2&&snap2.chkCount!=null) carbDone=snap2.chkCount;
-    else carbDone=(JSON.parse(ls("carb_"+dk(TODAY)+"_chk"))||[]).length;
-  }catch(e){}
   const el=document.getElementById("mm-nutrition");
   let parts=[];
-  if(validated)parts.push('<span class="pill green">✓ Validée</span>');
-  else if(dep)parts.push(`<span class="pill violet">${fmt(parseInt(dep))} kcal · ${apportRaw?fmt(parseInt(apportRaw))+"kcal cible":"—"}</span>`);
-  
-  if(carbDone>0) parts.push(`<span class="pill green">${carbDone} repas validés</span>`);
-  
-  // Récap macro depuis plan carburant
+
+  // Macros réels depuis Carburant
+  let kcalReel=0, pReel=0, lReel=0, gReel=0;
+  let repasValides=0;
   try{
-    const pr=ls("carb_"+dk(TODAY)+"_plan");
-    if(pr){
-      const pl=JSON.parse(pr);
-      parts.push(`<span style="font-size:10px;color:#c0c0c0;margin-top:4px;display:block;padding-left:2px;">P <span style="color:#7B72E9">${pl.p}g</span> · L <span style="color:#F59E0B">${pl.l}g</span> · G <span style="color:#22C55E">${pl.g}g</span></span>`);
-    }
+    const snap=JSON.parse(ls("carb_"+dk(TODAY)+"_plan")||"null");
+    if(snap&&snap.k){kcalReel=Math.round(snap.k);pReel=Math.round(snap.p||0);lReel=Math.round(snap.l||0);gReel=Math.round(snap.g||0);}
+    const done=JSON.parse(ls("carb_"+dk(TODAY)+"_done")||"{}");
+    repasValides=Object.values(done).filter(Boolean).length;
   }catch(e){}
-  el.innerHTML=parts.join(" ");
+
+  const depInt=dep?parseInt(dep):0;
+
+  if(validated) parts.push('<span class="pill green">✓ Dépense validée</span>');
+
+  if(kcalReel>0){
+    // Barre kcal mangés vs dépense cible
+    const pct=depInt>0?Math.min(Math.round(kcalReel/depInt*100),100):0;
+    const col=depInt>0?(pct>=90&&pct<=110?'#22C55E':pct>110?'#EF4444':'#7B72E9'):'#7B72E9';
+    parts.push(`<div style="margin:4px 0 2px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+        <span style="font-size:13px;font-weight:600;color:${col};">${kcalReel.toLocaleString('fr-FR')} kcal</span>
+        ${depInt>0?`<span style="font-size:9px;color:#444;">${pct}% · cible ${depInt.toLocaleString('fr-FR')}</span>`:''}
+      </div>
+      <div style="height:3px;background:#1a1a1a;border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;transition:width 0.4s;"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:6px;">
+        <span style="font-size:10px;color:#7B72E9;">P ${pReel}g</span>
+        <span style="font-size:10px;color:#F59E0B;">L ${lReel}g</span>
+        <span style="font-size:10px;color:#22C55E;">G ${gReel}g</span>
+        ${repasValides>0?`<span style="font-size:10px;color:#333;margin-left:auto;">${repasValides} repas ✓</span>`:''}
+      </div>
+    </div>`);
+  } else if(depInt>0){
+    parts.push(`<span class="pill violet">${fmt(depInt)} kcal cible</span><span style="font-size:10px;color:#333;margin-left:6px;">Aucun repas tracké</span>`);
+  } else {
+    parts.push(`<span style="font-size:11px;color:#2a2a2a;">Saisis ta dépense dans Énergie</span>`);
+  }
+
+  el.innerHTML=parts.join("");
 })();
   // Module Training — stat séance du jour
   (function(){
@@ -594,6 +633,36 @@ function openApiModal(){
   document.getElementById('api-key-status').style.color=k?'#22C55E':'#555';
 }
 function closeApiModal(){document.getElementById('api-modal-overlay').style.display='none';}
+
+function exportData(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    data[k]=localStorage.getItem(k);
+  }
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10);
+  a.href=url;a.download='atlas-backup-'+date+'.json';
+  a.click();URL.revokeObjectURL(url);
+  showToast('✓ Données exportées');
+}
+
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!confirm('Importer ces données ? Tes données actuelles seront remplacées.'))return;
+      Object.keys(data).forEach(k=>{localStorage.setItem(k,data[k]);});
+      showToast('✓ Données importées — rechargement...');
+      setTimeout(()=>location.reload(),1200);
+    }catch(err){showToast('❌ Fichier invalide');}
+  };
+  reader.readAsText(file);
+}
 function saveApiKey(){
   const k=document.getElementById('api-key-input').value.trim();
   if(!k||!k.startsWith('sk-ant-')){

@@ -86,17 +86,51 @@ textarea#msg-input::placeholder{color:#333;}
 .bn-lbl{font-size:7px;color:#333;letter-spacing:0.03em;text-transform:uppercase;margin-top:2px;}
 .bn.active .bn-lbl{color:#7B72E9;}
 .bn.active .bn-ico{filter:drop-shadow(0 0 4px #7B72E9);}
+
+/* CONVERSATION DRAWER */
+.conv-drawer{position:fixed;inset:0;z-index:300;display:none;}
+.conv-drawer.open{display:flex;}
+.conv-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);}
+.conv-panel{position:absolute;left:0;top:0;bottom:0;width:80%;max-width:320px;background:#0d0d0d;border-right:0.5px solid #1a1a1a;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.25s ease;padding-bottom:env(safe-area-inset-bottom,0px);}
+.conv-drawer.open .conv-panel{transform:translateX(0);}
+.conv-panel-hdr{padding:20px 16px 12px;border-bottom:0.5px solid #141414;display:flex;align-items:center;justify-content:space-between;}
+.conv-panel-title{font-size:14px;font-weight:600;color:#e8e8e8;}
+.conv-new-btn{background:#100e2e;border:0.5px solid #2a2660;color:#7B72E9;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;}
+.conv-list{flex:1;overflow-y:auto;padding:8px 0;}
+.conv-list::-webkit-scrollbar{display:none;}
+.conv-item{padding:12px 16px;cursor:pointer;border-bottom:0.5px solid #111;transition:background 0.15s;display:flex;align-items:center;gap:10px;}
+.conv-item:active{background:#141414;}
+.conv-item.active{background:#0d0d2e;border-left:2px solid #7B72E9;}
+.conv-item-ico{font-size:16px;flex-shrink:0;}
+.conv-item-info{flex:1;min-width:0;}
+.conv-item-name{font-size:12px;font-weight:500;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.conv-item-preview{font-size:10px;color:#333;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.conv-item-date{font-size:9px;color:#222;flex-shrink:0;}
+.conv-del-btn{background:none;border:none;color:#2a2a2a;font-size:14px;cursor:pointer;padding:4px;flex-shrink:0;}
+.conv-del-btn:active{color:#EF4444;}
 </style>
 </head>
 <body>
 
+<!-- CONVERSATION DRAWER -->
+<div class="conv-drawer" id="conv-drawer">
+  <div class="conv-overlay" onclick="closeConvDrawer()"></div>
+  <div class="conv-panel">
+    <div class="conv-panel-hdr">
+      <div class="conv-panel-title">💬 Conversations</div>
+      <button class="conv-new-btn" onclick="newConversation()">+ Nouveau</button>
+    </div>
+    <div class="conv-list" id="conv-list"></div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-left">
-    <button class="back-btn" onclick="location.href='dashboard.html'">← Retour</button>
+    <button class="back-btn" onclick="openConvDrawer()">☰ Chats</button>
     <div class="hdr-info">
-      <div class="hdr-title">Coach IA</div>
-      <div class="hdr-sub">Accès complet à tes données</div>
+      <div class="hdr-title" id="conv-title">Coach IA</div>
+      <div class="hdr-sub" id="conv-sub">Accès complet à tes données</div>
     </div>
   </div>
   <div class="hdr-status">
@@ -160,9 +194,154 @@ function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function getApiKey(){return localStorage.getItem('anthropic_api_key')||'';}
 function fmtTime(){const n=new Date();return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes();}
 
-// ── CONVERSATION HISTORY ───────────────────────────────────────
+// ── CONVERSATIONS PERSISTANTES ────────────────────────────────
+const CONV_KEY = 'coach_conversations';
+const MAX_CONVS = 30;
+let currentConvId = null;
 let conversationHistory = [];
 let isThinking = false;
+
+function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5);}
+
+function loadConversations(){
+  try{return JSON.parse(localStorage.getItem(CONV_KEY)||'[]');}catch(e){return[];}
+}
+function saveConversations(convs){
+  localStorage.setItem(CONV_KEY,JSON.stringify(convs));
+}
+
+function getCurrentConv(){
+  const convs=loadConversations();
+  return convs.find(c=>c.id===currentConvId)||null;
+}
+
+function newConversation(name){
+  const title=name||('Discussion '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'}));
+  const conv={
+    id:genId(),
+    name:title,
+    messages:[],
+    ts:Date.now()
+  };
+  const convs=loadConversations();
+  convs.unshift(conv);
+  if(convs.length>MAX_CONVS) convs.pop();
+  saveConversations(convs);
+  loadConversation(conv.id);
+  closeConvDrawer();
+}
+
+function loadConversation(id){
+  const convs=loadConversations();
+  const conv=convs.find(c=>c.id===id);
+  if(!conv)return;
+  currentConvId=id;
+  conversationHistory=conv.messages.map(m=>({role:m.role,content:m.content}));
+  // Render messages
+  const el=document.getElementById('messages');
+  el.innerHTML='';
+  if(conv.messages.length===0){
+    el.innerHTML='<div class="empty-state" id="empty-state"><div class="empty-ico">🧠</div><div class="empty-title">'+conv.name+'</div><div class="empty-sub">Je connais ton programme, ta nutrition, ta progression et ton sommeil. Pose-moi n\'importe quelle question.</div></div>';
+    document.getElementById('suggestions').style.display='';
+  } else {
+    document.getElementById('suggestions').style.display='none';
+    conv.messages.forEach(function(m){
+      appendMsg(m.role==='user'?'user':'coach', m.content, false);
+    });
+    el.scrollTop=el.scrollHeight;
+  }
+  // Update header
+  document.getElementById('conv-title').textContent=conv.name;
+  document.getElementById('conv-sub').textContent=conv.messages.length+' message'+(conv.messages.length!==1?'s':'');
+  renderConvList();
+}
+
+function saveCurrentMessage(role, content){
+  if(!currentConvId)return;
+  const convs=loadConversations();
+  const idx=convs.findIndex(c=>c.id===currentConvId);
+  if(idx===-1)return;
+  convs[idx].messages.push({role,content,ts:Date.now()});
+  convs[idx].ts=Date.now();
+  // Auto-rename après premier échange si nom générique
+  if(convs[idx].messages.length===2&&convs[idx].name.startsWith('Discussion ')){
+    const firstMsg=convs[idx].messages[0].content;
+    convs[idx].name=firstMsg.substring(0,40)+(firstMsg.length>40?'…':'');
+  }
+  saveConversations(convs);
+  // Mettre à jour sub-title
+  document.getElementById('conv-title').textContent=convs[idx].name;
+  document.getElementById('conv-sub').textContent=convs[idx].messages.length+' message'+(convs[idx].messages.length!==1?'s':'');
+}
+
+function deleteConversation(id, e){
+  e.stopPropagation();
+  const convs=loadConversations().filter(c=>c.id!==id);
+  saveConversations(convs);
+  if(currentConvId===id){
+    currentConvId=null;
+    conversationHistory=[];
+    if(convs.length>0) loadConversation(convs[0].id);
+    else newConversation();
+  }
+  renderConvList();
+}
+
+function renameConversation(id, e){
+  e.stopPropagation();
+  const convs=loadConversations();
+  const conv=convs.find(c=>c.id===id);
+  if(!conv)return;
+  const name=prompt('Renommer :',conv.name);
+  if(!name||!name.trim())return;
+  conv.name=name.trim();
+  saveConversations(convs);
+  if(currentConvId===id) document.getElementById('conv-title').textContent=name.trim();
+  renderConvList();
+}
+
+function renderConvList(){
+  const convs=loadConversations();
+  const el=document.getElementById('conv-list');
+  if(!convs.length){
+    el.innerHTML='<div style="text-align:center;padding:24px 16px;color:#2a2a2a;font-size:12px;">Aucune conversation</div>';
+    return;
+  }
+  el.innerHTML=convs.map(function(conv){
+    const isActive=conv.id===currentConvId;
+    const last=conv.messages[conv.messages.length-1];
+    const preview=last?last.content.substring(0,50):'Nouvelle conversation';
+    const dateStr=new Date(conv.ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+    return '<div class="conv-item'+(isActive?' active':'')+'" onclick="loadConversation(\''+conv.id+'\');closeConvDrawer()">'+
+      '<div class="conv-item-ico">💬</div>'+
+      '<div class="conv-item-info">'+
+        '<div class="conv-item-name">'+escHtml(conv.name)+'</div>'+
+        '<div class="conv-item-preview">'+escHtml(preview)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+
+        '<span class="conv-item-date">'+dateStr+'</span>'+
+        '<button class="conv-del-btn" onclick="deleteConversation(\''+conv.id+'\',event)" title="Supprimer">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function openConvDrawer(){
+  renderConvList();
+  document.getElementById('conv-drawer').classList.add('open');
+}
+function closeConvDrawer(){
+  document.getElementById('conv-drawer').classList.remove('open');
+}
+
+// Init : charger ou créer la première conversation
+(function(){
+  const convs=loadConversations();
+  if(convs.length>0){loadConversation(convs[0].id);}
+  else{newConversation('Ma première discussion');}
+})();
 
 // ── COLLECTER TOUTES LES DONNÉES ──────────────────────────────
 function collectAllData(){
@@ -176,15 +355,56 @@ function collectAllData(){
     if(!isNaN(w)&&w>0) data.poids.push({date:dk(d),kg:w,daysAgo:n});
   }
 
-  // Nutrition semaine
+  // Nutrition semaine (dépense + glucides cibles)
   data.nutrition = [];
   for(let n=0;n<7;n++){
     const d=addDays(TODAY,-n);
     const dep=parseInt(ls('gt5_dep_'+dk(d)))||0;
     const gluc=parseInt(ls('gt5_gluc_'+dk(d)))||0;
     const val=!!ls('gt5_val_'+dk(d));
-    data.nutrition.push({date:dk(d),dep,gluc,val,daysAgo:n,jour:DAYS[dow(d)]});
+    // Macros réels depuis Carburant (extras = recettes appliquées)
+    let kcalReel=0,pReel=0,lReel=0,gReel=0,repasCount=0;
+    try{
+      const snap=JSON.parse(ls('carb_'+dk(d)+'_plan')||'null');
+      if(snap&&snap.k){kcalReel=snap.k;pReel=snap.p||0;lReel=snap.l||0;gReel=snap.g||0;}
+      // Compter repas validés
+      const done=JSON.parse(ls('carb_'+dk(d)+'_done')||'{}');
+      repasCount=Object.values(done).filter(Boolean).length;
+    }catch(e){}
+    data.nutrition.push({date:dk(d),dep,gluc,val,daysAgo:n,jour:DAYS[dow(d)],
+      kcalReel,pReel,lReel,gReel,repasCount});
   }
+
+  // Repas d'aujourd'hui détaillés (aliments réels)
+  data.repasDuJour = [];
+  try{
+    const REPAS_NOMS=['Petit-déjeuner','En-cas pré-training','Déjeuner','En-cas pré-cardio','Dîner post-training'];
+    const ex=JSON.parse(ls('carb_'+dk(TODAY)+'_extras')||'{}');
+    const offDB=JSON.parse(ls('carb_off_db')||'{}');
+    // Totaux depuis le snap (source fiable)
+    const snap=JSON.parse(ls('carb_'+dk(TODAY)+'_plan')||'null');
+    REPAS_NOMS.forEach(function(nom,ri){
+      const items=ex[ri]||[];
+      if(items.length){
+        // Calcul kcal : utiliser offDB si dispo, sinon estimation
+        const total=items.reduce(function(s,it){
+          const entry=offDB[it.id];
+          const mac=entry?(entry.mac||entry):null;
+          const k=mac&&mac.k?mac.k*it.qty:0;
+          const p=mac&&mac.p?mac.p*it.qty:0;
+          return{k:s.k+k,p:s.p+p};
+        },{k:0,p:0});
+        data.repasDuJour.push({
+          repas:nom,
+          aliments:items.map(function(it){return it.n+' ('+it.qty+'g)';}).join(', '),
+          kcal:total.k>10?Math.round(total.k):null, // null si pas de données macros
+          prot:total.p>0?Math.round(total.p):null
+        });
+      }
+    });
+    // Ajouter totaux du jour depuis snap
+    if(snap&&snap.k>0) data.totauxJour={kcal:snap.k,p:snap.p,l:snap.l,g:snap.g};
+  }catch(e){}
 
   // Sommeil 7 jours
   data.sommeil = [];
@@ -443,8 +663,20 @@ CHEST/BACK : Bench Incline Smith 2×6-8 @40kg/côté · Kelso Shrug 2×6-8 · Ch
 SHOULDERS/ARMS : Seated Shoulder Machine 3×6-8 @45kg · Lateral Raises Mach. 3×12-15 · Reverse Pec Deck 3×15-20 · Preacher 2×8-10 · Single Push Down 2×8-10 · Bayesian 2×10-12 · Katana 2×10-12 · DB Curl×Ext. 2×échec
 
 NUTRITION 7 JOURS :
-${data.nutrition.map(d=>d.dep>0?`${d.jour} : ${d.dep}kcal · ${d.gluc}g glucides${d.val?' ✓':''}`:`${d.jour} : non tracké`).join('\n')}
+${data.nutrition.map(d=>{
+  let line=d.jour+' : ';
+  if(d.dep>0) line+=d.dep+'kcal cible · '+d.gluc+'g glucides';
+  else line+='dépense non saisie';
+  if(d.kcalReel>0) line+=` | réel: ${d.kcalReel}kcal · P${Math.round(d.pReel)}g · L${Math.round(d.lReel)}g · G${Math.round(d.gReel)}g`;
+  if(d.repasCount>0) line+=` · ${d.repasCount} repas validés`;
+  if(d.val) line+=' ✓';
+  return line;
+}).join('\n')}
 ${avgDep?`→ Dépense moyenne : ${avgDep}kcal`:''}
+
+REPAS D'AUJOURD'HUI :
+${data.repasDuJour.length?data.repasDuJour.map(r=>`${r.repas} : ${r.aliments}${r.kcal?` (~${r.kcal}kcal)`:''}`).join('\n'):"Aucun repas loggé aujourd'hui"}
+${data.totauxJour?`TOTAUX DU JOUR : ${data.totauxJour.kcal}kcal · P${Math.round(data.totauxJour.p)}g · L${Math.round(data.totauxJour.l)}g · G${Math.round(data.totauxJour.g)}g`:''}
 
 POIDS RÉCENTS : ${data.poids.length?data.poids.slice(0,8).map(p=>`${p.date}:${p.kg}kg`).join(' · '):'Aucune mesure'}
 
@@ -509,6 +741,22 @@ function formatCoachMsg(text){
     .replace(/^—\s*/gm,'• ')
     .replace(/\n\n/g,'</p><p style="margin-top:8px;">')
     .replace(/\n/g,'<br>');
+}
+
+function appendMsg(role, text, scroll=true){
+  const empty=document.getElementById('empty-state');
+  if(empty) empty.remove();
+  const msgs=document.getElementById('messages');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  const bubble=document.createElement('div');
+  bubble.className='msg-bubble';
+  if(role==='coach'){bubble.innerHTML='<p>'+formatCoachMsg(text)+'</p>';}
+  else{bubble.textContent=text;}
+  div.appendChild(bubble);
+  msgs.appendChild(div);
+  if(scroll) scrollToBottom();
+  return div;
 }
 
 function addMessage(role, text, time){
@@ -588,8 +836,9 @@ async function sendMessage(){
   updateSendBtn();
   document.getElementById('suggestions').style.display='none';
 
-  // Ajouter à l'historique
+  // Ajouter à l'historique et sauvegarder
   conversationHistory.push({role:'user', content:text});
+  saveCurrentMessage('user', text);
 
   isThinking=true;
   setStatus('thinking');
@@ -626,6 +875,7 @@ async function sendMessage(){
     } else {
       const reply=responseData.content&&responseData.content[0]?responseData.content[0].text:'';
       conversationHistory.push({role:'assistant',content:reply});
+      saveCurrentMessage('assistant', reply);
       addMessage('coach', reply);
 
       // Garder l'historique raisonnable (max 20 échanges)

@@ -96,19 +96,19 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .fc-uico{font-size:12px;flex-shrink:0;width:16px;text-align:center;margin-top:1px;}
 .fc-utxt strong{color:#c0c0c0;font-weight:500;}
 .fc-warn{display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:#1c1400;border:0.5px solid #3a2800;border-radius:8px;font-size:11px;color:#F59E0B;line-height:1.5;margin-top:10px;}
-.plan-inner{padding:16px 18px 80px;}
-.total-card{background:#0f0e1e;border:0.5px solid #2a2660;border-radius:12px;padding:14px;margin-bottom:16px;}
-.total-title{font-size:8px;color:#444;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;}
-.total-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-.tg{text-align:center;padding:8px 4px;background:#0a0a0a;border-radius:8px;}
-.tg-val{font-size:16px;font-weight:500;color:#e8e8e8;line-height:1;}
-.tg-val.prot{color:#7B72E9;}
-.tg-val.lip{color:#F59E0B;}
-.tg-val.gluc{color:#22C55E;}
-.tg-lbl{font-size:9px;color:#444;margin-top:3px;text-transform:uppercase;letter-spacing:0.03em;}
-.repas-block{margin-bottom:8px;}
-.repas-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 13px;background:#111;border:0.5px solid #1a1a1a;border-radius:12px;cursor:pointer;transition:border-radius 0.15s;}
-.repas-hdr.open{border-radius:12px 12px 0 0;}
+
+
+
+
+
+
+
+
+
+
+
+
+
 .repas-left{display:flex;align-items:center;gap:10px;}
 .repas-ico{font-size:18px;}
 .repas-name{font-size:13px;font-weight:500;color:#e8e8e8;}
@@ -131,7 +131,12 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 /* CSS plan-banner et pb-* supprimés — fusionnés dans renderTotalCard */
 
 /* PLAN DYNAMIQUE — inputs et layout */
-.repas-item{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 13px;border-bottom:0.5px solid #111;}
+.repas-item{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 13px;border-bottom:0.5px solid #111;position:relative;overflow:hidden;transition:transform 0.2s ease;}
+.repas-item-inner{display:flex;align-items:flex-start;justify-content:space-between;width:100%;background:#0a0a0a;position:relative;z-index:1;transition:transform 0.25s ease;}
+.repas-item-del{position:absolute;right:0;top:0;bottom:0;width:70px;background:#EF4444;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;z-index:0;opacity:0;transition:opacity 0.2s;}
+.repas-item.swiped .repas-item-del{opacity:1;}
+.repas-item.swiped .repas-item-inner{transform:translateX(-70px);}
+.repas-item.swiped-full .repas-item-inner{transform:translateX(-100%);opacity:0;}
 .repas-item:last-child{border-bottom:none;}
 .ri-left{flex:1;min-width:0;}
 .ri-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;margin-left:8px;}
@@ -307,7 +312,123 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .repas-done-btn.done{background:#0d1f17;border-color:#166534;color:#22C55E;}
 .repas-hide-btn{font-size:11px;background:none;border:none;color:#252525;cursor:pointer;padding:2px 6px;transition:color 0.2s;}
 .repas-hide-btn:hover{color:#EF4444;}
+.recipe-btn{font-size:9px;background:none;border:0.5px solid #2a2660;color:#7B72E9;border-radius:10px;padding:3px 8px;cursor:pointer;white-space:nowrap;}
+.recipe-item{background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.recipe-name{font-size:13px;font-weight:600;color:#e8e8e8;margin-bottom:2px;}
+.recipe-meta{font-size:10px;color:#444;}
+.recipe-apply-btn{background:#7B72E9;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600;}
+.recipe-del-btn{background:none;border:none;color:#333;font-size:14px;cursor:pointer;padding:2px 6px;}
+.recipe-save-btn{width:100%;padding:12px;background:#0d1f17;border:0.5px solid #166534;color:#22C55E;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;}
 .repas-hidden-msg{text-align:center;font-size:10px;color:#252525;padding:6px 0;font-style:italic;cursor:pointer;}
+
+
+/* PLAN ALIMENTAIRE - REDESIGN */
+.plan-inner{padding:0 0 80px;}
+
+/* Date nav */
+#carb-date-nav{padding:10px 18px 8px;background:#0a0a0a;border-bottom:0.5px solid #141414;}
+
+/* Total card */
+.total-card{margin:12px 18px 0;background:#0f0e1e;border:0.5px solid #2a2660;border-radius:16px;padding:18px 16px;}
+.total-title{font-size:8px;color:#555;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;}
+.total-kcal-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;}
+.total-kcal-main{display:flex;align-items:baseline;gap:6px;}
+.total-kcal-num{font-size:42px;font-weight:700;color:#e8e8e8;letter-spacing:-0.04em;line-height:1;}
+.total-kcal-unit{font-size:13px;color:#444;font-weight:400;}
+.total-kcal-target{text-align:right;}
+.total-kcal-target-num{font-size:14px;font-weight:600;color:#555;}
+.total-kcal-target-lbl{font-size:9px;color:#333;margin-top:2px;}
+.total-kcal-bar{height:4px;background:#1a1a2e;border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.total-kcal-bar-fill{height:100%;border-radius:4px;transition:width 0.5s ease;}
+.total-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.tm{background:#0a0a14;border-radius:10px;padding:10px 8px;}
+.tm-lbl{font-size:8px;color:#444;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;}
+.tm-val{font-size:16px;font-weight:600;line-height:1;margin-bottom:4px;}
+.tm-val.p{color:#7B72E9;}
+.tm-val.l{color:#F59E0B;}
+.tm-val.g{color:#22C55E;}
+.tm-bar{height:3px;background:#1a1a1a;border-radius:3px;overflow:hidden;}
+.tm-bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease;}
+.tm-bar-fill.p{background:#7B72E9;}
+.tm-bar-fill.l{background:#F59E0B;}
+.tm-bar-fill.g{background:#22C55E;}
+.tm-target{font-size:9px;color:#2a2a2a;margin-top:3px;}
+
+/* Section header */
+.plan-section-hdr{padding:18px 18px 8px;display:flex;align-items:center;justify-content:space-between;}
+.plan-section-title{font-size:9px;color:#444;letter-spacing:0.1em;text-transform:uppercase;}
+
+/* Meal cards */
+.repas-block{margin:0 18px 8px;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.4);}
+.repas-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 14px;background:#111;border:0.5px solid #1a1a1a;border-radius:14px;cursor:pointer;transition:border-radius 0.15s,background 0.15s;}
+.repas-hdr:active{background:#161616;}
+.repas-hdr.open{border-radius:14px 14px 0 0;border-bottom-color:transparent;}
+.repas-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+.repas-ico-wrap{width:40px;height:40px;border-radius:12px;background:#0a0a0a;border:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.repas-info{min-width:0;}
+.repas-name{font-size:14px;font-weight:600;color:#e8e8e8;letter-spacing:-0.01em;}
+.repas-time{font-size:10px;color:#333;margin-top:1px;}
+.repas-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.repas-kcal{font-size:16px;font-weight:700;color:#7B72E9;letter-spacing:-0.02em;}
+.repas-kcal-unit{font-size:10px;color:#444;font-weight:400;}
+.repas-arrow{font-size:8px;color:#333;transition:transform 0.2s;margin-left:4px;}
+.repas-hdr.open .repas-arrow{transform:rotate(180deg);}
+.repas-body{display:none;background:#0d0d0d;border:0.5px solid #1a1a1a;border-top:none;border-radius:0 0 14px 14px;overflow:hidden;}
+.repas-body.open{display:block;}
+
+/* Action bar */
+.repas-action-bar{display:flex;gap:6px;padding:10px 12px 8px;border-bottom:0.5px solid #111;}
+.repas-done-btn{font-size:10px;background:none;border:0.5px solid #1e1e1e;border-radius:20px;color:#444;padding:5px 12px;cursor:pointer;flex-shrink:0;}
+.repas-done-btn.done{background:#0d1f17;border-color:#166534;color:#22C55E;}
+.recipe-btn{font-size:10px;background:#100e2e;border:0.5px solid #2a2660;color:#7B72E9;border-radius:20px;padding:5px 12px;cursor:pointer;flex-shrink:0;}
+.repas-hide-btn{font-size:12px;background:none;border:none;color:#2a2a2a;cursor:pointer;padding:5px 8px;margin-left:auto;}
+.repas-hide-btn:active{color:#EF4444;}
+
+/* Empty state */
+.repas-empty{padding:24px 16px;text-align:center;}
+.repas-empty-ico{font-size:28px;margin-bottom:8px;opacity:0.3;}
+.repas-empty-txt{font-size:12px;color:#2a2a2a;}
+
+/* Food items */
+.repas-item{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 14px;border-bottom:0.5px solid #111;position:relative;overflow:hidden;}
+.repas-item-inner{display:flex;align-items:flex-start;justify-content:space-between;width:100%;background:#0d0d0d;position:relative;z-index:1;transition:transform 0.25s ease;}
+.repas-item-del{position:absolute;right:0;top:0;bottom:0;width:70px;background:#EF4444;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:0;opacity:0;transition:opacity 0.2s;}
+.repas-item.swiped .repas-item-del{opacity:1;}
+.repas-item.swiped .repas-item-inner{transform:translateX(-70px);}
+.repas-item.swiped-full .repas-item-inner{transform:translateX(-100%);opacity:0;}
+.repas-item:last-child{border-bottom:none;}
+.ri-left{flex:1;min-width:0;}
+.ri-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;margin-left:10px;}
+.ri-name{font-size:13px;color:#c0c0c0;font-weight:500;line-height:1.3;}
+.ri-qty-wrap{display:flex;align-items:center;gap:4px;margin-top:6px;}
+.ri-qty-input{width:56px;height:32px;background:#141414;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:13px;font-weight:500;padding:4px;text-align:center;-moz-appearance:textfield;}
+.ri-qty-input::-webkit-inner-spin-button,.ri-qty-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.ri-qty-input:focus{outline:none;border-color:#7B72E9;background:#0d0d2e;}
+.ri-unit{font-size:11px;color:#555;}
+.ri-kcal{font-size:14px;font-weight:600;color:#e8e8e8;}
+.ri-mini{font-size:10px;color:#444;margin-top:2px;text-align:right;}
+.ri-swap-btn{background:#141414;border:0.5px solid #1e1e1e;color:#444;font-size:11px;cursor:pointer;padding:4px 8px;border-radius:8px;flex-shrink:0;}
+.ri-def-btn{font-size:9px;color:#333;background:none;border:none;cursor:pointer;padding:2px 4px;}
+.ri-def-btn.saved{color:#22C55E;}
+
+/* Add food button */
+.add-food-btn{width:100%;padding:13px;background:none;border:none;border-top:0.5px solid #111;color:#7B72E9;font-size:13px;font-weight:500;cursor:pointer;text-align:center;letter-spacing:0.01em;}
+.add-food-btn:active{background:#0d0d2e;}
+
+/* Meal macros */
+.repas-macros{display:flex;justify-content:space-around;padding:12px 14px;border-top:0.5px solid #111;background:#0a0a0a;}
+.rm{text-align:center;}
+.rm-val{font-size:13px;font-weight:600;color:#e8e8e8;}
+.rm-val.prot{color:#7B72E9;}
+.rm-val.lip{color:#F59E0B;}
+.rm-val.gluc{color:#22C55E;}
+.rm-lbl{font-size:8px;color:#333;margin-top:2px;text-transform:uppercase;letter-spacing:0.05em;}
+
+/* Stocks */
+.stocks-wrap{margin:16px 18px 0;}
+
+/* No dep banner */
+#no-dep-banner{margin:12px 18px 0;padding:12px 16px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;text-align:center;}
 
 </style>
 </head>
@@ -432,6 +553,8 @@ function TDK(){return dk(curCarbDate);}
 function isToday(){return dk(curCarbDate)===dk(TODAY);}
 function carbNavDay(delta){
   var nd=new Date(curCarbDate);nd.setDate(nd.getDate()+delta);
+  var maxFuture=new Date(TODAY);maxFuture.setDate(maxFuture.getDate()+30);
+  if(nd>maxFuture)return; // limite +30j comme glucide_tracker
   curCarbDate=nd;
   lastDep=null;planQties=null;manualOv={};
   renderCarbDateNav();
@@ -443,15 +566,20 @@ function carbNavDay(delta){
 function renderCarbDateNav(){
   var el=document.getElementById('carb-date-nav');if(!el)return;
   var isT=isToday();
+  var maxFuture=new Date(TODAY);maxFuture.setDate(maxFuture.getDate()+30);
+  var atMax=curCarbDate>=maxFuture;
+  var isFuture=curCarbDate>TODAY;
   var opts={weekday:'long',day:'numeric',month:'long'};
   var lbl=isT?'Aujourd\'hui · '+curCarbDate.toLocaleDateString('fr-FR',opts):curCarbDate.toLocaleDateString('fr-FR',opts);
+  var titleColor=isT?'#e8e8e8':isFuture?'#F59E0B':'#7B72E9';
   el.innerHTML=
     '<button onclick="carbNavDay(-1)" style="color:#444;font-size:20px;background:none;border:none;padding:4px 10px;cursor:pointer;">‹</button>'
     +'<div style="text-align:center;">'
-    +'<div style="font-size:12px;font-weight:600;color:'+(isT?'#e8e8e8':'#7B72E9')+';">'+lbl+'</div>'
-    +(isT?'':'<div style="font-size:9px;color:#444;margin-top:2px;">↩ <span onclick="curCarbDate=new Date(TODAY);lastDep=null;planQties=null;manualOv={};renderCarbDateNav();renderPlan();updateProgress();renderFoods();renderMicro();" style="cursor:pointer;color:#7B72E9;">Revenir à aujourd\'hui</span></div>')
+    +'<div style="font-size:12px;font-weight:600;color:'+titleColor+';">'+lbl+(isFuture?' 🔮':'')+'</div>'
+    +(isFuture?'<div style="font-size:9px;color:#F59E0B;margin-top:2px;">Jour futur · planification</div>':'')
+    +(!isT&&!isFuture?'<div style="font-size:9px;color:#444;margin-top:2px;">↩ <span onclick="curCarbDate=new Date(TODAY);lastDep=null;planQties=null;manualOv={};renderCarbDateNav();renderPlan();updateProgress();renderFoods();renderMicro();" style="cursor:pointer;color:#7B72E9;">Revenir à aujourd\'hui</span></div>':'')
     +'</div>'
-    +'<button onclick="carbNavDay(1)" style="color:#444;font-size:20px;background:none;border:none;padding:4px 10px;cursor:pointer;">›</button>';
+    +'<button onclick="carbNavDay(1)" style="color:'+(atMax?'#1a1a1a':'#444')+';font-size:20px;background:none;border:none;padding:4px 10px;cursor:'+(atMax?'default':'pointer')+';">›</button>';
 }
 
 // ── Variables globales ───────────────────────────────────────
@@ -1194,35 +1322,11 @@ function iMac(it,qty){const q=qty!==undefined?qty:(it.qty||0);if(it.id&&DB[it.id
 function sumM(arr){return arr.reduce((a,b)=>({k:a.k+b.k,g:a.g+b.g,p:a.p+b.p,l:a.l+b.l}),{k:0,g:0,p:0,l:0});}
 
 const REPAS_BASE=[
-  {ico:"🥚",name:"Petit-déjeuner",time:"08h00",open:true,items:[
-    {n:"Noix du Brésil (2)",   id:"noix_br",   qty:8,  ed:true},
-    {n:"Shot gingembre bio",   id:"gingembre", qty:50, ed:true},
-    {n:"Œufs entiers (2)",     id:"oeuf",      qty:100,ed:true},
-    {n:"Beurre (cuisson)",     id:"beurre",    qty:5,  ed:true},
-    {n:"Avoine",               id:"avoine",    qty:150,ed:true},
-    {n:"Miel",                 id:"miel",      qty:10, ed:true},
-    {n:"Pomme avec peau",      id:"pomme",     qty:180,ed:true},
-    {n:"Kiwi vert",            id:"kiwi",      qty:69, ed:true},
-    {n:"Fruits rouges surgelés",id:"fruits_rouges",qty:60,ed:true},
-    {n:"Kéfir demi-écrémé",    id:"kefir",     qty:250,ed:true},
-  ]},
-  {ico:"⚡",name:"En-cas pré-training",time:"10h00",open:false,items:[
-    {n:"Fromage blanc 0%",     id:"fb0",       qty:250,ed:true},
-    {n:"Banane",               id:"banane",    qty:250,ed:true},
-    {n:"Graines grenade surgelé",id:"grenade", qty:40, ed:true},
-  ]},
-  {ico:"🍽️",name:"Déjeuner",time:"13h30",open:false,items:[
-    {n:"Sardines huile d'olive",id:"sardines", qty:120,ed:true},
-    {n:"Riz blanc cru",        id:"riz",       qty:100,ed:true},
-    {n:"Patate douce crue",    id:"patate",    qty:200,ed:true},
-  ]},
-  {ico:"🍌",name:"En-cas pré-cardio",time:"18h00",open:false,items:[
-    {n:"Banane",               id:"banane",    qty:120,ed:true},
-  ]},
-  {ico:"🍖",name:"Dîner post-training",time:"20h30",open:false,items:[
-    {n:"Riz blanc cru",        id:"riz",       qty:100,ed:true},
-    {n:"Patate douce crue",    id:"patate",    qty:200,ed:true},
-  ]},
+  {ico:"🥚", name:"Petit-déjeuner",      time:"08h00", open:true},
+  {ico:"⚡",  name:"En-cas pré-training", time:"10h00", open:false},
+  {ico:"🍽️", name:"Déjeuner",            time:"13h30", open:false},
+  {ico:"🍌",  name:"En-cas pré-cardio",   time:"18h00", open:false},
+  {ico:"🍖",  name:"Dîner post-training", time:"20h30", open:false},
 ];
 
 
@@ -1342,7 +1446,7 @@ function getLip(dep){return 100;}
 function saveSwaps(){localStorage.setItem(SWAP_KEY,JSON.stringify(itemSwaps));}
 function loadSwaps(){try{return JSON.parse(localStorage.getItem(SWAP_KEY)||"{}");}catch(e){return{};}}
 function getEffItem(ri,ii){
-  const base=REPAS_BASE[ri].items[ii];
+  const base={id:null,n:"",qty:0}; // items removed - recipe-driven
   const sw=itemSwaps[ri+"_"+ii];
   if(sw&&DB[sw.id]) return Object.assign({},base,{id:sw.id,n:sw.n});
   return base;
@@ -1362,24 +1466,11 @@ function getDep(){
     // Fallback sur apport si dep absent (ancien format)
     if(val&&val.apport&&val.apport>0) return val.apport;
   }catch(e){}
-  // 3. Fallback : hier relatif au jour courant
-  const yest=new Date(curCarbDate);yest.setDate(yest.getDate()-1);
-  return parseInt(localStorage.getItem("gt5_dep_"+dk(yest))||"0");
+  // 3. Pas de fallback sur hier — un jour sans dépense = 0
+  return 0;
 }
 
-function fixedMac(){
-  // Utilise getEffItem pour tenir compte des swaps manuels
-  // Exclut les repas masqués pour ce jour
-  let m={k:0,g:0,p:0,l:0};
-  REPAS_BASE.forEach((r,ri)=>{
-    if(isRepasHidden(ri)) return; // repas masqué → ne compte pas
-    r.items.forEach((it,ii)=>{
-      const eff=getEffItem(ri,ii);
-      const im=iMac(eff); m.k+=im.k; m.g+=im.g; m.p+=im.p; m.l+=im.l;
-    });
-  });
-  return m;
-}
+function fixedMac(){return {k:0,g:0,p:0,l:0};} // recipe-driven
 
 // ── Calcul dépense / apport / glucides cibles ────────────────────────────
 function computeAuto(){
@@ -1398,32 +1489,200 @@ function saveCustomDefault(ri,ii,qty){
   defs[ri+'_'+ii]=qty;
   localStorage.setItem(DEF_KEY,JSON.stringify(defs));
 }
+// ══ SYSTÈME DE RECETTES ═══════════════════════════════════════════
+// ── DEBOUNCE ─────────────────────────────────────────────────────
+var _rtcTimer=null;
+function renderTotalCardDebounced(auto){
+  clearTimeout(_rtcTimer);
+  _rtcTimer=setTimeout(function(){renderTotalCard(auto||computeAuto());},80);
+}
+
+var _recipeTargetRi = -1;
+
+function loadRecipes(){try{return JSON.parse(localStorage.getItem('carb_recipes')||'[]');}catch(e){return[];}}
+function saveRecipes(r){localStorage.setItem('carb_recipes',JSON.stringify(r));}
+
+function openRecipeModal(ri){
+  _recipeTargetRi = ri;
+  const r = REPAS_BASE[ri];
+  document.getElementById('recipe-modal-title').textContent = '📖 Recettes — '+r.name;
+  renderRecipeList();
+  document.getElementById('recipe-overlay').classList.add('open');
+}
+function closeRecipeModal(e){
+  if(e&&e.target!==document.getElementById('recipe-overlay'))return;
+  document.getElementById('recipe-overlay').classList.remove('open');
+  _recipeTargetRi=-1;
+}
+
+var _editRecipeIdx=-1;
+var _editRecipeQties={};
+
+function renderRecipeList(){
+  const recipes=loadRecipes();
+  const el=document.getElementById('recipe-list');
+  if(!recipes.length){
+    el.innerHTML='<div style="text-align:center;color:#333;font-size:12px;padding:24px 0;">Aucune recette sauvegardée.<br>Compose un repas puis appuie sur<br>"Sauvegarder comme recette".</div>';
+    return;
+  }
+  el.innerHTML=recipes.map(function(rec,idx){
+    const totalK=rec.items.reduce(function(s,it){return s+(DB[it.id]?DB[it.id].k*it.qty:0);},0);
+    return '<div class="recipe-item">'+
+      '<div style="flex:1;min-width:0;cursor:pointer;" onclick="openRecipeEdit('+idx+')">'+
+        '<div class="recipe-name">'+rec.name+'</div>'+
+        '<div class="recipe-meta">'+Math.round(totalK)+' kcal · '+rec.items.length+' aliment'+(rec.items.length>1?'s':'')+'</div>'+
+        '<div class="recipe-meta" style="margin-top:2px;color:#7B72E9;font-size:9px;">Tap pour voir & modifier</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:6px;align-items:center;">'+
+        '<button class="recipe-apply-btn" onclick="event.stopPropagation();openRecipeEdit('+idx+')">Appliquer</button>'+
+        '<button class="recipe-del-btn" onclick="event.stopPropagation();deleteRecipe('+idx+')">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function openRecipeEdit(idx){
+  const recipes=loadRecipes();
+  const rec=recipes[idx];
+  if(!rec)return;
+  _editRecipeIdx=idx;
+  // Init edit quantities from recipe
+  _editRecipeQties={};
+  rec.items.forEach(function(it,i){_editRecipeQties[i]=it.qty;});
+  // Show edit overlay
+  const el=document.getElementById('recipe-edit-overlay');
+  if(!el)return;
+  document.getElementById('recipe-edit-title').textContent=rec.name;
+  renderRecipeEdit();
+  el.classList.add('open');
+}
+
+function renderRecipeEdit(){
+  const recipes=loadRecipes();
+  const rec=recipes[_editRecipeIdx];
+  if(!rec)return;
+  const el=document.getElementById('recipe-edit-items');
+  const totalK=rec.items.reduce(function(s,it,i){
+    const qty=_editRecipeQties[i]||it.qty;
+    return s+(DB[it.id]?DB[it.id].k*qty:0);
+  },0);
+  document.getElementById('recipe-edit-total').textContent=Math.round(totalK)+' kcal';
+  el.innerHTML=rec.items.map(function(it,i){
+    const qty=_editRecipeQties[i]||it.qty;
+    const kcal=DB[it.id]?Math.round(DB[it.id].k*qty):0;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #111;">'+
+      '<div style="flex:1;font-size:12px;color:#c0c0c0;">'+it.n+'</div>'+
+      '<div style="display:flex;align-items:center;gap:6px;">'+
+        '<input type="number" min="0" max="2000" step="5" value="'+qty+'" '+
+        'style="width:56px;height:32px;background:#141414;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:13px;text-align:center;font-family:inherit;" '+
+        'oninput="_editRecipeQties['+i+']=+this.value;renderRecipeEdit()">'+
+        '<span style="font-size:10px;color:#555;">g</span>'+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:600;color:#7B72E9;min-width:50px;text-align:right;">'+kcal+' kcal</div>'+
+    '</div>';
+  }).join('');
+}
+
+function confirmApplyRecipe(){
+  if(_recipeTargetRi<0||_editRecipeIdx<0)return;
+  const recipes=loadRecipes();
+  const rec=recipes[_editRecipeIdx];
+  if(!rec)return;
+  const ri=_recipeTargetRi;
+  const ex=loadExtras();
+  ex[ri]=rec.items.map(function(it,i){
+    return{id:it.id,n:it.n,qty:_editRecipeQties[i]||it.qty};
+  });
+  saveExtras(ex);
+  renderRepasAll();
+  const auto=computeAuto();
+  saveSnap(auto);renderTotalCard(auto);
+  document.getElementById('recipe-edit-overlay').classList.remove('open');
+  document.getElementById('recipe-overlay').classList.remove('open');
+  _recipeTargetRi=-1;_editRecipeIdx=-1;_editRecipeQties={};
+}
+
+function applyRecipe(idx){openRecipeEdit(idx);}
+
+function saveCurrentAsRecipe(){
+  if(_recipeTargetRi<0)return;
+  const ri=_recipeTargetRi;
+  const r=REPAS_BASE[ri];
+  const items=[];
+  const ex=loadExtras();
+  if(ex[ri]) ex[ri].forEach(function(e){if(e.qty>0) items.push({id:e.id,n:e.n,qty:e.qty});});
+  if(!items.length){alert('Repas vide — ajoute des aliments avant de créer une recette.');return;}
+  const name=prompt('Nom de la recette :',r.name+' habituel');
+  if(!name||!name.trim())return;
+  const recipes=loadRecipes();
+  recipes.push({name:name.trim(),items:items,ts:Date.now()});
+  saveRecipes(recipes);
+  renderRecipeList();
+  const btn=document.querySelector('.recipe-save-btn');
+  if(btn){const orig=btn.textContent;btn.textContent='✓ Recette sauvegardée !';btn.style.color='#22C55E';setTimeout(function(){btn.textContent=orig;btn.style.color='';},1500);}
+}
+
+function deleteRecipe(idx){
+  if(!confirm('Supprimer cette recette ?'))return;
+  const recipes=loadRecipes();
+  recipes.splice(idx,1);
+  saveRecipes(recipes);
+  renderRecipeList();
+}
+
+// ── FIN RECETTES ─────────────────────────────────────────────────
+var _swipeState={};
+function _swipeId(type,ri,ii){return type+'_'+ri+'_'+ii;}
+function swipeStart(e,type,ri,ii){
+  var t=e.touches[0];
+  _swipeState[_swipeId(type,ri,ii)]={x:t.clientX,y:t.clientY,swiped:false};
+}
+function swipeMove(e,type,ri,ii){
+  var id=_swipeId(type,ri,ii);
+  var st=_swipeState[id];if(!st)return;
+  var dx=e.touches[0].clientX-st.x;
+  var dy=Math.abs(e.touches[0].clientY-st.y);
+  if(dy>20&&!st.swiped)return;
+  var elId=(type==='ex'?'ex_':'ri_')+ri+'_'+ii;
+  var el=document.getElementById(elId);
+  if(dx<-10){e.preventDefault();st.swiped=true;if(el)el.classList.add('swiped');}
+  else if(dx>10&&st.swiped){if(el)el.classList.remove('swiped');st.swiped=false;}
+}
+function swipeEnd(e,type,ri,ii){}
+function deleteItem(ri,ii){
+  var el=document.getElementById('ri_'+ri+'_'+ii);
+  if(el){el.classList.add('swiped-full');setTimeout(function(){_doDeleteItem(ri,ii);},250);}
+  else{_doDeleteItem(ri,ii);}
+}
+function _doDeleteItem(ri,ii){
+  // Mettre la quantité à 0 et sauvegarder comme défaut permanent
+  planQties[ri+'_'+ii]=0;
+  manualOv[ri+'_'+ii]=0;
+  var defs=loadCustomDefaults();
+  defs[ri+'_'+ii]=0;
+  localStorage.setItem(DEF_KEY,JSON.stringify(defs));
+  saveOv();
+  renderRepasAll();
+  renderTotalCard(computeAuto());
+  saveSnap(computeAuto());
+}
+
+// Fermer swipe ouvert si on tape ailleurs
+document.addEventListener('touchstart',function(e){
+  document.querySelectorAll('.repas-item.swiped').forEach(function(el){
+    if(!el.contains(e.target)) el.classList.remove('swiped');
+  });
+},{passive:true});
+
+function showHiddenItems(ri){renderRepasAll();}
+
 function setDefaultQty(ri,ii,qty){
   saveCustomDefault(ri,ii,qty);
   const btn=document.getElementById('defbtn_'+ri+'_'+ii);
   if(btn){btn.textContent='✓ défaut';btn.classList.add('saved');setTimeout(()=>{btn.textContent='★ défaut';btn.classList.remove('saved');},1500);}
 }
-function buildQties(auto){
-  const q={};
-  // B1: utiliser getEffItem pour la qty de base → si swap sans qty, hérite de l'item original
-  const _defs=loadCustomDefaults();
-  REPAS_BASE.forEach((r,ri)=>r.items.forEach((it,ii)=>{
-    const eff=getEffItem(ri,ii);
-    const baseQty=eff.qty!=null?eff.qty:(it.qty||0);
-    q[ri+"_"+ii]=_defs[ri+"_"+ii]!==undefined?_defs[ri+"_"+ii]:baseQty;
-  }));
-  if(auto){
-    REPAS_BASE.forEach((r,ri)=>r.items.forEach((it,ii)=>{
-      if(it.lever==="steak")      q[ri+"_"+ii]=auto.steakQty;
-      if(it.lever==="citrouille") q[ri+"_"+ii]=auto.grCit;
-      if(it.lever==="fb_soir"){const _effFb=getEffItem(ri,ii);q[ri+"_"+ii]=_effFb.qty!=null?_effFb.qty:(it.qty||200);}
-    }));
-  }
-  return q;
-}
+function buildQties(auto){return {};} // recipe-driven
 
-
-// ── EXTRAS PAR REPAS ─────────────────────────────────────────────────────
 function addExtraItem(ri, id, name, qty){
   const ex=loadExtras();
   if(!ex[ri]) ex[ri]=[];
@@ -1444,17 +1703,50 @@ function removeExtraItem(ri, idx){
   const auto=computeAuto();
   saveSnap(auto);renderTotalCard(auto);
 }
+function liveExtraQty(ri, idx, qty){
+  if(isNaN(qty)||qty<0) return;
+  // Màj affichage item
+  const ex=loadExtras();
+  if(!ex[ri]||!ex[ri][idx]) return;
+  // Màj temporaire en mémoire pour recalc
+  ex[ri][idx].qty=qty;
+  const m=iMacById(ex[ri][idx].id, qty);
+  const kEl=document.getElementById('exk_'+ri+'_'+idx);
+  if(kEl) kEl.textContent=Math.round(m.k)+' kcal';
+  const mEl=document.getElementById('exm_'+ri+'_'+idx);
+  if(mEl) mEl.textContent=r2(m.p)+'p · '+r2(m.g)+'g · '+r2(m.l)+'l';
+  // Màj total repas - recipe driven, only extras
+  const extTot=ex[ri].reduce((s,e)=>{const em=iMacById(e.id,e.qty||100);return{k:s.k+em.k,p:s.p+em.p,g:s.g+em.g,l:s.l+em.l};},{k:0,p:0,g:0,l:0});
+  const rm=extTot;
+  const rkEl=document.getElementById('rk_'+ri);
+  if(rkEl) rkEl.textContent=Math.round(rm.k)+' kcal';
+  const rmEl=document.getElementById('rm_'+ri);
+  if(rmEl) rmEl.innerHTML=macRow(rm);
+  // Màj carte totale - debounced
+  renderTotalCardDebounced();
+}
 function updateExtraQty(ri, idx, qty){
+  if(isNaN(qty)||qty<0) return;
   const ex=loadExtras();
   if(!ex[ri]||!ex[ri][idx]) return;
   ex[ri][idx].qty=qty;
   saveExtras(ex);
-  const auto=computeAuto();
-  saveSnap(auto);renderTotalCard(auto);
-  // Mise à jour inline sans re-render complet
+  // Mise à jour inline kcal + macros item
   const m=iMacById(ex[ri][idx].id, qty);
   const kEl=document.getElementById('exk_'+ri+'_'+idx);
   if(kEl) kEl.textContent=Math.round(m.k)+' kcal';
+  const mEl=document.getElementById('exm_'+ri+'_'+idx);
+  if(mEl) mEl.textContent=r2(m.p)+'p · '+r2(m.g)+'g · '+r2(m.l)+'l';
+  // Mise à jour total repas
+  const rm=repasMac(ri);
+  const rkEl=document.getElementById('rk_'+ri);
+  if(rkEl) rkEl.textContent=Math.round(rm.k)+' kcal';
+  const rmEl=document.getElementById('rm_'+ri);
+  if(rmEl) rmEl.innerHTML=macRow(rm);
+  // Mise à jour carte totale
+  const auto=computeAuto();
+  renderTotalCard(auto);
+  saveSnap(auto);
 }
 var _extraPickerOpen=-1;
 function openExtraPicker(ri){
@@ -1469,36 +1761,31 @@ function openExtraPicker(ri){
 function extrasHTML(ri){
   const ex=loadExtras();
   const items=ex[ri]||[];
-  let html='';
-  if(items.length){
-    html+=items.map(function(e,idx){
-      const m=iMacById(e.id,e.qty||100);
-      return '<div class="repas-item" style="border-top:0.5px solid #0f0f0f;">'
-        +'<div class="ri-left">'
-        +'<div class="ri-name" style="color:#7B72E9;">'+e.n+'</div>'
-        +'<div class="ri-qty-wrap">'
-        +'<input class="ri-qty-input" type="number" min="0" max="2000" step="5" value="'+(e.qty||100)+'" '
-        +'onchange="updateExtraQty('+ri+','+idx+',+this.value)" oninput="updateExtraQty('+ri+','+idx+',+this.value)">'
-        +'<span class="ri-unit">g</span>'
-        +'<button onclick="removeExtraItem('+ri+','+idx+')" style="font-size:11px;color:#444;padding:4px 8px;border:0.5px solid #1a1a1a;border-radius:8px;background:#0a0a0a;cursor:pointer;min-height:32px;" title="Retirer">✕</button>'
-        +'</div></div>'
-        +'<div class="ri-right">'
-        +'<div class="ri-kcal" id="exk_'+ri+'_'+idx+'">'+Math.round(m.k)+' kcal</div>'
-        +'<div class="ri-mini">'+r2(m.p)+'p · '+r2(m.g)+'g · '+r2(m.l)+'l</div>'
-        +'</div></div>';
-    }).join('');
-  }
-  html+='<button class="add-food-btn" onclick="openExtraPicker('+ri+')">➕ Ajouter un aliment</button>';
-  return html;
+  if(!items.length) return '';
+  return items.map(function(e,idx){
+    const m=iMacById(e.id,e.qty||100);
+    return '<div class="repas-item" id="ex_'+ri+'_'+idx+'" ontouchstart="swipeStart(event,\'ex\','+ri+','+idx+')" ontouchmove="swipeMove(event,\'ex\','+ri+','+idx+')" ontouchend="swipeEnd(event,\'ex\','+ri+','+idx+')">'
+      +'<div class="repas-item-del" onclick="removeExtraItem('+ri+','+idx+')">🗑️</div>'
+      +'<div class="repas-item-inner">'
+      +'<div class="ri-left">'
+      +'<div class="ri-name">'+e.n+'</div>'
+      +'<div class="ri-qty-wrap">'
+      +'<input class="ri-qty-input" type="number" min="0" max="2000" step="5" value="'+(e.qty||100)+'" '
+      +'onchange="updateExtraQty('+ri+','+idx+',+this.value)" oninput="liveExtraQty('+ri+','+idx+',+this.value)">'
+      +'<span class="ri-unit">g</span>'
+      +'</div></div>'
+      +'<div class="ri-right">'
+      +'<div class="ri-kcal" id="exk_'+ri+'_'+idx+'">'+Math.round(m.k)+'</div>'
+      +'<div class="ri-mini" id="exm_'+ri+'_'+idx+'">'+r2(m.p)+'p · '+r2(m.g)+'g · '+r2(m.l)+'l</div>'
+      +'</div>'
+      +'</div></div>';
+  }).join('');
 }
 
 function repasMac(ri){
-  const _dow=curCarbDate.getDay();
-  const _isRestDay=(_dow===0||_dow===4);
-  const base=_isRestDay?{k:0,p:0,g:0,l:0}:sumM(REPAS_BASE[ri].items.map((_,ii)=>iMac(getEffItem(ri,ii),planQties[ri+"_"+ii]||0)));
   const ex=loadExtras();
-  const extMac=(!_isRestDay&&ex[ri])?sumM(ex[ri].map(e=>iMacById(e.id,e.qty||100))):({k:0,p:0,g:0,l:0});
-  return{k:base.k+extMac.k,p:base.p+extMac.p,g:base.g+extMac.g,l:base.l+extMac.l};
+  const extMac=ex[ri]?sumM(ex[ri].map(e=>iMacById(e.id,e.qty||100))):({k:0,p:0,g:0,l:0});
+  return extMac;
 }
 function dayMac(){
   const base=sumM(REPAS_BASE.map((_,ri)=>isRepasHidden(ri)?{k:0,p:0,g:0,l:0}:repasMac(ri)));
@@ -1524,7 +1811,7 @@ function loadOv(){
 
 // ── Snapshot pour dashboard ───────────────────────────────────────────────
 function saveSnap(auto){
-  if(!planQties) return;
+  if(false) return; // planQties no longer required
   const day=dayMac(); const dep=getDep();
   // auto optionnel — évite un double appel computeAuto()
   if(!auto) auto=computeAuto();
@@ -1566,31 +1853,11 @@ function showRepasToday(ri){
 }
 
 function renderPlan(){
-  itemSwaps=loadSwaps();
-  const dep=getDep(); const auto=computeAuto();
-
-  // Jeudi (4) et Dimanche (0) — jours de repos, plan vide, tu remplis toi-même
-  const _dow = curCarbDate.getDay();
-  if(_dow===0||_dow===4){
-    planQties={};
-    const ov=loadOv(); if(ov) Object.assign(planQties,ov);
-    renderRepasAll(); renderTotalCard(auto);
-    saveSnap(auto);
-    return;
-  }
-
-  if(lastDep===null||Math.abs(dep-lastDep)>50){
-    if(lastDep!==null&&Math.abs(dep-lastDep)>50){manualOv={}; localStorage.removeItem("carb_"+TDK()+"_ov");}
-    planQties=buildQties(auto);
-    const ov=loadOv(); if(ov) Object.assign(planQties,ov);
-    lastDep=dep; saveSnap(auto);
-  } else if(!planQties){
-    const ov2=loadOv();
-    planQties=buildQties(auto);
-    if(ov2) Object.assign(planQties,ov2);
-    lastDep=dep; saveSnap(auto);
-  }
-  renderRepasAll(); renderTotalCard(auto);
+  planQties={};
+  const auto=computeAuto();
+  renderRepasAll();
+  renderTotalCard(auto);
+  saveSnap(auto);
 }
 
 function resetPlan(){
@@ -1628,67 +1895,34 @@ function renderRepasAll(){
 function repasHTML(ri){
   const r=REPAS_BASE[ri];
   const rm=repasMac(ri);
-  if(isRepasHidden(ri)) return `<div class="repas-hidden-msg" onclick="showRepasToday(${ri})">+ Afficher ${r.name}</div>`;
-  const _dow=curCarbDate.getDay();
-  const _isRestDay=(_dow===0||_dow===4);
+  if(isRepasHidden(ri)) return `<div style="margin:0 18px 8px;padding:12px 14px;border:0.5px dashed #1e1e1e;border-radius:14px;color:#2a2a2a;font-size:12px;cursor:pointer;text-align:center;" onclick="showRepasToday(${ri})">+ Afficher ${r.name}</div>`;
+  const ex=loadExtras();
+  const hasItems=ex[ri]&&ex[ri].length>0;
+  const done=isRepasDone(ri);
   return`<div class="repas-block">
     <div class="repas-hdr${r.open?" open":""}" id="rh_${ri}" onclick="toggleRepas(${ri})">
-      <div class="repas-left"><div class="repas-ico">${r.ico}</div><div>
-        <div class="repas-name">${r.name}</div>
-      </div></div>
-      <div class="repas-right" onclick="event.stopPropagation()">
-        <button class="repas-done-btn${isRepasDone(ri)?' done':''}" onclick="toggleRepasDone(${ri})">
-          ${isRepasDone(ri)?'✓ Pris':'○ Valider'}
-        </button>
-        <button class="repas-hide-btn" onclick="hideRepasToday(${ri})" title="Masquer ce repas">✕</button>
-        <div class="repas-kcal" id="rk_${ri}">${Math.round(rm.k)} kcal</div>
-        <div class="repas-arrow" onclick="event.stopPropagation();toggleRepas(${ri})">▼</div>
+      <div class="repas-left">
+        <div class="repas-ico-wrap" style="${done?'border-color:#166534;background:#071a0a;':''}">${r.ico}</div>
+        <div class="repas-info">
+          <div class="repas-name" style="${done?'color:#22C55E;':''}">${r.name}</div>
+          <div class="repas-time">${r.time}${done?' · ✓ Validé':hasItems?' · '+ex[ri].length+' aliment'+(ex[ri].length>1?'s':''):' · Vide'}</div>
+        </div>
+      </div>
+      <div class="repas-right">
+        ${rm.k>0?`<div><span class="repas-kcal">${Math.round(rm.k)}</span><span class="repas-kcal-unit"> kcal</span></div>`:''}
+        <div class="repas-arrow">▼</div>
       </div>
     </div>
     <div class="repas-body${r.open?" open":""}" id="rb_${ri}">
-      ${_isRestDay?'':r.items.map((it,ii)=>itemHTML(ri,ii,it)).join("")}
-      ${_isRestDay?`<div style="font-size:10px;color:#333;padding:8px 12px;font-style:italic;">Jour de repos · ajoute tes aliments manuellement</div>`:''}
+      <div class="repas-action-bar" onclick="event.stopPropagation()">
+        <button class="repas-done-btn${done?' done':''}" onclick="toggleRepasDone(${ri})">${done?'✓ Validé':'○ Valider'}</button>
+        <button class="recipe-btn" onclick="openRecipeModal(${ri})">📖 Recettes</button>
+        <button class="repas-hide-btn" onclick="hideRepasToday(${ri})">✕</button>
+      </div>
+      ${!hasItems?`<div class="repas-empty"><div class="repas-empty-ico">🍽️</div><div class="repas-empty-txt">Repas vide · applique une recette<br>ou ajoute un aliment</div></div>`:''}
       ${extrasHTML(ri)}
-      <div class="repas-macros" id="rm_${ri}">${macRow(rm)}</div>
-    </div>
-  </div>`;
-}
-
-function itemHTML(ri,ii,it){
-  const eff=getEffItem(ri,ii);
-  const qty=planQties[ri+"_"+ii]||0;
-  const m=iMac(eff,qty);
-  const isLever=!!it.lever;
-  const isSwaped=!!itemSwaps[ri+"_"+ii];
-  const dispName=eff.n+(isSwaped?'<span class="ri-swap-badge">↔</span>':'');
-  if(eff.id&&DB[eff.id]){
-    return`<div class="repas-item">
-      <div class="ri-left">
-        <div class="ri-name">${dispName}${isLever?'<span class="lever-badge">auto</span>':''}</div>
-        <div class="ri-qty-wrap">
-          <input class="ri-qty-input${isLever?' lever':''}" type="number" min="0" max="2000" step="5"
-            value="${qty}"
-            onchange="updateItem(${ri},${ii},+this.value)"
-            oninput="liveUpdateItem(${ri},${ii},+this.value)">
-          <span class="ri-unit">g</span>
-          <button class="ri-swap-btn" onclick="openSwapModal(${ri},${ii})" title="Substituer">🔄</button>
-          <button class="ri-def-btn" id="defbtn_${ri}_${ii}" onclick="setDefaultQty(${ri},${ii},planQties['${ri}_${ii}']||0)" title="Définir comme quantité par défaut">★ défaut</button>
-        </div>
-      </div>
-      <div class="ri-right">
-        <div class="ri-kcal" id="rik_${ri}_${ii}">${Math.round(m.k)} kcal</div>
-        <div class="ri-mini" id="rim_${ri}_${ii}">${r2(m.p)}p · ${r2(m.g)}g · ${r2(m.l)}l</div>
-      </div>
-    </div>`;
-  }
-  // Item sans id (Curcuma+poivre, valeurs fixes)
-  return`<div class="repas-item">
-    <div class="ri-left">
-      <div class="ri-name">${eff.n}</div>
-      <div class="ri-fixed" style="font-size:10px;color:#444;margin-top:2px;">${Math.round(m.k)} kcal · fixe</div>
-    </div>
-    <div class="ri-right">
-      <div class="ri-kcal">${Math.round(m.k)} kcal</div>
+      ${hasItems?`<div class="repas-macros"><div class="rm"><div class="rm-val">${Math.round(rm.k)}</div><div class="rm-lbl">kcal</div></div><div class="rm"><div class="rm-val prot">${Math.round(rm.p)}g</div><div class="rm-lbl">prot</div></div><div class="rm"><div class="rm-val lip">${r2(rm.l)}g</div><div class="rm-lbl">lip</div></div><div class="rm"><div class="rm-val gluc">${Math.round(rm.g)}g</div><div class="rm-lbl">gluc</div></div></div>`:''}
+      <button class="add-food-btn" onclick="openExtraPicker(${ri})">＋ Ajouter un aliment</button>
     </div>
   </div>`;
 }
@@ -1734,48 +1968,54 @@ function updateItem(ri,ii,qty){
 function renderTotalCard(auto){
   const tc=document.getElementById("total-card"); if(!tc) return;
   const day=dayMac();
-  const pOk=Math.abs(Math.round(day.p)-P_CIBLE)<=8;
-  const lipCible=getLip(auto?auto.dep:(getDep()||0));
-  const lOk=Math.abs(Math.round(day.l)-lipCible)<=8;
+  const kcal=Math.round(day.k);
+  const depTarget=auto?auto.dep:0;
+  const glucTarget=auto?auto.glucG:0;
+  const kcalPct=depTarget>0?Math.min(Math.round(kcal/depTarget*100),100):0;
+  const kcalColor=depTarget>0?(kcalPct>=95&&kcalPct<=105?'#22C55E':kcalPct>105?'#EF4444':'#7B72E9'):'#7B72E9';
+  const pPct=Math.min(Math.round(day.p/P_CIBLE*100),100);
+  const lPct=Math.min(Math.round(day.l/100*100),100);
+  const gPct=glucTarget>0?Math.min(Math.round(day.g/glucTarget*100),100):0;
+
   if(!auto){
-    tc.innerHTML=`<div class="total-title">Plan de base · saisis ta dépense dans Énergie</div>
-      <div class="total-grid">
-        <div class="tg"><div class="tg-val">${Math.round(day.k).toLocaleString("fr-FR")}</div><div class="tg-lbl">kcal</div></div>
-        <div class="tg"><div class="tg-val" style="color:#22C55E">${Math.round(day.p)}g</div><div class="tg-lbl">Protéines</div></div>
-        <div class="tg"><div class="tg-val" style="color:#F59E0B">${Math.round(day.l)}g</div><div class="tg-lbl">Lipides</div></div>
-        <div class="tg"><div class="tg-val gluc">${Math.round(day.g)}g</div><div class="tg-lbl">Glucides</div></div>
+    tc.innerHTML=`
+    <div class="total-title">Journée · saisis ta dépense dans Énergie</div>
+    <div class="total-kcal-row">
+      <div class="total-kcal-main">
+        <span class="total-kcal-num">${kcal.toLocaleString('fr-FR')}</span>
+        <span class="total-kcal-unit">kcal</span>
       </div>
-      <div style="margin-top:8px;font-size:11px;color:#444;">
-        <span class="pb-link" onclick="location.href='glucide_tracker.html'">→ Saisir ma dépense dans Énergie</span>
-      </div>`;
+    </div>
+    <div class="total-macros">
+      <div class="tm"><div class="tm-lbl">Protéines</div><div class="tm-val p">${Math.round(day.p)}g</div><div class="tm-bar"><div class="tm-bar-fill p" style="width:${pPct}%"></div></div><div class="tm-target">/ ${P_CIBLE}g</div></div>
+      <div class="tm"><div class="tm-lbl">Lipides</div><div class="tm-val l">${Math.round(day.l)}g</div><div class="tm-bar"><div class="tm-bar-fill l" style="width:${lPct}%"></div></div><div class="tm-target">/ 100g</div></div>
+      <div class="tm"><div class="tm-lbl">Glucides</div><div class="tm-val g">${Math.round(day.g)}g</div><div class="tm-bar"><div class="tm-bar-fill g" style="width:0%"></div></div><div class="tm-target" style="cursor:pointer;color:#7B72E9;" onclick="location.href='glucide_tracker.html'">→ Énergie</div></div>
+    </div>`;
     return;
   }
-  const delta=Math.round(day.k)-auto.dep;
-  const deltaStr=delta===0?"≈ dépense exacte":(delta>0?`+${delta} kcal vs dép.`:`${delta} kcal vs dép.`);
-  const deltaColor=Math.abs(delta)<=20?"#22C55E":"#F59E0B";
-  // Timestamp dernière modif
-  let tsStr="";
-  try{const sn=JSON.parse(localStorage.getItem("carb_"+TDK()+"_plan")||"null");if(sn&&sn.ts){const d=new Date(sn.ts);tsStr=d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");}}catch(e){}
-  tc.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-    <div><div class="total-title" style="margin-bottom:2px;">⚡ ${auto.dep.toLocaleString("fr-FR")} kcal</div><div style="font-size:10px;color:${deltaColor};">${deltaStr}${tsStr?' · màj '+tsStr:''}</div></div>
 
-  </div>
-  <div class="total-grid">
-    <div class="tg"><div class="tg-val">${Math.round(day.k).toLocaleString("fr-FR")}</div><div class="tg-lbl">kcal plan</div><div style="font-size:9px;color:#444;margin-top:2px;">/ ${auto.dep.toLocaleString("fr-FR")}</div></div>
-    <div class="tg"><div class="tg-val" style="color:${pOk?"#22C55E":"#F59E0B"}">${Math.round(day.p)}g</div><div class="tg-lbl">Protéines</div><div style="font-size:9px;color:#444;margin-top:2px;">/ 200g</div></div>
-    <div class="tg"><div class="tg-val" style="color:${lOk?"#22C55E":"#F59E0B"}">${Math.round(day.l)}g</div><div class="tg-lbl">Lipides</div><div style="font-size:9px;color:#444;margin-top:2px;">/ ${lipCible}g</div></div>
-    <div class="tg"><div class="tg-val gluc">${Math.round(day.g)}g</div><div class="tg-lbl">Glucides</div><div style="font-size:9px;color:#444;margin-top:2px;">/ ${auto.glucG}g cible</div></div>
-  </div>
-  <div style="margin-top:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-      <div style="font-size:9px;color:#444;">Kcal plan / dépense</div>
-      <div style="font-size:10px;font-weight:600;color:${Math.abs(delta)<=50?'#22C55E':'#F59E0B'};">${Math.round(day.k).toLocaleString('fr-FR')} / ${auto.dep.toLocaleString('fr-FR')} kcal</div>
+  const delta=kcal-depTarget;
+  const deltaStr=delta===0?'✓ Objectif atteint':(delta>0?`+${delta} kcal`:`${delta} kcal`);
+  const deltaCol=Math.abs(delta)<=50?'#22C55E':delta>50?'#EF4444':'#444';
+
+  tc.innerHTML=`
+    <div class="total-title">Journée du ${curCarbDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="total-kcal-row">
+      <div class="total-kcal-main">
+        <span class="total-kcal-num" style="color:${kcalColor}">${kcal.toLocaleString('fr-FR')}</span>
+        <span class="total-kcal-unit">kcal</span>
+      </div>
+      <div class="total-kcal-target">
+        <div class="total-kcal-target-num">/ ${depTarget.toLocaleString('fr-FR')}</div>
+        <div class="total-kcal-target-lbl" style="color:${deltaCol}">${deltaStr}</div>
+      </div>
     </div>
-    <div style="height:6px;background:#141414;border-radius:3px;overflow:hidden;">
-      <div style="height:100%;border-radius:3px;width:${Math.min(Math.round(day.k/auto.dep*100),100)}%;background:${Math.round(day.k/auto.dep*100)>=95&&Math.round(day.k/auto.dep*100)<=105?'#22C55E':Math.round(day.k/auto.dep*100)>105?'#EF4444':'#7B72E9'};transition:width 0.4s ease;"></div>
-    </div>
-    <div style="font-size:9px;color:#333;margin-top:4px;text-align:right;">${Math.round(day.k/auto.dep*100)}% de la dépense couverte</div>
-  </div>`;
+    <div class="total-kcal-bar"><div class="total-kcal-bar-fill" style="width:${kcalPct}%;background:${kcalColor};"></div></div>
+    <div class="total-macros">
+      <div class="tm"><div class="tm-lbl">Protéines</div><div class="tm-val p">${Math.round(day.p)}g</div><div class="tm-bar"><div class="tm-bar-fill p" style="width:${pPct}%"></div></div><div class="tm-target">/ ${P_CIBLE}g</div></div>
+      <div class="tm"><div class="tm-lbl">Lipides</div><div class="tm-val l">${Math.round(day.l)}g</div><div class="tm-bar"><div class="tm-bar-fill l" style="width:${lPct}%"></div></div><div class="tm-target">/ 100g</div></div>
+      <div class="tm"><div class="tm-lbl">Glucides</div><div class="tm-val g">${Math.round(day.g)}g</div><div class="tm-bar"><div class="tm-bar-fill g" style="width:${gPct}%"></div></div><div class="tm-target">/ ${glucTarget}g</div></div>
+    </div>`;
 }
 
 
@@ -1797,38 +2037,16 @@ function renderMicro(){
   var _dow=curCarbDate.getDay();
   var _isRestDay=(_dow===0||_dow===4);
 
-  if(!_isRestDay){
-    // Aliments du plan
-    REPAS_BASE.forEach(function(r,ri){r.items.forEach(function(it,ii){
-      var eff=getEffItem(ri,ii);
-      var qty=planQties[ri+"_"+ii]||0;
-      if(!qty||!eff.id)return;
-      var m=MICRO_DB[eff.id];
-      if(!m)return;
+  // Tous les aliments viennent des extras (recettes appliquées)
+  var _ex=loadExtras();
+  Object.keys(_ex).forEach(function(ri){
+    (_ex[ri]||[]).forEach(function(e){
+      if(!e.id)return;
+      var m=MICRO_DB[e.id];if(!m)return;
+      var qty=e.qty||100;
       Object.keys(AJR).forEach(function(k){if(m[k]!=null)totals[k]+=(m[k]||0)*qty;});
-    });});
-    // Extras manuels
-    var ex=loadExtras();
-    Object.keys(ex).forEach(function(ri){
-      (ex[ri]||[]).forEach(function(e){
-        if(!e.id)return;
-        var m=MICRO_DB[e.id];if(!m)return;
-        var qty=e.qty||100;
-        Object.keys(AJR).forEach(function(k){if(m[k]!=null)totals[k]+=(m[k]||0)*qty;});
-      });
     });
-  } else {
-    // Jour de repos : uniquement les extras ajoutés manuellement
-    var ex2=loadExtras();
-    Object.keys(ex2).forEach(function(ri){
-      (ex2[ri]||[]).forEach(function(e){
-        if(!e.id)return;
-        var m=MICRO_DB[e.id];if(!m)return;
-        var qty=e.qty||100;
-        Object.keys(AJR).forEach(function(k){if(m[k]!=null)totals[k]+=(m[k]||0)*qty;});
-      });
-    });
-  }
+  });
 
   // Alertes UL
   var alerts=[];
@@ -2001,6 +2219,19 @@ function renderStocks(){
   }).join('');
 }
 
+// Restaurer les macros OFF sauvegardées
+(function(){
+  try{
+    const offDB=JSON.parse(localStorage.getItem('carb_off_db')||'{}');
+    Object.keys(offDB).forEach(function(id){
+      const d=offDB[id];
+      // Compatibilité ancien format {k,p,g,l,n} et nouveau {mac:{},n}
+      const mac=d.mac||{k:d.k||0,p:d.p||0,g:d.g||0,l:d.l||0};
+      if(!DB[id]) DB[id]=mac;
+      if(!DB_LABELS[id]) DB_LABELS[id]={n:d.n||id,cat:'Autre',ico:'🌍'};
+    });
+  }catch(e){}
+})();
 renderFoods();updateProgress();renderPlan();renderStocks();renderCarbDateNav();
 // Auto-switch vers l'onglet demandé via le hash
 (function(){
@@ -2148,7 +2379,8 @@ if(document.querySelector('.tab[data-v="micro"].active')) renderMicro();
       </div>
       <div class="swap-search-wrap">
         <div class="swap-search-ico">🔍</div>
-        <input class="swap-search" id="add-srch" placeholder="Chercher un aliment..." oninput="renderAddList()">
+        <input class="swap-search" id="add-srch" placeholder="Chercher un aliment..." oninput="renderAddList();searchOFF(this.value)">
+        <div id="off-status" style="font-size:9px;color:#7B72E9;padding:4px 14px;min-height:14px;"></div>
       </div>
     </div>
     <div class="swap-cats" id="add-cats"></div>
@@ -2183,44 +2415,134 @@ const SWAP_CATS=["Tout","Protéine","Glucide","Laitier","Légume","Lipide","Frui
 
 // ── Modal Ajouter un aliment ──────────────────────────────────────────────
 let _addCat="Tout";
+let _offResults=[]; // résultats Open Food Facts
+let _offTimer=null;
+
 function closeAddModal(e){
   if(e&&e.target!==document.getElementById('add-overlay'))return;
   document.getElementById('add-overlay').classList.remove('open');
   _extraPickerOpen=-1;
+  _offResults=[];
 }
+
 function renderAddCats(){
   const el=document.getElementById('add-cats');
   el.innerHTML=SWAP_CATS.map(cat=>`<button class="swap-cat${_addCat===cat?' on':''}" onclick="setAddCat('${cat}')">${cat}</button>`).join('');
 }
 function setAddCat(cat){_addCat=cat;renderAddCats();renderAddList();}
+
+// ── Base OFF persistante ─────────────────────────────────────────────
+function loadOFFDb(){try{return JSON.parse(localStorage.getItem('carb_off_db')||'{}');}catch(e){return{};}}
+function saveOFFDb(db){try{localStorage.setItem('carb_off_db',JSON.stringify(db));}catch(e){}}
+function initOFFDb(){
+  const db=loadOFFDb();
+  Object.keys(db).forEach(function(id){
+    if(!DB[id]){
+      // Compatibilité ancien format {k,p,g,l,n} et nouveau {mac:{},n}
+      const entry=db[id];
+      const mac=entry.mac||{k:entry.k||0,p:entry.p||0,g:entry.g||0,l:entry.l||0};
+      DB[id]=mac;
+      DB_LABELS[id]={n:entry.n||id,cat:'Autre',ico:'🌍'};
+    }
+  });
+}
+initOFFDb();
+
+function searchOFF(q){
+  clearTimeout(_offTimer);
+  if(!q||q.length<2){_offResults=[];renderAddList();return;}
+  const offEl=document.getElementById('off-status');
+  if(offEl) offEl.textContent='🔍 Recherche Open Food Facts...';
+  _offTimer=setTimeout(function(){
+    const url='https://world.openfoodfacts.org/api/v2/search?search_terms='+encodeURIComponent(q)
+      +'&fields=product_name,nutriments,brands&page_size=20&sort_by=popularity_key';
+    fetch(url, {headers:{'User-Agent':'Atlas-App/1.0'}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      _offResults=(data.products||[]).filter(function(p){
+        const n=p.nutriments;
+        return p.product_name&&n&&(n['energy-kcal_100g']!=null||n['energy_100g']!=null)&&n['proteins_100g']!=null;
+      }).slice(0,20).map(function(p){
+        const n=p.nutriments;
+        const brand=p.brands?p.brands.split(',')[0].trim():'';
+        const kcal=n['energy-kcal_100g']!=null?n['energy-kcal_100g']:(n['energy_100g']||0)/4.184;
+        return {
+          id:'off_'+Math.random().toString(36).substr(2,9),
+          n:p.product_name+(brand?' · '+brand:''),
+          mac:{
+            k:kcal/100,
+            p:(n['proteins_100g']||0)/100,
+            g:(n['carbohydrates_100g']||0)/100,
+            l:(n['fat_100g']||0)/100
+          },
+          fib:(n['fiber_100g']||0)/100
+        };
+      });
+      if(offEl) offEl.textContent=_offResults.length?'✓ '+_offResults.length+' résultats':'Aucun résultat';
+      renderAddList();
+    }).catch(function(err){
+      if(offEl) offEl.textContent='❌ Erreur connexion';
+      _offResults=[];
+      renderAddList();
+    });
+  },600);
+}
+
 function renderAddList(){
   const q=(document.getElementById('add-srch').value||'').toLowerCase();
   const el=document.getElementById('add-list');
+  // Aliments locaux
   const ids=Object.keys(DB_LABELS);
-  const filtered=ids.filter(id=>{
+  const local=ids.filter(id=>{
     const lbl=DB_LABELS[id];
     if(!DB[id])return false;
     if(_addCat!=='Tout'&&lbl.cat!==_addCat)return false;
     if(q&&!lbl.n.toLowerCase().includes(q))return false;
     return true;
-  });
-  if(!filtered.length){el.innerHTML='<div style="padding:20px;text-align:center;color:#2a2a2a;font-size:12px;">Aucun résultat</div>';return;}
-  el.innerHTML=filtered.map(id=>{
-    const lbl=DB_LABELS[id];
-    const d=DB[id];
+  }).map(id=>{
+    const lbl=DB_LABELS[id];const d=DB[id];
     return`<div class="swap-item" onclick="selectAdd('${id}')">
       <div class="swap-ico">${lbl.ico}</div>
       <div class="swap-info">
         <div class="swap-name">${lbl.n}</div>
-        <div class="swap-macros">
-          <span class="p">${Math.round(d.p*100)}g P</span> ·
-          <span class="l">${Math.round(d.l*100)}g L</span> ·
-          <span class="g">${Math.round(d.g*100)}g G</span>
-        </div>
+        <div class="swap-macros"><span class="p">${Math.round(d.p*100)}g P</span> · <span class="l">${Math.round(d.l*100)}g L</span> · <span class="g">${Math.round(d.g*100)}g G</span></div>
       </div>
       <div class="swap-kcal">${Math.round(d.k*100)} kcal<br><span style="font-size:9px;color:#2a2a2a;">/ 100g</span></div>
     </div>`;
-  }).join('');
+  });
+  // Résultats Open Food Facts
+  const offHtml=_offResults.map(function(item,i){
+    const mac=item.mac;
+    return`<div class="swap-item" onclick="selectAddOFF(${i})" style="border-left:2px solid #7B72E930;">
+      <div class="swap-ico">🌍</div>
+      <div class="swap-info">
+        <div class="swap-name">${item.n}</div>
+        <div class="swap-macros"><span class="p">${Math.round(mac.p*100)}g P</span> · <span class="l">${Math.round(mac.l*100)}g L</span> · <span class="g">${Math.round(mac.g*100)}g G</span></div>
+        <div style="font-size:8px;color:#555;margin-top:1px;">🌍 Open Food Facts</div>
+      </div>
+      <div class="swap-kcal">${Math.round(mac.k*100)} kcal<br><span style="font-size:9px;color:#2a2a2a;">/ 100g</span></div>
+    </div>`;
+  });
+  const all=[...local,...offHtml];
+  if(!all.length){el.innerHTML='<div style="padding:20px;text-align:center;color:#2a2a2a;font-size:12px;">Aucun résultat local · tape pour chercher dans Open Food Facts</div>';return;}
+  el.innerHTML=all.join('');
+}
+
+function selectAddOFF(idx){
+  const item=_offResults[idx];
+  if(!item||_extraPickerOpen<0)return;
+  const qty=parseInt(document.getElementById('add-qty').value)||100;
+  const id=item.id||('off_'+Date.now());
+  const mac=item.mac;
+  DB[id]=mac;
+  DB_LABELS[id]={n:item.n,cat:'Autre',ico:'🌍'};
+  // Persister dans localStorage pour survie au reload
+  const offDB=loadOFFDb();
+  offDB[id]={n:item.n,mac:mac};
+  saveOFFDb(offDB);
+  addExtraItem(_extraPickerOpen,id,item.n,qty);
+  document.getElementById('add-overlay').classList.remove('open');
+  _offResults=[];_extraPickerOpen=-1;
 }
 function selectAdd(foodId){
   const lbl=DB_LABELS[foodId];
@@ -2300,7 +2622,7 @@ function selectSwap(foodId){
   const lbl=DB_LABELS[foodId];
   if(!lbl)return;
   const key=_swapRi+"_"+_swapIi;
-  const base=REPAS_BASE[_swapRi].items[_swapIi];
+  const base={id:null,n:"item",qty:0};
   if(foodId===base.id){
     delete itemSwaps[key];
   } else {
@@ -2314,17 +2636,12 @@ function selectSwap(foodId){
   const rkEl=document.getElementById("rk_"+ri);
   const rmEl=document.getElementById("rm_"+ri);
   if(rbEl){
-    const r=REPAS_BASE[ri];
     const rm=repasMac(ri);
-    rbEl.innerHTML=r.items.map((_,ii)=>itemHTML(ri,ii,REPAS_BASE[ri].items[ii])).join("")+'<div class="repas-macros" id="rm_'+ri+'">'+macRow(rm)+'</div>';
+    rbEl.innerHTML=extrasHTML(ri)+'<div class="repas-macros" id="rm_'+ri+'">'+macRow(rm)+'</div>';
   }
   if(rkEl)rkEl.textContent=Math.round(repasMac(ri).k)+" kcal";
-  // Recalcul levers après swap
-  lastDep=null;
-  const _autoSw=computeAuto();
-  if(_autoSw) planQties=buildQties(_autoSw);
   renderRepasAll();
-  renderTotalCard(_autoSw||computeAuto());
+  renderTotalCard(computeAuto());
   document.getElementById("swap-overlay").classList.remove("open");
   // R4 — Flash confirmation sur le header du repas (toujours visible)
   const rHead=document.getElementById("rh_"+ri);
@@ -2342,5 +2659,33 @@ document.addEventListener('click', function(e){
 });
 
 </script>
+<!-- ── MODAL RECETTES ─────────────────────────────────────────── -->
+<div class="swap-overlay" id="recipe-overlay" onclick="closeRecipeModal(event)">
+  <div class="swap-sheet" onclick="event.stopPropagation()" style="max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:700;color:#e8e8e8;" id="recipe-modal-title">📖 Recettes</div>
+      <button onclick="closeRecipeModal()" style="background:none;border:none;color:#444;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div id="recipe-list"></div>
+    <button class="recipe-save-btn" onclick="saveCurrentAsRecipe()">💾 Sauvegarder ce repas comme recette</button>
+  </div>
+</div>
+
+<!-- ── MODAL EDIT RECETTE ─────────────────────────────────────── -->
+<div class="swap-overlay" id="recipe-edit-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="swap-sheet" onclick="event.stopPropagation()" style="max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0;">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#e8e8e8;" id="recipe-edit-title"></div>
+        <div style="font-size:11px;color:#7B72E9;margin-top:2px;" id="recipe-edit-total"></div>
+      </div>
+      <button onclick="document.getElementById('recipe-edit-overlay').classList.remove('open')" style="background:none;border:none;color:#444;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:10px;color:#333;margin-bottom:10px;flex-shrink:0;">Ajuste les quantités avant d'appliquer</div>
+    <div id="recipe-edit-items" style="overflow-y:auto;flex:1;"></div>
+    <button onclick="confirmApplyRecipe()" style="width:100%;padding:14px;background:#7B72E9;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;flex-shrink:0;">✓ Appliquer la recette</button>
+  </div>
+</div>
+
 </body>
 </html>

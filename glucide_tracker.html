@@ -1054,8 +1054,8 @@ function compute(){
   }
 
   
-  document.getElementById("s-dep").textContent=fmt(dep);
-  document.getElementById("s-bilan").textContent=fmt(apport);
+  var _sdep=document.getElementById("s-dep");if(_sdep)_sdep.textContent=fmt(dep);
+  var _sbil=document.getElementById("s-bilan");if(_sbil)_sbil.textContent=fmt(apport);
   var depBigEl=document.getElementById("dep-big");
   var apportBigEl=document.getElementById("apport-big");
   var depRefEl=document.getElementById("dep-ref-lbl");
@@ -1475,7 +1475,7 @@ function fallbackClip(text){
   document.body.removeChild(ta);
 }
 function copyDay(){
-  const g=document.getElementById("s-gluc").textContent,dep=document.getElementById("s-dep").textContent,ap=document.getElementById("s-apport").textContent;
+  const _gEl=document.getElementById("s-gluc"),_dEl=document.getElementById("s-dep"),_aEl=document.getElementById("s-apport");const g=_gEl?_gEl.textContent:"0",dep=_dEl?_dEl.textContent:"0",ap=_aEl?_aEl.textContent:"0";
   const ds=curDate.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
   clipboardWrite(`${ds} — Dép: ${dep} kcal | Apport: ${ap} kcal | G:${g}g P:200g L:100g`);
 }

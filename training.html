@@ -1271,6 +1271,26 @@ function renderProg(){
     });
   });
 
+  // Ajouter les exercices custom qui ont de l'historique
+  const customSeen=new Set();
+  try{
+    Object.keys(localStorage).filter(k=>k.startsWith('train_custom_')).forEach(k=>{
+      try{
+        const parts=k.replace('train_custom_','').split('_');
+        const sid=parts[parts.length-1];
+        const dateStr=parts.slice(0,-1).join('-');
+        const customs=JSON.parse(localStorage.getItem(k)||'[]');
+        customs.forEach(function(c){
+          const cid='_custom_'+c.name;
+          if(!customSeen.has(cid)&&!seen.has(cid)){
+            customSeen.add(cid);
+            allExos.push({id:cid,name:c.name,muscle:'Custom',sets:3,repsTarget:'—',seanceId:sid,isCustom:true});
+          }
+        });
+      }catch(e){}
+    });
+  }catch(e){}
+
   if(!allExos.length){
     container.innerHTML='<div class="prog-empty">Aucun exercice enregistré</div>';
     return;

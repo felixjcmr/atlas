@@ -559,10 +559,10 @@ function updateDayProgress(){
   var totalMin=endMin-startMin;
   var elapsed=Math.max(0,Math.min(nowMin-startMin,totalMin));
   var pct=Math.round(elapsed/totalMin*100);
-  document.getElementById('day-progress-bar').style.width=pct+'%';
+  var _dpb=document.getElementById('day-progress-bar');if(_dpb)_dpb.style.width=pct+'%';
   var h=Math.floor(elapsed/60),m=elapsed%60;
-  document.getElementById('day-progress-lbl').textContent='Journée : '+h+'h'+(m>0?m.toString().padStart(2,'0'):'')+ ' écoulées';
-  document.getElementById('day-progress-pct').textContent=pct+'%';
+  var _dpl=document.getElementById('day-progress-lbl');if(_dpl)_dpl.textContent='Journée : '+h+'h'+(m>0?m.toString().padStart(2,'0'):'')+ ' écoulées';
+  var _dpp=document.getElementById('day-progress-pct');if(_dpp)_dpp.textContent=pct+'%';
 }
 
 
@@ -770,7 +770,9 @@ function renderToday(){
   blocs.forEach(function(b,i){
     var c = COL[b.type]||COL.sleep;
     var isLast = i===blocs.length-1;
-    var current = nowMin>=b.m && nowMin<b.m+60;
+    var nextBloc = blocs[i+1];
+    var blocEnd = nextBloc ? nextBloc.m : b.m+120;
+    var current = nowMin>=b.m && nowMin<blocEnd;
     var cls = current?'current':'';
     html += '<div class="tl-block '+cls+'">';
     html += '<div class="tl-left">';
@@ -805,13 +807,13 @@ function renderSemaine(){
   for(var d2=0;d2<7;d2++){
     var w = WEEK[d2];
     var isT = d2===todayDow;
-    html += '<div class="jour-col'+(isT?' today':'')+'" id="jcol_'+d2+'" onclick="openTrainingDay('+((d2+1)%7)+')" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')" ondrop="dropDayBloc(event,'+d2+');this.classList.remove(\'drag-over\')" style="cursor:pointer;">';
+    html += '<div class="jour-col'+(isT?' today':'')+'" id="jcol_'+d2+'" onclick="openTrainingDay('+((d2+1)%7)+')" style="cursor:pointer;">';
     html += '<div class="jour-col-hdr">';
     html += '<div class="jour-col-name">'+JOURS[d2]+'</div>';
     var _dispSeance=_wkCustom[d2]||SEANCES[d2];
     var _dispCol=typeof _dispSeance==='object'?_dispSeance.color:SEANCE_COL[d2];
     var _dispLbl=typeof _dispSeance==='object'?_dispSeance.label:_dispSeance;
-    html += '<div class="jour-col-type" style="color:'+SEANCE_COL[d2]+';cursor:grab;" draggable="true" ondragstart="dragDaySeance(event,'+d2+')">'+_dispLbl+'</div>';
+    html += '<div class="jour-col-type" style="color:'+SEANCE_COL[d2]+';cursor:pointer;">'+_dispLbl+'</div>';
     html += '</div><div class="jour-col-body">';
     if(w.matin.length>0){
       html += '<div class="jour-section">Matin</div>';
@@ -1085,7 +1087,7 @@ const FOCUS_JOUR={
 
 function autoSaveNote(){
   var noteEl=document.getElementById('note-ta');
-  if(!noteEl||!noteEl.value.trim()) return;
+  if(!noteEl||!noteEl.value||!noteEl.value.trim()) return;
   var today=new Date();today.setHours(0,0,0,0);
   localStorage.setItem(LS_PRE+'note_'+dkGt(today),noteEl.value);
 }
@@ -1600,30 +1602,7 @@ function showTrainingModal(title, content){
 // ── DRAG & DROP SEMAINE ─────────────────────────────────────
 var _dragFromDay=-1;
 
-function dragDaySeance(e, d2){
-  _dragFromDay=d2;
-  e.dataTransfer.effectAllowed='move';
-  e.dataTransfer.setData('text/plain',String(d2));
-  e.stopPropagation();
-}
 
-function dropDayBloc(e, toDow){
-  e.preventDefault();e.stopPropagation();
-  var fromDow=_dragFromDay;
-  if(fromDow<0||fromDow===toDow){_dragFromDay=-1;return;}
-  // Échanger les séances des deux jours dans un override localStorage
-  var custom=loadWeekCustom();
-  // Récupérer les séances sources (custom ou défaut)
-  var fromSeance=custom[fromDow]||SEANCES[fromDow];
-  var toSeance=custom[toDow]||SEANCES[toDow];
-  custom[fromDow]=toSeance;
-  custom[toDow]=fromSeance;
-  saveWeekCustom(custom);
-  _dragFromDay=-1;
-  renderSemaine();
-  // Notifier le tracker que la semaine a changé
-  localStorage.setItem('rt5_week_swapped','1');
-}
 
 function loadWeekCustom(){
   try{return JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');}catch(e){return {};}
@@ -1884,6 +1863,7 @@ function saveAnalysis(){
   var history = loadPhysiqueHistory();
   history = history.filter(function(h){return (h.weekKey||h.dk) !== weekKey;});
   history.push(entry);
+  if(history.length>10)history.splice(0,history.length-10); // max 10 photos
   localStorage.setItem('rt5_physique_history', JSON.stringify(history));
 
   // Compresser et sauvegarder la photo (max 500px, qualité 0.5 → ~50-80ko)

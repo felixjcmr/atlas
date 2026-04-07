@@ -250,7 +250,10 @@ function collectWeek(monday){
     const sid=SEANCES_IDS[i];
     let exosDone=0,exosTotal=0;
     try{const tr=JSON.parse(ls('train_'+dk(d)+'_'+sid)||'null');if(tr){Object.keys(tr).forEach(k=>{if(tr[k]&&tr[k].sets){exosTotal++;if(tr[k].sets.some(s=>s.done||s.kg||s.reps))exosDone++;}});}}catch(e){}
-    days.push({d,i,dep,gluc,poids,val,sleep,feelMatin,feelSoir,jRating,jGood,jBad,jFocus,exosDone,exosTotal,sid,isFuture});
+    // Macros réels depuis Carburant
+    let kcalReel=0,pReel=0,lReel=0,gReel=0;
+    try{const snap=JSON.parse(ls('carb_'+dk(d)+'_plan')||'null');if(snap&&snap.k){kcalReel=snap.k;pReel=snap.p||0;lReel=snap.l||0;gReel=snap.g||0;}}catch(e){}
+    days.push({d,i,dep,gluc,poids,val,sleep,feelMatin,feelSoir,jRating,jGood,jBad,jFocus,exosDone,exosTotal,sid,isFuture,kcalReel,pReel,lReel,gReel});
   }
   return days;
 }
@@ -262,9 +265,14 @@ function calcScore(days){
   const pw=past.filter(d=>d.poids).map(d=>d.poids);
   let leanScore=20;
   if(pw.length>=2){const delta=pw[pw.length-1]-pw[0];const rate=delta/pw.length*7;if(rate>=0.15&&rate<=0.55)leanScore=40;else if(rate>=0.05&&rate<=0.7)leanScore=25;else if(rate>0&&rate<=1.0)leanScore=12;else if(rate<0)leanScore=5;else leanScore=0;}
-  const tracked=past.filter(d=>d.dep>0);
+  // Énergie : préférer les kcal réellement mangés (carburant) à la dépense cible
+  const tracked=past.filter(d=>d.dep>0||d.kcalReel>0);
   let energyScore=0;
-  if(tracked.length>0){const avg=tracked.reduce((a,b)=>a+b.dep,0)/tracked.length;if(avg>=3800)energyScore=35;else if(avg>=3500)energyScore=28;else if(avg>=3200)energyScore=20;else if(avg>=2800)energyScore=10;else energyScore=5;if(tracked.length>=5&&energyScore>0)energyScore=Math.min(35,energyScore+5);}
+  if(tracked.length>0){
+    const avg=tracked.reduce((a,b)=>a+(b.kcalReel>0?b.kcalReel:b.dep),0)/tracked.length;
+    if(avg>=3800)energyScore=35;else if(avg>=3500)energyScore=28;else if(avg>=3200)energyScore=20;else if(avg>=2800)energyScore=10;else energyScore=5;
+    if(tracked.length>=5&&energyScore>0)energyScore=Math.min(35,energyScore+5);
+  }
   const sn=past.filter(d=>d.sleep);
   let sleepScore=0;
   if(sn.length>=3){const avg=sn.reduce((a,b)=>a+b.sleep,0)/sn.length;if(avg>=480)sleepScore=25;else if(avg>=420)sleepScore=18;else if(avg>=360)sleepScore=10;else sleepScore=4;}
@@ -281,7 +289,7 @@ function render(){
   document.getElementById('btn-next-week').disabled=isCurrent;
   document.getElementById('week-nav-lbl').textContent=currentMonday.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})+' — '+sunday.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
   document.getElementById('hdr-week').textContent='Semaine du '+currentMonday.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
-  const hasData=days.filter(d=>!d.isFuture).some(d=>d.dep>0||d.poids||d.sleep||d.exosDone>0);
+  const hasData=days.filter(d=>!d.isFuture).some(d=>d.dep>0||d.kcalReel>0||d.poids||d.sleep||d.exosDone>0);
   renderScore(days,prevDays);
   renderDaysStrip(days);
   if(!hasData&&isCurrent){
@@ -319,18 +327,18 @@ function renderScore(days,prevDays){
 function renderDaysStrip(days){
   document.getElementById('days-strip').innerHTML=days.map(d=>{
     let cls='day-dot',inner=SFR[d.i];
-    if(d.isFuture){cls+=' empty';}else if(d.val){cls+=' ok';inner='✓';}else if(d.dep>0||d.exosDone>0){cls+=' partial';}else{cls+=' empty';}
+    if(d.isFuture){cls+=' empty';}else if(d.val){cls+=' ok';inner='✓';}else if(d.dep>0||d.kcalReel>0||d.exosDone>0){cls+=' partial';}else{cls+=' empty';}
     if(dk(d.d)===dk(TODAY))cls+=' today';
-    const sub=d.dep>0?(d.dep>=1000?(d.dep/1000).toFixed(1)+'k':String(d.dep)):'';
+    const _kcal=d.kcalReel>0?d.kcalReel:d.dep;const sub=_kcal>0?(_kcal>=1000?(_kcal/1000).toFixed(1)+'k':String(_kcal)):'';
     return`<div class="day-col"><div class="day-lbl">${DAYS[d.i].substring(0,3)}</div><div class="${cls}" style="${d.isFuture?'opacity:0.15':''}">${inner}</div><div class="day-sub">${sub}</div></div>`;
   }).join('');
 }
 
 function renderStats(days,prevDays){
-  const past=days.filter(d=>!d.isFuture&&d.dep>0);
-  const prevPast=prevDays.filter(d=>d.dep>0);
-  const avgDep=past.length?Math.round(past.reduce((a,b)=>a+b.dep,0)/past.length):0;
-  const prevAvgDep=prevPast.length?Math.round(prevPast.reduce((a,b)=>a+b.dep,0)/prevPast.length):0;
+  const past=days.filter(d=>!d.isFuture&&(d.dep>0||d.kcalReel>0));
+  const prevPast=prevDays.filter(d=>d.dep>0||d.kcalReel>0);
+  const avgDep=past.length?Math.round(past.reduce((a,b)=>a+(b.kcalReel>0?b.kcalReel:b.dep),0)/past.length):0;
+  const prevAvgDep=prevPast.length?Math.round(prevPast.reduce((a,b)=>a+(b.kcalReel>0?b.kcalReel:b.dep),0)/prevPast.length):0;
   const sleepN=days.filter(d=>!d.isFuture&&d.sleep);
   const avgSleep=sleepN.length?Math.round(sleepN.reduce((a,b)=>a+b.sleep,0)/sleepN.length):0;
   const trainDays=days.filter(d=>!d.isFuture&&d.exosDone>0).length;
@@ -459,7 +467,10 @@ async function genererAnalyse(){
   ctx+=`\nDONNÉES :\n`;
   days.filter(d=>!d.isFuture).forEach(d=>{
     ctx+=`${DAYS[d.i]} : `;const parts=[];
-    if(d.dep>0){parts.push(`${d.dep} kcal · ${d.gluc}g glucides cibles — tracké`);}
+    if(d.dep>0){
+      parts.push(`${d.dep} kcal cible · ${d.gluc}g glucides cibles — tracké`);
+      if(d.kcalReel>0) parts.push(`réel: ${d.kcalReel}kcal · P${Math.round(d.pReel)}g · L${Math.round(d.lReel)}g · G${Math.round(d.gReel)}g`);
+    }
     else{const glucEst=Math.max(0,Math.round((avgDepTrack-FIXED)/4));parts.push(`non tracké (supposé ~${avgDepTrack} kcal · ~${glucEst}g glucides)`);}
     if(d.poids)parts.push(`poids ${d.poids}kg`);
     if(d.sleep)parts.push(`sommeil ${fmtSleep(d.sleep)}${d.feelMatin?` (matin ${d.feelMatin}/5)`:''}`);
