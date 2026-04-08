@@ -2516,15 +2516,16 @@ function renderBuilderItems(){
 }
 
 function openBuilderPicker(){
-  // Réutilise le picker existant en mode builder
   _builderMode = true;
-  _extraPickerOpen = -99; // sentinel for builder mode
+  _extraPickerOpen = -99;
   _addCat = 'Tout';
   _offResults = [];
   document.getElementById('add-srch').value = '';
   document.getElementById('add-qty').value = '100';
   renderAddList();
-  document.getElementById('add-overlay').classList.add('open');
+  const ao = document.getElementById('add-overlay');
+  ao.style.zIndex = '400';
+  ao.classList.add('open');
 }
 
 function saveBuilderRecipe(){
@@ -3463,7 +3464,7 @@ let _offTimer=null;
 function closeAddModal(e){
   if(e&&e.target!==document.getElementById('add-overlay'))return;
   document.getElementById('add-overlay').classList.remove('open');
-  _extraPickerOpen=-1;
+  if(_extraPickerOpen!==-99) _extraPickerOpen=-1;
   _offResults=[];
 }
 
@@ -3577,7 +3578,9 @@ function selectAddOFF(idx){
     DB[id]=item.mac; DB_LABELS[id]={n:item.n,cat:'Autre',ico:'🌍'};
     const offDB=loadOFFDb(); offDB[id]={n:item.n,mac:item.mac}; saveOFFDb(offDB);
     _builderItems.push({id:id,n:item.n,qty:qty});
-    document.getElementById('add-overlay').classList.remove('open');
+    const ao=document.getElementById('add-overlay');
+    ao.classList.remove('open');
+    ao.style.zIndex='';
     _offResults=[];
     renderBuilderItems();
     return;
@@ -3602,7 +3605,9 @@ function selectAdd(foodId){
   // Builder mode
   if(_extraPickerOpen===-99){
     _builderItems.push({id:foodId,n:lbl.n,qty:qty});
-    document.getElementById('add-overlay').classList.remove('open');
+    const ao=document.getElementById('add-overlay');
+    ao.classList.remove('open');
+    ao.style.zIndex='';
     renderBuilderItems();
     return;
   }
@@ -3751,7 +3756,7 @@ document.addEventListener('click', function(e){
 
 
 <!-- ── BUILDER DE RECETTE ─────────────────────────────────────── -->
-<div class="swap-overlay" id="recipe-builder-overlay" onclick="if(event.target===this)closeRecipeBuilder()">
+<div class="swap-overlay" id="recipe-builder-overlay" style="z-index:300;" onclick="if(event.target===this)closeRecipeBuilder()">
   <div class="swap-sheet" onclick="event.stopPropagation()" style="max-height:90vh;display:flex;flex-direction:column;">
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;">
