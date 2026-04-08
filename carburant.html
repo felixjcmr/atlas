@@ -2990,7 +2990,7 @@ function repasHTML(ri){
         </div>
       </div>
       <div class="repas-right">
-        ${rm.k>0?`<div><span class="repas-kcal">${Math.round(rm.k)}</span><span class="repas-kcal-unit"> kcal</span></div>`:''}
+        ${rm.k>0?`<div id="rh-kcal-${ri}"><span class="repas-kcal">${Math.round(rm.k)}</span><span class="repas-kcal-unit"> kcal</span></div>`:`<div id="rh-kcal-${ri}"></div>`}
         <div class="repas-arrow">▼</div>
       </div>
     </div>
@@ -3002,7 +3002,7 @@ function repasHTML(ri){
       </div>
       ${!hasItems?`<div class="repas-empty"><div class="repas-empty-ico">🍽️</div><div class="repas-empty-txt">Repas vide · applique une recette<br>ou ajoute un aliment</div></div>`:''}
       ${extrasHTML(ri)}
-      ${hasItems?`<div class="repas-macros"><div class="rm"><div class="rm-val">${Math.round(rm.k)}</div><div class="rm-lbl">kcal</div></div><div class="rm"><div class="rm-val prot">${Math.round(rm.p)}g</div><div class="rm-lbl">prot</div></div><div class="rm"><div class="rm-val lip">${r2(rm.l)}g</div><div class="rm-lbl">lip</div></div><div class="rm"><div class="rm-val gluc">${Math.round(rm.g)}g</div><div class="rm-lbl">gluc</div></div></div>`:''}
+      ${hasItems?`<div class="repas-macros" id="rm_${ri}"><div class="rm"><div class="rm-val">${Math.round(rm.k)}</div><div class="rm-lbl">kcal</div></div><div class="rm"><div class="rm-val prot">${Math.round(rm.p)}g</div><div class="rm-lbl">prot</div></div><div class="rm"><div class="rm-val lip">${r2(rm.l)}g</div><div class="rm-lbl">lip</div></div><div class="rm"><div class="rm-val gluc">${Math.round(rm.g)}g</div><div class="rm-lbl">gluc</div></div></div>`:''}
       <button class="add-food-btn" onclick="openExtraPicker(${ri})">＋ Ajouter un aliment</button>
     </div>
   </div>`;
@@ -3028,8 +3028,9 @@ function liveUpdateItem(ri,ii,qty){
   if(macEl) macEl.textContent=r2(m.p)+"p · "+r2(m.g)+"g · "+r2(m.l)+"l";
   // Mettre à jour le total du repas
   const rm=repasMac(ri);
-  const rkEl=document.getElementById("rk_"+ri);
-  if(rkEl) rkEl.textContent=Math.round(rm.k)+" kcal";
+  // Mettre à jour le kcal dans l'en-tête du repas
+  const rhEl=document.getElementById("rh-kcal-"+ri);
+  if(rhEl) rhEl.innerHTML=`<span class="repas-kcal">${Math.round(rm.k)}</span><span class="repas-kcal-unit"> kcal</span>`;
   const rmEl=document.getElementById("rm_"+ri);
   if(rmEl) rmEl.innerHTML=macRow(rm);
   // Mettre à jour la carte totale et la barre
