@@ -2454,9 +2454,9 @@ function searchOFF(q){
   const offEl=document.getElementById('off-status');
   if(offEl) offEl.textContent='🔍 Recherche Open Food Facts...';
   _offTimer=setTimeout(function(){
-    const url='https://world.openfoodfacts.org/api/v2/search?search_terms='+encodeURIComponent(q)
-      +'&fields=product_name,nutriments,brands&page_size=20&sort_by=popularity_key';
-    fetch(url)
+    const url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)
+      +'&search_simple=1&action=process&json=1&fields=product_name,nutriments,brands&page_size=20&sort_by=popularity_key&lc=fr';
+    fetch(url, {mode:'cors'})
     .then(function(r){return r.json();})
     .then(function(data){
       _offResults=(data.products||[]).filter(function(p){
