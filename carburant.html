@@ -2504,14 +2504,36 @@ function renderBuilderItems(){
     totalK += kcal;
     return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:0.5px solid #111;">' +
       '<div style="flex:1;font-size:12px;color:#c0c0c0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + it.n + '</div>' +
-      '<input type="number" min="0" max="2000" step="5" value="' + it.qty + '" ' +
-        'style="width:54px;height:30px;background:#141414;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:12px;text-align:center;font-family:inherit;" ' +
-        'oninput="_builderItems[' + i + '].qty=+this.value;renderBuilderItems()">' +
+      '<input type="number" min="0" max="2000" step="5" value="' + it.qty + '" data-bidx="' + i + '" ' +
+        'style="width:54px;height:30px;background:#141414;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:12px;text-align:center;font-family:inherit;">' +
       '<span style="font-size:9px;color:#555;">g</span>' +
-      '<div style="font-size:11px;font-weight:600;color:#7B72E9;min-width:42px;text-align:right;">' + kcal + ' kcal</div>' +
-      '<button onclick="_builderItems.splice(' + i + ',1);renderBuilderItems()" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;padding:0 2px;">✕</button>' +
+      '<div id="bkcal-' + i + '" style="font-size:11px;font-weight:600;color:#7B72E9;min-width:42px;text-align:right;">' + kcal + ' kcal</div>' +
+      '<button data-bdel="' + i + '" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;padding:0 2px;">✕</button>' +
     '</div>';
   }).join('');
+  document.getElementById('builder-total').textContent = Math.round(totalK) + ' kcal · ' + _builderItems.length + ' aliment' + (_builderItems.length > 1 ? 's' : '');
+  // Event delegation — no re-render on input
+  el.oninput = function(e){
+    const inp = e.target.closest('input[data-bidx]');
+    if(!inp) return;
+    const i = +inp.dataset.bidx;
+    const v = Math.max(0, +inp.value || 0);
+    _builderItems[i].qty = v;
+    const k = DB[_builderItems[i].id] ? Math.round(DB[_builderItems[i].id].k * v) : 0;
+    const lbl = document.getElementById('bkcal-' + i);
+    if(lbl) lbl.textContent = k + ' kcal';
+    updateBuilderTotal();
+  };
+  el.onclick = function(e){
+    const btn = e.target.closest('button[data-bdel]');
+    if(!btn) return;
+    _builderItems.splice(+btn.dataset.bdel, 1);
+    renderBuilderItems();
+  };
+}
+
+function updateBuilderTotal(){
+  const totalK = _builderItems.reduce(function(s,it){ return s + (DB[it.id] ? DB[it.id].k * it.qty : 0); }, 0);
   document.getElementById('builder-total').textContent = Math.round(totalK) + ' kcal · ' + _builderItems.length + ' aliment' + (_builderItems.length > 1 ? 's' : '');
 }
 
@@ -2606,24 +2628,40 @@ function renderRecipeEdit(){
   if(!rec)return;
   const el=document.getElementById('recipe-edit-items');
   const totalK=rec.items.reduce(function(s,it,i){
-    const qty=_editRecipeQties[i]||it.qty;
+    const qty=_editRecipeQties[i]!==undefined?_editRecipeQties[i]:it.qty;
     return s+(DB[it.id]?DB[it.id].k*qty:0);
   },0);
   document.getElementById('recipe-edit-total').textContent=Math.round(totalK)+' kcal';
   el.innerHTML=rec.items.map(function(it,i){
-    const qty=_editRecipeQties[i]||it.qty;
+    const qty=_editRecipeQties[i]!==undefined?_editRecipeQties[i]:it.qty;
     const kcal=DB[it.id]?Math.round(DB[it.id].k*qty):0;
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #111;">'+
       '<div style="flex:1;font-size:12px;color:#c0c0c0;">'+it.n+'</div>'+
       '<div style="display:flex;align-items:center;gap:6px;">'+
-        '<input type="number" min="0" max="2000" step="5" value="'+qty+'" '+
-        'style="width:56px;height:32px;background:#141414;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:13px;text-align:center;font-family:inherit;" '+
-        'oninput="_editRecipeQties['+i+']=+this.value;renderRecipeEdit()">'+
+        '<input type="number" min="0" max="2000" step="5" value="'+qty+'" data-eidx="'+i+'" '+
+        'style="width:56px;height:32px;background:#141414;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:13px;text-align:center;font-family:inherit;">'+
         '<span style="font-size:10px;color:#555;">g</span>'+
       '</div>'+
-      '<div style="font-size:12px;font-weight:600;color:#7B72E9;min-width:50px;text-align:right;">'+kcal+' kcal</div>'+
+      '<div id="ekcal-'+i+'" style="font-size:12px;font-weight:600;color:#7B72E9;min-width:50px;text-align:right;">'+kcal+' kcal</div>'+
     '</div>';
   }).join('');
+  // Event delegation
+  el.oninput = function(e){
+    const inp = e.target.closest('input[data-eidx]');
+    if(!inp) return;
+    const i = +inp.dataset.eidx;
+    const v = Math.max(0, +inp.value || 0);
+    _editRecipeQties[i] = v;
+    const it = rec.items[i];
+    const k = DB[it.id] ? Math.round(DB[it.id].k * v) : 0;
+    const lbl = document.getElementById('ekcal-' + i);
+    if(lbl) lbl.textContent = k + ' kcal';
+    const tot = rec.items.reduce(function(s,it2,j){
+      const q = _editRecipeQties[j]!==undefined ? _editRecipeQties[j] : it2.qty;
+      return s + (DB[it2.id] ? DB[it2.id].k * q : 0);
+    },0);
+    document.getElementById('recipe-edit-total').textContent = Math.round(tot) + ' kcal';
+  };
 }
 
 function confirmApplyRecipe(){
