@@ -298,9 +298,10 @@ const PROGRAM = {
     {id:'katana',       name:'Triceps Katana Unilatéral',   muscle:'Triceps',    sets:2, repsTarget:'10-12',kgRef:'7,5', deg:false, note:'Genou appuyé · poulie sol', link:'https://vm.tiktok.com/ZNRXBwH88/'},
     {id:'db_curl_ext',  name:'Hammer DB Curls × Extension bar triceps', muscle:'Bi/Tri', sets:1, repsTarget:'↑ échec', kgRef:'24-25', deg:false},
   ],
-  footing:  [],
-  repos:    [],
-  natation: [],
+  footing:   [],
+  repos:     [],
+  natation:  [],
+  corde_sac: [],
 };
 
 
@@ -313,7 +314,6 @@ const STREET_WO = {
       {ico:'💪', name:'Pompes larges', detail:'4×8 · 60s repos'},
       {ico:'📐', name:'Pompes déclinées', detail:'4×8 · 60s repos · pieds sur chaise'},
       {ico:'💎', name:'Pompes diamant', detail:'4×8 · 60s repos · mains en triangle'},
-      {ico:'🪢', name:'Corde à sauter', detail:'4×3min · 1min repos'},
     ]
   },
   2: { // Mardi — Street Pull
@@ -323,34 +323,29 @@ const STREET_WO = {
       {ico:'🔙', name:'Tractions supination serrée', detail:'4×6 · 90s repos'},
       {ico:'📊', name:'Australiennes sur table', detail:'4×6 · 90s repos'},
       {ico:'⏸️', name:'Isométrique mi-parcours', detail:'4×10s maintien · 60s repos'},
-      {ico:'🥊', name:'Sac de frappe', detail:'4×3min · 1min repos'},
     ]
   },
-  3: { // Mercredi — Natation
-    type: 'natation',
+  3: { // Mercredi — Corde + Sac
+    type: 'corde_sac',
     items: [
-      {ico:'🏊', name:'Échauffement — 10min', detail:'4×25m crawl tranquille (20s récup) · 2×25m dos crawlé (20s récup)'},
-      {ico:'💪', name:'Bloc principal — 35min', detail:'Phase 1 (sem 1-3) : 6×50m crawl (40s récup) · 4×25m brasse coulée (30s récup) · 2×50m dos (40s récup) ≈ 800m\nPhase 2 (sem 4-6) : 8×50m crawl (30s récup) · 4×50m brasse coulée (40s récup) · 2×50m dos (30s récup) ≈ 1000m'},
-      {ico:'🌊', name:'Récupération active — 10min', detail:'4×25m brasse coulée très lente · 2×25m dos tranquille'},
-      {ico:'🧘', name:"Étirements dans l'eau — 5min", detail:'Épaules · Hanches · Ouverture pectoraux contre le bord'},
+      {ico:'🪢', name:'Corde à sauter — 15min', detail:'4×3min · 1min repos · rythme modéré'},
+      {ico:'🥊', name:'Sac de frappe — 15min', detail:'4×3min · 1min repos · combos libres'},
     ]
   },
-  4: null, // Jeudi — Repos
-  5: { // Vendredi — Footing
-    type:'footing',
-    items: [
-      {ico:'🏃', name:'Footing 5km', detail:'30mn — allure confortable, zone 2'},
-    ]
-  },
-  6: { // Samedi — Sprint & Pliométrie
+  4: { // Jeudi — Sprint & Pliométrie
     type: 'sprint',
     items: [
       {ico:'🔥', name:'Échauffement — 10min', detail:'5min footing léger\nMontées de genoux 2×20m · Talons-fesses 2×20m\nFentes marchées 2×10 pas · Jambes tendues 2×20m\nAccélérations progressives 3×30m à 60/75/90%'},
       {ico:'⚡', name:'Pliométrie — 20min', detail:'Squat jumps 3×8 (45s récup)\nFrog jumps 3×6 (45s récup)\nBounding 3×20m (45s récup)\nLateral bounds 3×10 (45s récup)'},
-      {ico:'💨', name:'Sprints — 30min', detail:'6 sprints × 60m intensité maximale · 3min récup marche active entre chaque\nSem 1-3 : 6 sprints · Sem 4-6 : 8 sprints'},
+      {ico:'💨', name:'Sprints — 30min', detail:'8 sprints × 60m intensité maximale · 3min récup marche active entre chaque'},
       {ico:'🧘', name:'Retour au calme — 5min', detail:'3min footing très lent\nÉtirements statiques : ischio · quadriceps · mollets'},
     ]
   },
+  5: { // Vendredi — Chest/Back (gym seulement)
+    type:'footing',
+    items: []
+  },
+  6: null, // Samedi — Shoulders/Arms (gym seulement, pas de street)
   0: { // Dimanche — Footing
     type: 'footing',
     items: [
@@ -620,9 +615,9 @@ function renderSeance(){
   let swHtml = '';
   // Toujours afficher le SW/natation du VRAI jour, peu importe la séance sélectionnée
   if(_sw && _sw.items && _sw.items.length){
-    const _borderCol=_sw.type==="natation"?"#1e3a5f":_sw.type==="sprint"?"#3a1f0d":_sw.type==="footing"?"#0d2a1a":_sw.type==="street_push"?"#1a1628":_sw.type==="street_pull"?"#0d1f0d":"#141414";
-    const _accentCol=_sw.type==="natation"?"#60A5FA":_sw.type==="sprint"?"#F97316":_sw.type==="footing"?"#34D399":_sw.type==="street_push"?"#7B72E9":_sw.type==="street_pull"?"#22C55E":"#F59E0B";
-    const _titleLbl=_sw.type==="natation"?"🏊 Natation — Mercredi soir":_sw.type==="sprint"?"💨 Sprint & Pliométrie":_sw.type==="footing"?"🏃 Footing":_sw.type==="street_push"?"💪 Street Push — Lundi soir":_sw.type==="street_pull"?"🔝 Street Pull — Mardi soir":"🌅 Street Workout";
+    const _borderCol=_sw.type==="natation"?"#1e3a5f":_sw.type==="corde_sac"?"#2a1a0a":_sw.type==="sprint"?"#3a1f0d":_sw.type==="footing"?"#0d2a1a":_sw.type==="street_push"?"#1a1628":_sw.type==="street_pull"?"#0d1f0d":"#141414";
+    const _accentCol=_sw.type==="natation"?"#60A5FA":_sw.type==="corde_sac"?"#F59E0B":_sw.type==="sprint"?"#F97316":_sw.type==="footing"?"#34D399":_sw.type==="street_push"?"#7B72E9":_sw.type==="street_pull"?"#22C55E":"#F59E0B";
+    const _titleLbl=_sw.type==="natation"?"🏊 Natation":_sw.type==="corde_sac"?"🪢 Corde + Sac — Mercredi":_sw.type==="sprint"?"💨 Sprint & Pliométrie":_sw.type==="footing"?"🏃 Footing":_sw.type==="street_push"?"💪 Street Push — Lundi soir":_sw.type==="street_pull"?"🔝 Street Pull — Mardi soir":"🌅 Street Workout";
     swHtml += `<div style="margin:12px 14px 6px;background:#0d0d0d;border:0.5px solid ${_borderCol};border-radius:12px;padding:12px 14px;border-left:3px solid ${_accentCol};">
       <div style="font-size:9px;color:${_accentCol};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">${_titleLbl}</div>`;
     _sw.items.forEach(item=>{
