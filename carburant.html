@@ -2452,29 +2452,24 @@ function searchOFF(q){
   clearTimeout(_offTimer);
   if(!q||q.length<2){_offResults=[];renderAddList();return;}
   const offEl=document.getElementById('off-status');
-  if(offEl) offEl.textContent='🔍 Recherche Open Food Facts...';
+  if(offEl) offEl.textContent='🔍 Recherche...';
   _offTimer=setTimeout(function(){
-    const url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)
-      +'&search_simple=1&action=process&json=1&fields=product_name,nutriments,brands&page_size=20&sort_by=popularity_key&lc=fr';
-    fetch(url, {mode:'cors'})
+    const target='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+'&search_simple=1&action=process&json=1&fields=product_name,nutriments,brands&page_size=15&sort_by=popularity_key&lc=fr';
+    const url='https://corsproxy.io/?'+encodeURIComponent(target);
+    fetch(url)
     .then(function(r){return r.json();})
     .then(function(data){
       _offResults=(data.products||[]).filter(function(p){
         const n=p.nutriments;
         return p.product_name&&n&&(n['energy-kcal_100g']!=null||n['energy_100g']!=null)&&n['proteins_100g']!=null;
-      }).slice(0,20).map(function(p){
+      }).slice(0,15).map(function(p){
         const n=p.nutriments;
         const brand=p.brands?p.brands.split(',')[0].trim():'';
         const kcal=n['energy-kcal_100g']!=null?n['energy-kcal_100g']:(n['energy_100g']||0)/4.184;
-        return {
+        return{
           id:'off_'+Math.random().toString(36).substr(2,9),
           n:p.product_name+(brand?' · '+brand:''),
-          mac:{
-            k:kcal/100,
-            p:(n['proteins_100g']||0)/100,
-            g:(n['carbohydrates_100g']||0)/100,
-            l:(n['fat_100g']||0)/100
-          },
+          mac:{k:kcal/100,p:(n['proteins_100g']||0)/100,g:(n['carbohydrates_100g']||0)/100,l:(n['fat_100g']||0)/100},
           fib:(n['fiber_100g']||0)/100
         };
       });
@@ -2482,10 +2477,9 @@ function searchOFF(q){
       renderAddList();
     }).catch(function(err){
       if(offEl) offEl.textContent='❌ Erreur connexion';
-      _offResults=[];
-      renderAddList();
+      _offResults=[];renderAddList();
     });
-  },600);
+  },700);
 }
 
 function renderAddList(){
