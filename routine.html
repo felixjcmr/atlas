@@ -171,58 +171,12 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchView('today')">Aujourd'hui</button>
-  <button class="tab-btn" onclick="switchView('semaine')">Semaine</button>
+  <button class="tab-btn active" onclick="switchView('semaine')">Semaine</button>
   <button class="tab-btn" onclick="switchView('journal')">Journal</button>
   <button class="tab-btn" onclick="switchView('objectifs')">Objectifs</button>
 </div>
 
-<div id="view-today">
-  <div class="jour-card">
-    <div class="jour-title" id="jour-title">—</div>
-    <div class="jour-sub" id="jour-sub">—</div>
-  <div id="jour-note" style="display:none;margin-top:3px;font-size:10px;color:#555;font-style:italic;">Pas de corde ni sac de frappe aujourd'hui</div>
-  </div>
-
-  <!-- STATS DU JOUR depuis tracker -->
-  <div class="day-stats" style="grid-template-columns:repeat(2,1fr);">
-    <div class="day-stat">
-      <div class="day-stat-val" id="ds-dep">—</div>
-      <div class="day-stat-lbl">Kcal dépensées</div>
-    </div>
-    <div class="day-stat">
-      <div class="day-stat-val" id="ds-gluc">—</div>
-      <div class="day-stat-lbl">G glucides cible</div>
-    </div>
-  </div>
-  <div style="margin:6px 18px 0;padding:8px 12px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-      <div style="font-size:9px;color:#333;text-transform:uppercase;letter-spacing:0.06em;">Macros du jour · Carburant</div>
-      <div style="font-size:9px;" id="ds-poids-rt"></div>
-    </div>
-    <div style="font-size:11px;color:#555;" id="ds-macros">— · ouvre Carburant pour générer le plan</div>
-    <div style="font-size:10px;margin-top:4px;" id="ds-val-rt"></div>
-  </div>
-
-  <div class="timeline" id="timeline"></div>
-
-  <!-- Accès Physique -->
-  <div style="margin:12px 18px 0;" onclick="switchView('physique')" id="physique-today-card">
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:20px;">📸</span>
-        <div>
-          <div style="font-size:12px;font-weight:600;color:#e8e8e8;">Check-in physique</div>
-          <div style="font-size:10px;color:#444;margin-top:2px;">Analyse photo hebdomadaire</div>
-        </div>
-      </div>
-      <span style="color:#444;font-size:14px;">›</span>
-    </div>
-  </div>
-  <div style="height:16px;"></div>
-</div>
-
-<div id="view-semaine" style="display:none;">
+<div id="view-semaine" style="display:block;">
   <div class="semaine-scroll">
     <div class="semaine-grid" id="semaine-grid"></div>
   </div>
@@ -377,7 +331,47 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
     <!-- HISTORIQUE JOURNAL -->
     <div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;">Historique 7 jours</div>
     <div id="journal-history" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+    <!-- CHECK-IN PHYSIQUE -->
+    <div style="margin:16px 0 8px;display:flex;align-items:center;gap:8px;">
+      <div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;">📸 Check-in physique</div>
+      <div style="flex:1;height:0.5px;background:#141414;"></div>
+    </div>
+    <div id="view-physique-inline">
+      <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:14px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:11px;color:#555;margin-bottom:14px;line-height:1.6;">Même angle, même lumière, sans vêtements. Chaque lundi de préférence.</div>
+        <label id="photo-label" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;border:1px dashed #2a2a2a;border-radius:12px;cursor:pointer;background:#0a0a0a;">
+          <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="onPhotoSelected(event)">
+          <div id="photo-preview-wrap" style="display:none;width:100%;">
+            <img id="photo-preview" style="width:100%;border-radius:10px;max-height:300px;object-fit:cover;" />
+          </div>
+          <div id="photo-placeholder" style="text-align:center;">
+            <div style="font-size:28px;margin-bottom:6px;">📷</div>
+            <div style="font-size:12px;color:#555;">Appuie pour choisir une photo</div>
+            <div style="font-size:10px;color:#333;margin-top:3px;">depuis ta pellicule</div>
+          </div>
+        </label>
+        <button id="btn-analyze" onclick="analyzePhoto()" style="display:none;width:100%;margin-top:12px;padding:14px;background:#100e2e;border:0.5px solid #2e2b6e;border-radius:12px;color:#7B72E9;font-size:13px;font-weight:500;cursor:pointer;">✦ Analyser avec Claude</button>
+        <button id="btn-change-photo" onclick="resetPhoto()" style="display:none;width:100%;margin-top:6px;padding:10px;background:none;border:0.5px solid #1a1a1a;border-radius:12px;color:#444;font-size:11px;cursor:pointer;">Changer la photo</button>
+      </div>
+      <div id="physique-result" style="display:none;">
+        <div style="background:#0d0d0d;border:0.5px solid #2e2b6e;border-radius:14px;padding:14px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-size:9px;color:#7B72E9;letter-spacing:0.08em;text-transform:uppercase;">Analyse Claude</div>
+            <div id="physique-date" style="font-size:10px;color:#444;"></div>
+          </div>
+          <div id="physique-text" style="font-size:12px;color:#c0c0c0;line-height:1.7;white-space:pre-wrap;"></div>
+        </div>
+        <button onclick="saveAnalysis()" id="btn-save-analysis" style="width:100%;padding:12px;background:#071a0a;border:0.5px solid #166534;border-radius:12px;color:#22C55E;font-size:12px;font-weight:500;cursor:pointer;">💾 Sauvegarder cette analyse</button>
+      </div>
+      <div id="physique-loader" style="display:none;text-align:center;padding:30px;">
+        <div style="font-size:24px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⟳</div>
+        <div style="font-size:11px;color:#555;">Analyse en cours...</div>
+      </div>
+      <div id="physique-history"></div>
+    </div>
   </div>
+  <div style="height:80px;"></div>
 </div>
 <div id="view-objectifs" style="display:none;padding:14px 18px 100px;">
 
@@ -438,58 +432,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
     </div>
     <div class="obj-list" id="obj-list-yearly"></div>
   </div>
-
-</div>
-
-<div id="view-physique" style="display:none;padding:16px 18px 80px;">
-
-  <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:14px;padding:14px;margin-bottom:12px;">
-    <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">📸 Check-in hebdomadaire</div>
-    <div style="font-size:11px;color:#555;margin-bottom:14px;line-height:1.6;">Même angle, même lumière, sans vêtements. Chaque lundi de préférence.</div>
-
-    <!-- Zone upload -->
-    <label id="photo-label" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;border:1px dashed #2a2a2a;border-radius:12px;cursor:pointer;transition:border-color 0.15s;background:#0a0a0a;">
-      <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="onPhotoSelected(event)">
-      <div id="photo-preview-wrap" style="display:none;width:100%;">
-        <img id="photo-preview" style="width:100%;border-radius:10px;max-height:300px;object-fit:cover;" />
-      </div>
-      <div id="photo-placeholder" style="text-align:center;">
-        <div style="font-size:28px;margin-bottom:6px;">📷</div>
-        <div style="font-size:12px;color:#555;">Appuie pour choisir une photo</div>
-        <div style="font-size:10px;color:#333;margin-top:3px;">depuis ta pellicule</div>
-      </div>
-    </label>
-
-    <button id="btn-analyze" onclick="analyzePhoto()" style="display:none;width:100%;margin-top:12px;padding:14px;background:#100e2e;border:0.5px solid #2e2b6e;border-radius:12px;color:#7B72E9;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;">
-      ✦ Analyser avec Claude
-    </button>
-    <button id="btn-change-photo" onclick="resetPhoto()" style="display:none;width:100%;margin-top:6px;padding:10px;background:none;border:0.5px solid #1a1a1a;border-radius:12px;color:#444;font-size:11px;cursor:pointer;">
-      Changer la photo
-    </button>
-  </div>
-
-  <!-- Résultat analyse -->
-  <div id="physique-result" style="display:none;">
-    <div style="background:#0d0d0d;border:0.5px solid #2e2b6e;border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-size:9px;color:#7B72E9;letter-spacing:0.08em;text-transform:uppercase;">Analyse Claude</div>
-        <div id="physique-date" style="font-size:10px;color:#444;"></div>
-      </div>
-      <div id="physique-text" style="font-size:12px;color:#c0c0c0;line-height:1.7;white-space:pre-wrap;"></div>
-    </div>
-    <button onclick="saveAnalysis()" id="btn-save-analysis" style="width:100%;padding:12px;background:#071a0a;border:0.5px solid #166534;border-radius:12px;color:#22C55E;font-size:12px;font-weight:500;cursor:pointer;">
-      💾 Sauvegarder cette analyse
-    </button>
-  </div>
-
-  <!-- Loader -->
-  <div id="physique-loader" style="display:none;text-align:center;padding:30px;">
-    <div style="font-size:24px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⟳</div>
-    <div style="font-size:11px;color:#555;">Analyse en cours...</div>
-  </div>
-
-  <!-- Historique analyses -->
-  <div id="physique-history"></div>
 
 </div>
 
@@ -589,87 +531,86 @@ function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 
 var JOURS   = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 var SFR     = ['L','M','M','J','V','S','D'];
-var SEANCES = ['Push','Pull','Lower','Repos','Chest / Back','Shoulders / Arms','Footing'];
+var SEANCES = ['Push','Pull','Lower','Sprint & Plio','Chest / Back','Shoulders / Arms','Footing'];
 var SEANCE_COL = ['#7B72E9','#22C55E','#F59E0B','#555','#EF4444','#E879F9','#34D399'];
 
 // ── DONNÉES SEMAINE COMPLÈTE ─────────────────────────────────────
 var WEEK = {
   0: { // Lundi - Push
     matin:[
-      {n:'Mobilité',           dur:'20mn',            type:'mobi'},
-      {n:'Step',               dur:'1h',              type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',  type:'muscu'},
+      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
+      {n:'Step', dur:'1h+', type:'step'},
+      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
     ],
     aprem:[
-      {n:'Libre',          dur:'4h',   type:'taf'},
-      {n:'Street Push',    dur:'30mn', type:'sport'},
-      {n:'Corde',          dur:'16mn', type:'corde'},
+      {n:'Libre',       dur:'',     type:'taf'},
+      {n:'Street Push', dur:'30mn', type:'sport'},
     ], steps:true
   },
   1: { // Mardi - Pull
     matin:[
-      {n:'Mobilité',           dur:'20mn',            type:'mobi'},
-      {n:'Step',               dur:'1h',              type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',  type:'muscu'},
+      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
+      {n:'Step', dur:'1h+', type:'step'},
+      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
     ],
     aprem:[
-      {n:'Libre',          dur:'4h',   type:'taf'},
-      {n:'Street Pull',    dur:'30mn', type:'sport'},
-      {n:'Sac de frappe',  dur:'12mn', type:'sac'},
+      {n:'Libre',       dur:'',     type:'taf'},
+      {n:'Street Pull', dur:'30mn', type:'sport'},
     ], steps:true
   },
   2: { // Mercredi - Lower
     matin:[
-      {n:'Mobilité',           dur:'20mn',            type:'mobi'},
-      {n:'Step',               dur:'1h',              type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',  type:'muscu'},
+      {n:'Mobilité',  dur:'20mn',  type:'mobi'},
+      {n:'Step', dur:'1h+', type:'step'},
+      {n:'Gym',       dur:'90mn',  type:'muscu'},
     ],
     aprem:[
-      {n:'Libre',      dur:'4h',   type:'taf'},
-      {n:'Natation',   dur:'1h',   type:'swim'},
+      {n:'Libre',         dur:'',     type:'taf'},
+      {n:'Corde',         dur:'15mn', type:'corde'},
+      {n:'Sac de frappe', dur:'15mn', type:'sac'},
     ], steps:true
   },
-  3: { // Jeudi - Repos
+  3: { // Jeudi - Sprint & Plio
     matin:[
-      {n:'Mobilité',        dur:'20mn',  type:'mobi'},
-      {n:'Step / Marche',   dur:'1h30',  type:'step'},
+      {n:'Mobilité',  dur:'20mn', type:'mobi'},
+      {n:'Step', dur:'1h+', type:'step'},
     ],
     aprem:[
-      {n:'Repos complet',   dur:'',      type:'taf'},
-      {n:'Step / Marche',   dur:'1h30',  type:'step'},
-    ], steps:false
+      {n:'Libre',       dur:'',     type:'taf'},
+      {n:'Pliométrie',  dur:'20mn', type:'plio'},
+      {n:'Sprint',      dur:'30mn', type:'sprint'},
+    ], steps:true
   },
   4: { // Vendredi - Chest/Back
     matin:[
-      {n:'Mobilité',           dur:'20mn',            type:'mobi'},
-      {n:'Step',               dur:'1h',              type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',  type:'muscu'},
+      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
+      {n:'Step', dur:'1h+', type:'step'},
+      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
     ],
     aprem:[
-      {n:'Libre',   dur:'',    type:'taf'},
-      {n:'Footing', dur:'30mn', type:'sport'},
+      {n:'Libre', dur:'',  type:'taf'},
+      {n:'Step', dur:'1h+', type:'step'},
     ], steps:true
   },
-  5: { // Samedi - S/Arms
+  5: { // Samedi - Shoulders/Arms
     matin:[
-      {n:'Mobilité',           dur:'20mn',            type:'mobi'},
-      {n:'Step',               dur:'1h',              type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',  type:'muscu'},
+      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
+      {n:'Step', dur:'1h+', type:'step'},
+      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
     ],
     aprem:[
-      {n:'Libre',      dur:'',    type:'taf'},
-      {n:'Pliométrie', dur:'20mn', type:'plio'},
-      {n:'Sprint',     dur:'30mn', type:'sprint'},
+      {n:'Libre', dur:'',  type:'taf'},
+      {n:'Step', dur:'1h+', type:'step'},
     ], steps:true
   },
-  6: { // Dimanche - Footing
+  6: { // Dimanche - Footing récup
     matin:[
-      {n:'Mobilité',   dur:'20mn', type:'mobi'},
-      {n:'Step',       dur:'1h',   type:'step'},
-      {n:'Footing',    dur:'10km', type:'sport'},
+      {n:'Mobilité', dur:'20mn', type:'mobi'},
+      {n:'Footing',  dur:'10km', type:'sport'},
     ],
     aprem:[
-      {n:'Libre — famille', dur:'', type:'taf'},
+      {n:'Libre — famille', dur:'',  type:'taf'},
+      {n:'Step',            dur:'1h+', type:'step'},
     ], steps:false
   }
 };
@@ -699,53 +640,65 @@ var COL = {
 function toMin(h,m){return h*60+(m||0);}
 
 function getTimelineBlocs(d2){
-  var muscu_detail = ['Footing','Push','Pull','Lower','Repos','Chest/Back','Shoulders/Arms'];
+  var muscu_detail = ['Footing','Push','Pull','Lower','Sprint/Plio','Chest/Back','Shoulders/Arms'];
   var blocs = [];
 
-  // ─ MATIN commun — routine matinale complète ─
+  // ─ MATIN commun ─
   blocs.push({h:'7h30', m:7*60+30, name:'Réveil · Routine matinale', detail:'', type:'shot'});
   blocs.push({h:'8h00', m:8*60,    name:'Petit-déjeuner · Compléments', detail:'', type:'nutri'});
   blocs.push({h:'9h00', m:9*60,    name:'Step / Marche', detail:'1h — marche, activation, lumière naturelle', type:'step'});
   blocs.push({h:'10h00',m:10*60,   name:'En-cas pré-training', detail:'Fromage blanc 250g · 2 bananes · graines grenade', type:'nutri'});
 
   if(d2===3){
-    // Jeudi — Repos complet
-    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',              detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
-    blocs.push({h:'14h00',m:14*60,    name:'Repos complet',         detail:'Pas d\'entraînement · récupération totale', type:'taf'});
-    blocs.push({h:'15h00',m:15*60,    name:'Step / Marche',         detail:'1h — balade calme, lumière naturelle', type:'step'});
-    blocs.push({h:'20h30',m:20*60+30, name:'Dîner',                 detail:'Riz · Patate douce · Protéine + libre', type:'nutri'});
+    // Jeudi — Sprint & Pliométrie
+    blocs.push({h:'10h30',m:10*60+30, name:'Libre',            detail:'Récupération active · taf · sortie', type:'taf'});
+    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',         detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
+    blocs.push({h:'15h00',m:15*60,    name:'Échauffement',     detail:'5min footing · éducatifs athlétisme', type:'sport'});
+    blocs.push({h:'15h20',m:15*60+20, name:'Pliométrie',       detail:'20mn · Squat jumps · Frog jumps · Bounding · Lateral bounds', type:'plio'});
+    blocs.push({h:'15h40',m:15*60+40, name:'8 Sprints × 60m', detail:'Effort maximal · 3min récup marche entre chaque', type:'sprint'});
+    blocs.push({h:'17h00',m:17*60,    name:'Retour au calme',  detail:'Marche · Étirements ischio · quadri · mollets', type:'step'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner',            detail:'Riz · Patate douce · Protéine + libre', type:'nutri'});
   } else if(d2===6){
-    // Dimanche — Footing 10km
-    blocs.push({h:'10h30',m:10*60+30, name:'Footing',               detail:'10km — allure confortable, zone 2', type:'sport'});    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',              detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
-    blocs.push({h:'14h00',m:14*60,    name:'Libre — famille',       detail:'Repos mental · journée famille', type:'taf'});
-    blocs.push({h:'20h30',m:20*60+30, name:'Dîner',                 detail:'Riz · Patate douce · Protéine + libre', type:'nutri'});
-  } else {
-    // Jours muscu (lun/mar/mer/ven/sam)
-    var sw_detail = {
-      1: 'Street Push 40mn · Dips + Pompes + Corde 4×3mn',
-      2: 'Street Pull 40mn · Tractions + Australiennes + Sac 4×3mn',
-      3: 'Natation 1h',
-      5: 'Footing 5km — 30mn zone 2',
-      6: 'Pliométrie 20mn · Sprint 6×60m'
-    };
-    var sw_name = {
-      1: 'Street Push + Corde',
-      2: 'Street Pull + Sac',
-      3: 'Natation',
-      5: 'Footing 5km',
-      6: 'Sprint & Pliométrie'
-    };
-    blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:muscu_detail[d2]+' — 2h salle (marche inclinée incluse)', type:'muscu'});
-    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',                detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
-    blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'4h — taf, étapes, lumière naturelle', type:'taf'});
+    // Dimanche — Footing 10km récup
+    blocs.push({h:'10h30',m:10*60+30, name:'Footing 10km',     detail:'Allure zone 2 — conversation possible · ~55-60min', type:'sport'});
+    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',         detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
+    blocs.push({h:'14h00',m:14*60,    name:'Libre — famille',  detail:'Repos mental · journée famille', type:'taf'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner',            detail:'Riz · Patate douce · Protéine + libre', type:'nutri'});
+  } else if(d2===2){
+    // Mercredi — Lower + Corde & Sac
+    blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Lower — 2h salle (marche inclinée incluse)', type:'muscu'});
+    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
+    blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Récupération · taf · lumière naturelle', type:'taf'});
+    blocs.push({h:'17h30',m:17*60+30, name:'Corde à sauter',         detail:'15mn · allure modérée', type:'corde'});
+    blocs.push({h:'17h45',m:17*60+45, name:'Sac de frappe',          detail:'15mn · combinaisons libres', type:'sac'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
+  } else if(d2===0){
+    // Lundi — Push + Street Push soir
+    blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Push — 2h salle (marche inclinée incluse)', type:'muscu'});
+    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
+    blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Taf · étapes · lumière naturelle', type:'taf'});
     blocs.push({h:'18h00',m:18*60,    name:'En-cas pré-effort',       detail:'Banane 120g (si besoin)', type:'nutri'});
-    blocs.push({h:'18h30',m:18*60+30, name:(sw_name[d2]||'Street Cardio'), detail:(sw_detail[d2]||'Street WO 30mn'), type:(d2===2?'swim':'sport')});
-    blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',     detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
+    blocs.push({h:'18h30',m:18*60+30, name:'Street Push',            detail:'30mn · Dips + Pompes larges + Déclinées + Diamant', type:'sport'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
+  } else if(d2===1){
+    // Mardi — Pull + Street Pull soir
+    blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Pull — 2h salle (marche inclinée incluse)', type:'muscu'});
+    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
+    blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Taf · étapes · lumière naturelle', type:'taf'});
+    blocs.push({h:'18h00',m:18*60,    name:'En-cas pré-effort',       detail:'Banane 120g (si besoin)', type:'nutri'});
+    blocs.push({h:'18h30',m:18*60+30, name:'Street Pull',            detail:'30mn · Tractions + Australiennes + Isométrique', type:'sport'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
+  } else {
+    // Vendredi & Samedi — muscu uniquement
+    blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:muscu_detail[d2]+' — 2h salle (marche inclinée incluse)', type:'muscu'});
+    blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
+    blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Récupération · taf · lumière naturelle', type:'taf'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner',                  detail:'Riz · Patate douce · Protéine + libre', type:'nutri'});
   }
 
-  blocs.push({h:'22h30',m:22*60+30, name:'Routine soir',    detail:'', type:'soin'});
-  blocs.push({h:'22h45',m:22*60+45, name:'Lecture au lit',  detail:'Lumière tamisée — déconnexion', type:'sleep'});
-  blocs.push({h:'23h00',m:23*60,    name:'Dodo 💤',          detail:'Cible : 8h–9h · réveil 8h30', type:'sleep'});
+  blocs.push({h:'22h30',m:22*60+30, name:'Routine soir',   detail:'', type:'soin'});
+  blocs.push({h:'22h45',m:22*60+45, name:'Lecture au lit', detail:'Lumière tamisée — déconnexion', type:'sleep'});
+  blocs.push({h:'23h00',m:23*60,    name:'Dodo 💤',         detail:'Cible : 8h–9h · réveil 8h30', type:'sleep'});
 
   return blocs;
 }
@@ -997,14 +950,13 @@ function renderSleepHistory(){
 
 // ── SWITCH VIEW ──────────────────────────────────────────────────
 function switchView(v){
-  ['today','semaine','journal','objectifs','physique'].forEach(function(id){
+  ['semaine','journal','objectifs'].forEach(function(id){
     var el=document.getElementById('view-'+id);
     if(el) el.style.display = v===id?'block':'none';
   });
   document.querySelectorAll('.tab-btn').forEach(function(b,i){
-    b.classList.toggle('active',['today','semaine','journal','objectifs'][i]===v);
+    b.classList.toggle('active',['semaine','journal','objectifs'][i]===v);
   });
-  if(v==='today') loadDayStats();
   if(v==='semaine') renderSemaine();
   if(v==='objectifs') renderObjectifs();
   if(v==='journal'){
@@ -1028,8 +980,8 @@ function switchView(v){
     autoSaveNote();
     jCurrentDate = new Date(); jCurrentDate.setHours(0,0,0,0);
     loadJournal();
+    renderPhysiqueHistory();
   }
-  if(v==='physique') renderPhysiqueHistory();
 }
 
 // ── JOURNAL ──────────────────────────────────────────────────────
@@ -1503,39 +1455,33 @@ var PROG_MUSCU = {
 };
 
 var PROG_SW = {
-  1:{label:'Street Push',color:'#7B72E9',items:[
+  0:{label:'Street Push',color:'#7B72E9',items:[
     {ico:'🏋️',n:'Élévations latérales',d:'4×20 · 45s repos · haltères 2-4kg'},
-    {ico:'🤸',n:'Dips',d:'4×10 · 60s repos · barres parallèles tower'},
+    {ico:'🤸',n:'Dips',d:'4×10 · 60s repos · barres parallèles'},
     {ico:'💪',n:'Pompes larges',d:'4×8 · 60s repos'},
     {ico:'📐',n:'Pompes déclinées',d:'4×8 · 60s repos · pieds sur chaise'},
     {ico:'💎',n:'Pompes diamant',d:'4×8 · 60s repos · mains en triangle'},
-    {ico:'🪢',n:'Corde à sauter',d:'4×3min · 1min repos'},
   ]},
-  2:{label:'Street Pull',color:'#22C55E',items:[
+  1:{label:'Street Pull',color:'#22C55E',items:[
     {ico:'🔝',n:'Tractions pronation large',d:'4×6 · 90s repos'},
     {ico:'🔙',n:'Tractions supination serrée',d:'4×6 · 90s repos'},
     {ico:'📊',n:'Australiennes sur table',d:'4×6 · 90s repos'},
     {ico:'⏸️',n:'Isométrique mi-parcours',d:'4×10s · 60s repos'},
-    {ico:'🥊',n:'Sac de frappe',d:'4×3min · 1min repos'},
   ]},
-  3:{label:'Natation',color:'#60A5FA',items:[
-    {ico:'🏊',n:'Échauffement — 10min',d:'4×25m crawl tranquille (20s récup) · 2×25m dos crawlé (20s récup)'},
-    {ico:'💪',n:'Bloc principal — 35min',d:'Phase 1 (sem 1-3) : 6×50m crawl · 4×25m brasse coulée · 2×50m dos ≈ 800m\nPhase 2 (sem 4-6) : 8×50m crawl · 4×50m brasse coulée · 2×50m dos ≈ 1000m'},
-    {ico:'🌊',n:'Récupération active — 10min',d:'4×25m brasse coulée lente · 2×25m dos tranquille'},
-    {ico:'🧘',n:"Étirements dans l'eau — 5min",d:'Épaules · Hanches · Pectoraux contre le bord'},
+  2:{label:'Corde & Sac',color:'#F59E0B',items:[
+    {ico:'🪢',n:'Corde à sauter',d:'15mn continu ou intervalles · allure modérée'},
+    {ico:'🥊',n:'Sac de frappe',d:'15mn · combinaisons libres · récup active entre rounds'},
   ]},
-  4:{label:'Repos',color:'#555',items:[]},
-  5:{label:'Footing',color:'#34D399',items:[
-    {ico:'🏃',n:'Footing 5km',d:'30mn — allure confortable, zone 2'},
-  ]},
-  6:{label:'Sprint & Pliométrie',color:'#F97316',items:[
+  3:{label:'Sprint & Pliométrie',color:'#F97316',items:[
     {ico:'🔥',n:'Échauffement',d:'5min footing · Montées genoux 2×20m · Talons-fesses 2×20m · Fentes marchées 2×10 · Jambes tendues 2×20m · Accélérations 3×30m'},
     {ico:'⚡',n:'Pliométrie',d:'Squat jumps 3×8 · Frog jumps 3×6 · Bounding 3×20m · Lateral bounds 3×10'},
-    {ico:'💨',n:'Sprints',d:'6 sprints × 60m max · 3min récup marche (sem 1-3) → 8 sprints (sem 4-6)'},
+    {ico:'💨',n:'8 Sprints × 60m',d:'Effort maximal · 3min récup marche entre chaque'},
     {ico:'🧘',n:'Retour calme',d:'3min footing lent · Étirements ischio · quadri · mollets'},
   ]},
-  0:{label:'Footing',color:'#34D399',items:[
-    {ico:'🏃',n:'Footing — 1h',d:'Allure confortable, zone 2 — conversation possible\nSem 1-3 : 8km · Sem 4-6 : 10km'},
+  4:{label:'Chest/Back',color:'#EF4444',items:[]},
+  5:{label:'Shoulders/Arms',color:'#E879F9',items:[]},
+  6:{label:'Footing récupération',color:'#34D399',items:[
+    {ico:'🏃',n:'Footing 10km',d:'Allure zone 2 — conversation possible · ~55-60min'},
     {ico:'🧘',n:'Retour au calme — 5min',d:'Marche lente · Étirements ischio · quadriceps · mollets'},
   ]},
 };
