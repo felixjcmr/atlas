@@ -182,6 +182,14 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
 <!-- MODULES -->
 <div class="sec-title">Modules</div>
+<!-- BANNIERE SAUVEGARDE -->
+<div id="backup-banner" style="background:#0d1f17;border:0.5px solid #166534;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+  <div>
+    <div style="font-size:12px;font-weight:600;color:#22C55E;">💾 Sauvegarde</div>
+    <div style="font-size:10px;color:#444;margin-top:2px;" id="backup-date-lbl">Jamais sauvegardé</div>
+  </div>
+  <button onclick="exportDataNow()" style="background:#22C55E;color:#000;border:none;border-radius:10px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">⬇ Exporter</button>
+</div>
 <div class="modules">
 
   <div class="mod nutrition" style="cursor:default;">
@@ -634,7 +642,9 @@ function openApiModal(){
 }
 function closeApiModal(){document.getElementById('api-modal-overlay').style.display='none';}
 
-function exportData(){
+function exportData(){ exportDataNow(); }
+
+function exportDataNow(){
   const data={};
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
@@ -643,10 +653,26 @@ function exportData(){
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  const date=new Date().toISOString().slice(0,10);
+  const now=new Date();
+  const date=now.toISOString().slice(0,10);
   a.href=url;a.download='atlas-backup-'+date+'.json';
   a.click();URL.revokeObjectURL(url);
-  showToast('✓ Données exportées');
+  // Sauvegarder la date de dernière sauvegarde
+  localStorage.setItem('atlas_last_backup', now.toISOString());
+  updateBackupBanner();
+  showToast('✓ Données exportées — garde ce fichier précieusement !');
+}
+
+function updateBackupBanner(){
+  const lbl = document.getElementById('backup-date-lbl');
+  if(!lbl) return;
+  const last = localStorage.getItem('atlas_last_backup');
+  if(!last){ lbl.textContent = '⚠️ Jamais sauvegardé — exporte maintenant !'; lbl.style.color='#EF4444'; return; }
+  const d = new Date(last);
+  const diff = Math.floor((Date.now() - d) / 86400000);
+  if(diff === 0){ lbl.textContent = '✓ Sauvegardé auj.'; lbl.style.color='#22C55E'; }
+  else if(diff === 1){ lbl.textContent = 'Dernière sauvegarde : hier'; lbl.style.color='#F59E0B'; }
+  else { lbl.textContent = 'Dernière sauvegarde : il y a '+diff+' jours'; lbl.style.color = diff > 3 ? '#EF4444' : '#F59E0B'; }
 }
 
 function importData(e){
@@ -678,6 +704,7 @@ function saveApiKey(){
 
 </script>
 <script>
+updateBackupBanner();
 if("serviceWorker" in navigator){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("sw.js").then(function(reg){
