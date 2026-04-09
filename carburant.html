@@ -590,7 +590,27 @@ let manualOv    = {};   // overrides manuels de l'utilisateur
 let hiddenActsOpen = false; // section masquée ouverte?
 function EXTRAS_KEY(){return 'carb_'+TDK()+'_extras';}
 function loadExtras(){try{return JSON.parse(localStorage.getItem(EXTRAS_KEY())||'{}');}catch(e){return{};}}
-function saveExtras(ex){localStorage.setItem(EXTRAS_KEY(),JSON.stringify(ex));}
+function saveExtras(ex){
+  try {
+    localStorage.setItem(EXTRAS_KEY(),JSON.stringify(ex));
+    // Check localStorage usage ~5MB max iOS
+    let total=0;
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      total+=(localStorage.getItem(k)||'').length;
+    }
+    if(total>4000000){ // ~4MB — purge préventive
+      purgeOldSnaps();
+    }
+  } catch(e) {
+    if(e.name==='QuotaExceededError'){
+      purgeOldSnaps();
+      try{ localStorage.setItem(EXTRAS_KEY(),JSON.stringify(ex)); }catch(e2){
+        alert('Stockage plein. Exporte tes données depuis le Dashboard puis vide quelques anciennes entrées.');
+      }
+    }
+  }
+}
 const SWAP_KEY   = 'carb_swaps_perm';
 function HIDDEN_KEY(){return 'carb_'+TDK()+'_hidden';}
 const DEF_KEY    = 'carb_defaults_perm';
@@ -812,7 +832,7 @@ const DB={
   citron:       {k:0.29, g:0.090,p:0.010,l:0.003},
 
   // ── PROTÉINES ────────────────────────────────────────────────────────
-  poulet:       {k:1.65, g:0,    p:0.310,l:0.036},
+  poulet:       {k:1.10, g:0,    p:0.240,l:0.010},
   dinde:        {k:1.57, g:0,    p:0.290,l:0.040},
   boeuf_maigre: {k:1.50, g:0,    p:0.210,l:0.080},
   veau:         {k:1.47, g:0,    p:0.220,l:0.070},
@@ -2297,7 +2317,7 @@ function iMac(it,qty){const q=qty!==undefined?qty:(it.qty||0);if(it.id&&DB[it.id
 function sumM(arr){return arr.reduce((a,b)=>({k:a.k+b.k,g:a.g+b.g,p:a.p+b.p,l:a.l+b.l}),{k:0,g:0,p:0,l:0});}
 
 const REPAS_BASE=[
-  {ico:"🥚", name:"Petit-déjeuner",      time:"08h00", open:true},
+  {ico:"🥚", name:"Petit-déjeuner",      time:"08h00", open:false},
   {ico:"⚡",  name:"En-cas pré-training", time:"10h00", open:false},
   {ico:"🍽️", name:"Déjeuner",            time:"13h30", open:false},
   {ico:"🍌",  name:"En-cas pré-cardio",   time:"18h00", open:false},
@@ -2486,7 +2506,11 @@ function openRecipeBuilder(){
 }
 
 function closeRecipeBuilder(){
+  if(_builderItems.length > 0){
+    if(!confirm('Abandonner cette recette ? Les aliments ajoutés seront perdus.')) return;
+  }
   _builderMode = false;
+  _builderItems = [];
   document.getElementById('recipe-builder-overlay').classList.remove('open');
 }
 
@@ -2663,16 +2687,24 @@ function renderRecipeEdit(){
   };
 }
 
-function confirmApplyRecipe(){
+function confirmApplyRecipe(mode){
   if(_recipeTargetRi<0||_editRecipeIdx<0)return;
   const recipes=loadRecipes();
   const rec=recipes[_editRecipeIdx];
   if(!rec)return;
   const ri=_recipeTargetRi;
   const ex=loadExtras();
-  ex[ri]=rec.items.map(function(it,i){
-    return{id:it.id,n:it.n,qty:_editRecipeQties[i]||it.qty};
+  const newItems=rec.items.map(function(it,i){
+    return{id:it.id,n:it.n,qty:_editRecipeQties[i]!==undefined?_editRecipeQties[i]:it.qty};
   });
+  if(mode==='replace' && ex[ri] && ex[ri].length>0){
+    if(!confirm(ex[ri].length+' aliment(s) existant(s) seront effacés. Continuer ?')) return;
+    ex[ri]=newItems;
+  } else if(mode==='add' && ex[ri] && ex[ri].length>0){
+    ex[ri]=ex[ri].concat(newItems);
+  } else {
+    ex[ri]=newItems;
+  }
   saveExtras(ex);
   renderRepasAll();
   const auto=computeAuto();
@@ -2894,6 +2926,24 @@ function loadOv(){
 }
 
 // ── Snapshot pour dashboard ───────────────────────────────────────────────
+function purgeOldSnaps(){
+  // Supprimer les snaps de plus de 30 jours pour éviter de saturer le localStorage
+  try {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
+    const toDelete = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(!k||!k.startsWith('carb_'))continue;
+      const parts=k.split('_');
+      if(parts.length>=2){
+        const d=new Date(parts[1]);
+        if(!isNaN(d)&&d<cutoff) toDelete.push(k);
+      }
+    }
+    toDelete.forEach(k=>localStorage.removeItem(k));
+  } catch(e){}
+}
+
 function saveSnap(auto){
   if(false) return; // planQties no longer required
   const day=dayMac(); const dep=getDep();
@@ -3116,7 +3166,10 @@ function renderMicro(){
     return;
   }
   var dayK=dayMac().k;
-  var fibTarget=Math.max(25,Math.round(dayK/1000*15));
+  // Fibres calculées sur la DÉPENSE calorique cible, pas ce qui est tracké
+  var _snap=loadSnap();
+  var _depK=(_snap&&_snap.dep&&_snap.dep>0)?_snap.dep:(dayK>0?dayK:2500);
+  var fibTarget=Math.max(25,Math.round(_depK/1000*15));
   var totals={};
   Object.keys(AJR).forEach(function(k){totals[k]=0;});
   var _dow=curCarbDate.getDay();
@@ -3816,7 +3869,10 @@ document.addEventListener('click', function(e){
     </div>
     <div style="font-size:10px;color:#333;margin-bottom:10px;flex-shrink:0;">Ajuste les quantités avant d'appliquer</div>
     <div id="recipe-edit-items" style="overflow-y:auto;flex:1;"></div>
-    <button onclick="confirmApplyRecipe()" style="width:100%;padding:14px;background:#7B72E9;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;flex-shrink:0;">✓ Appliquer la recette</button>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;" id="recipe-apply-btns">
+      <button onclick="confirmApplyRecipe('replace')" style="flex:1;padding:14px;background:#7B72E9;color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;">↺ Remplacer</button>
+      <button onclick="confirmApplyRecipe('add')" style="flex:1;padding:14px;background:#0d1f17;border:0.5px solid #22C55E;color:#22C55E;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;">＋ Ajouter</button>
+    </div>
   </div>
 </div>
 

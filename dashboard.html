@@ -692,12 +692,20 @@ async function syncToGitHub(){
     if(res.ok){
       localStorage.setItem('atlas_last_backup', new Date().toISOString());
       updateBackupBanner();
-      document.getElementById('sync-status').textContent = '☁️ Sync GitHub OK — ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-      document.getElementById('sync-status').style.color = '#22C55E';
+      const el = document.getElementById('sync-status');
+      if(el){ el.textContent = '☁️ Sync OK — ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); el.style.color='#22C55E'; }
+    } else if(res.status === 401){
+      const el = document.getElementById('sync-status');
+      if(el){ el.textContent = '⚠️ Token expiré — reconfigure dans ⚙️ Config'; el.style.color='#EF4444'; }
+      localStorage.removeItem('atlas_gh_token'); // Effacer le token invalide
+      updateBackupBanner();
+    } else {
+      const el = document.getElementById('sync-status');
+      if(el){ el.textContent = '⚠️ Sync échouée ('+res.status+')'; el.style.color='#EF4444'; }
     }
   } catch(e) {
-    document.getElementById('sync-status').textContent = '⚠️ Sync échouée';
-    document.getElementById('sync-status').style.color = '#EF4444';
+    const el = document.getElementById('sync-status');
+    if(el){ el.textContent = '⚠️ Sync échouée — vérifie ta connexion'; el.style.color='#EF4444'; }
   }
 }
 
@@ -774,14 +782,23 @@ function exportDataNow(){
 
 function updateBackupBanner(){
   const lbl = document.getElementById('backup-date-lbl');
-  if(!lbl) return;
+  const banner = document.getElementById('backup-banner');
+  const hasToken = !!getGHToken();
   const last = localStorage.getItem('atlas_last_backup');
-  if(!last){ lbl.textContent = '⚠️ Jamais sauvegardé — exporte maintenant !'; lbl.style.color='#EF4444'; return; }
-  const d = new Date(last);
-  const diff = Math.floor((Date.now() - d) / 86400000);
-  if(diff === 0){ lbl.textContent = '✓ Sauvegardé auj.'; lbl.style.color='#22C55E'; }
-  else if(diff === 1){ lbl.textContent = 'Dernière sauvegarde : hier'; lbl.style.color='#F59E0B'; }
-  else { lbl.textContent = 'Dernière sauvegarde : il y a '+diff+' jours'; lbl.style.color = diff > 3 ? '#EF4444' : '#F59E0B'; }
+  if(lbl){
+    if(!last){ lbl.textContent = hasToken ? 'Sync en attente...' : '⚠️ Configure ton token pour activer'; lbl.style.color = hasToken ? '#555' : '#EF4444'; }
+    else {
+      const diff = Math.floor((Date.now() - new Date(last)) / 86400000);
+      if(diff === 0){ lbl.textContent = 'Sync active ✓'; lbl.style.color='#22C55E'; }
+      else if(diff === 1){ lbl.textContent = 'Dernière sync : hier'; lbl.style.color='#F59E0B'; }
+      else { lbl.textContent = 'Dernière sync : il y a '+diff+' jours'; lbl.style.color = diff > 3 ? '#EF4444' : '#F59E0B'; }
+    }
+  }
+  if(banner && last){
+    const diff = Math.floor((Date.now() - new Date(last)) / 86400000);
+    banner.style.padding = diff === 0 ? '6px 14px' : '12px 14px';
+    banner.style.opacity = diff === 0 ? '0.6' : '1';
+  }
 }
 
 function importData(e){

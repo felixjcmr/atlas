@@ -356,7 +356,36 @@ const STREET_WO = {
 // ── STORAGE ────────────────────────────────────────────────────
 function dk(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
 function keySeance(dateStr,seanceId){return 'train_'+dateStr+'_'+seanceId;}
-function saveSeance(dateStr,seanceId,data){localStorage.setItem(keySeance(dateStr,seanceId),JSON.stringify(data));}
+function purgeOldTrainSnaps(){
+  try{
+    const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-90);
+    const del=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(!k||!k.startsWith('train_'))continue;
+      const parts=k.split('_');
+      if(parts.length>=2){const d=new Date(parts[1]);if(!isNaN(d)&&d<cutoff)del.push(k);}
+    }
+    del.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
+
+function saveSeance(dateStr,seanceId,data){
+  try{
+    localStorage.setItem(keySeance(dateStr,seanceId),JSON.stringify(data));
+    // Vérif quota ~4MB
+    let total=0;
+    for(let i=0;i<localStorage.length;i++) total+=(localStorage.getItem(localStorage.key(i))||'').length;
+    if(total>4000000) purgeOldTrainSnaps();
+  }catch(e){
+    if(e.name==='QuotaExceededError'){
+      purgeOldTrainSnaps();
+      try{localStorage.setItem(keySeance(dateStr,seanceId),JSON.stringify(data));}catch(e2){
+        alert('Stockage plein. Va dans le Dashboard et exporte tes données.');
+      }
+    }
+  }
+}
 function loadSeance(dateStr,seanceId){try{return JSON.parse(localStorage.getItem(keySeance(dateStr,seanceId))||'null');}catch(e){return null;}}
 function loadNote(dateStr,seanceId,exoId){
   const d=loadSeance(dateStr,seanceId);
@@ -371,11 +400,18 @@ function loadSets(dateStr,seanceId,exoId){
 function getHistory(seanceId, exoId){
   const results=[];
   const today=new Date(); today.setHours(0,0,0,0);
-  for(let i=0;i<90;i++){
+  // Scan 365 jours pour capturer tous les PRs sur l'année
+  for(let i=0;i<365;i++){
     const d=new Date(today);d.setDate(d.getDate()-i);
     const data=loadSeance(dk(d),seanceId);
     if(data&&data[exoId]&&data[exoId].sets&&data[exoId].sets.length){
-      results.unshift({date:dk(d),sets:data[exoId].sets,drop:data[exoId].drop||null,note:data[exoId].note||''});
+      results.unshift({
+        date:dk(d),
+        sets:data[exoId].sets,
+        drop:data[exoId].drop||null,
+        drops:data[exoId].drops||null,
+        note:data[exoId].note||''
+      });
     }
   }
   return results;

@@ -711,7 +711,35 @@ function loadState(date){
   if(!s.gestes_quotidien||!s.gestes_quotidien.c) s.gestes_quotidien={c:true,v:100};
   return s;
 }
-function saveState(d,s){localStorage.setItem("gt5_"+dk(d),JSON.stringify(s));}
+function purgeOldGTSnaps(){
+  try{
+    const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-60);
+    const del=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(!k||!k.startsWith('gt5_'))continue;
+      // Keys like gt5_2024-01-15
+      const m=k.match(/gt5_(\d{4}-\d{2}-\d{2})/);
+      if(m){const d=new Date(m[1]);if(!isNaN(d)&&d<cutoff)del.push(k);}
+    }
+    del.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
+function saveState(d,s){
+  try{
+    localStorage.setItem("gt5_"+dk(d),JSON.stringify(s));
+    let total=0;
+    for(let i=0;i<localStorage.length;i++) total+=(localStorage.getItem(localStorage.key(i))||'').length;
+    if(total>4000000) purgeOldGTSnaps();
+  }catch(e){
+    if(e.name==='QuotaExceededError'){
+      purgeOldGTSnaps();
+      try{localStorage.setItem("gt5_"+dk(d),JSON.stringify(s));}catch(e2){
+        alert('Stockage plein. Va dans le Dashboard et exporte tes données.');
+      }
+    }
+  }
+}
 function hasData(d){return!!localStorage.getItem("gt5_dep_"+dk(d));}
 function loadCustom(d){
   try{const r=localStorage.getItem("gt5_custom_"+dk(d));return r?JSON.parse(r):{name:"",kcal:0,active:false};}
@@ -874,7 +902,9 @@ function openDay(){
   if(_addBtn)_addBtn.textContent="− Réduire";
   const existingW=localStorage.getItem("gt5_w_"+dk(curDate));
   const wInp=document.getElementById("w-input");if(wInp)wInp.value=existingW?parseFloat(existingW).toString().replace(".",","):"";
-  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display=existingW?"block":"none";
+  // Montrer "Voir la courbe" si au moins une entrée poids dans l'historique
+  const _hasAnyW = Object.keys(localStorage).some(k=>k.startsWith("gt5_w_"));
+  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display=_hasAnyW?"block":"none";
   const delBtn=document.getElementById("w-del-btn");if(delBtn)delBtn.style.display=existingW?"block":"none";
   updateWeightSaveStatus();
   // #14 — restaurer position scroll
@@ -1197,7 +1227,9 @@ function deleteWeight(){
   localStorage.removeItem("gt5_w_"+dk(curDate)); invalidateBMRCache();
   const inp=document.getElementById("w-input");if(inp)inp.value="";
   renderWeightHist();updateWeightSummaryCard();updateWeightSaveStatus();
-  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display="none";
+  // Re-check si d'autres entrées existent encore
+  const _anyW=Object.keys(localStorage).some(k=>k.startsWith("gt5_w_"));
+  const lnk=document.getElementById("w-link");if(lnk)lnk.style.display=_anyW?"block":"none";
   if(document.getElementById("view-weight").classList.contains("active"))renderWeightFull();
   renderCal();
 }
