@@ -244,13 +244,13 @@ button,input,textarea{font-family:inherit;}
 <script>
 // ── PROGRAMME ──────────────────────────────────────────────────
 const SEANCES = {
-  0: {id:'footing',       label:'Footing',          color:'#34D399', emoji:'🏃'},
-  1: {id:'push',         label:'Push',             color:'#7B72E9', emoji:'💪'},
-  2: {id:'pull',         label:'Pull',             color:'#22C55E', emoji:'🔗'},
-  3: {id:'lower',        label:'Lower',            color:'#F59E0B', emoji:'🦵'},
-  4: {id:'repos',        label:'Repos',            color:'#555',    emoji:'😴'},
-  5: {id:'chestback',    label:'Chest / Back',     color:'#EF4444', emoji:'🔥'},
-  6: {id:'shoulderarms', label:'Shoulders / Arms', color:'#E879F9', emoji:'⚡'},
+  0: {id:'footing',       label:'Footing',          color:'#34D399', emoji:'🏃'},  // Dimanche
+  1: {id:'chestback',     label:'Chest / Back',     color:'#EF4444', emoji:'🔥'},  // Lundi
+  2: {id:'shoulderarms',  label:'Shoulders / Arms', color:'#E879F9', emoji:'⚡'},  // Mardi
+  3: {id:'lower',         label:'Lower',            color:'#F59E0B', emoji:'🦵'},  // Mercredi
+  4: {id:'push',          label:'Push',             color:'#7B72E9', emoji:'💪'},  // Jeudi
+  5: {id:'pull',          label:'Pull',             color:'#22C55E', emoji:'🔗'},  // Vendredi
+  6: {id:'sprint',        label:'Sprint & Plio',    color:'#555',    emoji:'💨'},  // Samedi
 };
 
 const PROGRAM = {
@@ -306,7 +306,24 @@ const PROGRAM = {
 
 
 const STREET_WO = {
-  1: { // Lundi — Street Push
+  // clés = getDay() : 0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam
+  0: { // Dimanche — Footing
+    type: 'footing',
+    items: [
+      {ico:'🏃', name:'Footing — 10km', detail:'Allure confortable, zone 2 — conversation possible\nSem 1-3 : 8km · Sem 4-6 : 10km'},
+      {ico:'🧘', name:'Retour au calme — 5min', detail:'Marche lente · Étirements ischio · quadriceps · mollets'},
+    ]
+  },
+  1: null, // Lundi — Chest/Back (pas de street)
+  2: null, // Mardi — Shoulders/Arms (pas de street)
+  3: { // Mercredi — Corde + Sac
+    type: 'corde_sac',
+    items: [
+      {ico:'🪢', name:'Corde à sauter — 15min', detail:'4×3min · 1min repos · rythme modéré'},
+      {ico:'🥊', name:'Sac de frappe — 15min', detail:'4×3min · 1min repos · combos libres'},
+    ]
+  },
+  4: { // Jeudi — Street Push (après Push gym)
     type: 'street_push',
     items: [
       {ico:'🏋️', name:'Élévations latérales', detail:'4×20 · 45s repos · haltères 2-4kg'},
@@ -316,7 +333,7 @@ const STREET_WO = {
       {ico:'💎', name:'Pompes diamant', detail:'4×8 · 60s repos · mains en triangle'},
     ]
   },
-  2: { // Mardi — Street Pull
+  5: { // Vendredi — Street Pull (après Pull gym)
     type: 'street_pull',
     items: [
       {ico:'🔝', name:'Tractions pronation large', detail:'4×6 · 90s repos'},
@@ -325,32 +342,13 @@ const STREET_WO = {
       {ico:'⏸️', name:'Isométrique mi-parcours', detail:'4×10s maintien · 60s repos'},
     ]
   },
-  3: { // Mercredi — Corde + Sac
-    type: 'corde_sac',
-    items: [
-      {ico:'🪢', name:'Corde à sauter — 15min', detail:'4×3min · 1min repos · rythme modéré'},
-      {ico:'🥊', name:'Sac de frappe — 15min', detail:'4×3min · 1min repos · combos libres'},
-    ]
-  },
-  4: { // Jeudi — Sprint & Pliométrie
+  6: { // Samedi — Sprint & Pliométrie
     type: 'sprint',
     items: [
       {ico:'🔥', name:'Échauffement — 10min', detail:'5min footing léger\nMontées de genoux 2×20m · Talons-fesses 2×20m\nFentes marchées 2×10 pas · Jambes tendues 2×20m\nAccélérations progressives 3×30m à 60/75/90%'},
       {ico:'⚡', name:'Pliométrie — 20min', detail:'Squat jumps 3×8 (45s récup)\nFrog jumps 3×6 (45s récup)\nBounding 3×20m (45s récup)\nLateral bounds 3×10 (45s récup)'},
       {ico:'💨', name:'Sprints — 30min', detail:'8 sprints × 60m intensité maximale · 3min récup marche active entre chaque'},
       {ico:'🧘', name:'Retour au calme — 5min', detail:'3min footing très lent\nÉtirements statiques : ischio · quadriceps · mollets'},
-    ]
-  },
-  5: { // Vendredi — Chest/Back (gym seulement)
-    type:'footing',
-    items: []
-  },
-  6: null, // Samedi — Shoulders/Arms (gym seulement, pas de street)
-  0: { // Dimanche — Footing
-    type: 'footing',
-    items: [
-      {ico:'🏃', name:'Footing — 1h', detail:'Allure confortable, zone 2 — conversation possible\nSem 1-3 : 8km · Sem 4-6 : 10km'},
-      {ico:'🧘', name:'Retour au calme — 5min', detail:'Marche lente · Étirements ischio · quadriceps · mollets'},
     ]
   },
 };
@@ -582,7 +580,7 @@ function renderPicker(){
   const nativeBtn=_isNonMuscu?`<button class="sp-btn ${curSeanceId===_nativeSid?'active':''}" onclick="switchSeance('${_nativeSid}')" style="order:-1;">${_nativeLabel}</button>`:'';
   // Bouton Natation supplémentaire le mercredi (Lower + Natation soir)
   const _isWed=_dayDate.getDay()===3;
-  const nataBtn=_isWed?`<button class="sp-btn ${curSeanceId==='natation'?'active':''}" onclick="switchSeance('natation')" style="order:-1;">🏊 Natation</button>`:'';
+  const nataBtn='';
   picker.innerHTML=nataBtn+nativeBtn+seances.map(s=>
     `<button class="sp-btn ${curSeanceId===s.id?'active':''}" onclick="switchSeance('${s.id}')">${s.label}</button>`
   ).join('')+(dayHasMuscu?'':'<span style="font-size:10px;color:#252525;margin-left:8px;">Pas de muscu</span>');

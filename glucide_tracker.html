@@ -568,18 +568,20 @@ const ACTS=[
   {id:"muscu",       name:"Musculation",          unit:"mn",   kpu:8.33, def:90, dot:"purple", group:"seance"},
   {id:"marche_incl", name:"Marche inclinée 15%",  unit:"mn",   kpu:9,    def:20, dot:"orange", group:"seance"},
   {id:"sport_collect",name:"Sport collectif",     unit:"mn",   kpu:6.67, def:60, dot:"green",  group:"seance"},
-  {id:"steps_neat",  name:"Steps NEAT total",     unit:"k pas",kpu:45,   def:6,  dot:"gray",   group:"seance"},
-  {id:"gestes_quotidien", name:"Gestes quotidiens", unit:"kcal", kpu:1, def:100, dot:"#9CA3AF", group:"autre"},
+  {id:"steps_neat",  name:"Steps NEAT total",     unit:"k pas",kpu:45,   def:12, dot:"gray",   group:"seance"},
+  {id:"gestes_quotidien", name:"Gestes quotidiens", unit:"kcal", kpu:1, def:200, dot:"#9CA3AF", group:"autre"},
 ];
 
 const PRESETS=[
-  {name:"Push",            acts:{mobility:{c:1,v:20},street:{c:1,v:30},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
-  {name:"Pull",            acts:{mobility:{c:1,v:20},street:{c:1,v:30},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
-  {name:"Lower",           acts:{mobility:{c:1,v:20},corde:{c:1,v:15},sac:{c:1,v:15},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
-  {name:"Sprint",          acts:{mobility:{c:1,v:20},plio:{c:1,v:20},sprint:{c:1,v:30},walkstep:{c:1,v:1},steps_neat:{c:1,v:8},gestes_quotidien:{c:1,v:100}}},
-  {name:"Chest / Back",   acts:{mobility:{c:1,v:20},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
-  {name:"Shoulders / Arms",acts:{mobility:{c:1,v:20},muscu:{c:1,v:90},marche_incl:{c:1,v:20},walkstep:{c:1,v:1},steps_neat:{c:1,v:6},gestes_quotidien:{c:1,v:100}}},
-  {name:"Footing",         acts:{mobility:{c:1,v:20},footing:{c:1,v:10},walkstep:{c:1,v:1},steps_neat:{c:1,v:10},gestes_quotidien:{c:1,v:100}}},
+  // 0=Lundi=Chest/Back, 1=Mardi=Shoulders/Arms, 2=Mercredi=Lower
+  // 3=Jeudi=Push, 4=Vendredi=Pull, 5=Samedi=Sprint, 6=Dimanche=Footing
+  {name:"Chest / Back",    acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Shoulders / Arms",acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Lower",           acts:{muscu:{c:1,v:90},corde:{c:1,v:15},sac:{c:1,v:15},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Push",            acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},street:{c:1,v:30},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Pull",            acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},street:{c:1,v:30},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Sprint",          acts:{plio:{c:1,v:20},sprint:{c:1,v:30},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Footing",         acts:{footing:{c:1,v:10},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
 ];
 
 // UTILS
@@ -604,6 +606,16 @@ function getActDef(a){var d=loadDefaults();return d[a.id]!=null?d[a.id]:a.def;}
 
 // ── DÉFAUTS PAR PRESET ──────────────────────────────────────────
 function loadPresetDefaults(){try{return JSON.parse(localStorage.getItem('gt5_preset_defs_v2')||'{}');}catch(e){return{};}}
+
+// Reset preset defaults if program changed — force re-apply new values
+(function(){
+  var knownNames = PRESETS.map(function(p){return p.name;}).join(',');
+  var stored = localStorage.getItem('gt5_preset_program_sig');
+  if(stored !== knownNames){
+    localStorage.removeItem('gt5_preset_defs_v2');
+    localStorage.setItem('gt5_preset_program_sig', knownNames);
+  }
+})();
 function savePresetDefaults(obj){localStorage.setItem('gt5_preset_defs_v2',JSON.stringify(obj));}
 
 function getCurrentPresetName(date){

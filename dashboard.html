@@ -183,12 +183,20 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 <!-- MODULES -->
 <div class="sec-title">Modules</div>
 <!-- BANNIERE SAUVEGARDE -->
-<div id="backup-banner" style="background:#0d1f17;border:0.5px solid #166534;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-  <div>
-    <div style="font-size:12px;font-weight:600;color:#22C55E;">💾 Sauvegarde</div>
-    <div style="font-size:10px;color:#444;margin-top:2px;" id="backup-date-lbl">Jamais sauvegardé</div>
+<div id="backup-banner" style="background:#0d1f17;border:0.5px solid #166534;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:#22C55E;">☁️ Sauvegarde automatique</div>
+      <div style="font-size:10px;color:#444;margin-top:2px;" id="backup-date-lbl">Jamais sauvegardé</div>
+    </div>
+    <button onclick="openGHModal()" style="background:#7B72E9;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">⚙️ Config</button>
   </div>
-  <button onclick="exportDataNow()" style="background:#22C55E;color:#000;border:none;border-radius:10px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">⬇ Exporter</button>
+  <div id="sync-status" style="font-size:10px;color:#444;margin-bottom:8px;">Configure ton token GitHub pour activer la sync automatique</div>
+  <div style="display:flex;gap:8px;">
+    <button onclick="syncToGitHub()" style="flex:1;padding:8px;background:#0a1a0a;border:0.5px solid #22C55E;border-radius:8px;color:#22C55E;font-size:11px;font-weight:600;cursor:pointer;">☁️ Sync maintenant</button>
+    <button onclick="restoreFromGitHub()" style="flex:1;padding:8px;background:#0a0a1a;border:0.5px solid #7B72E9;border-radius:8px;color:#7B72E9;font-size:11px;font-weight:600;cursor:pointer;">↩ Restaurer</button>
+    <button onclick="exportDataNow()" style="flex:1;padding:8px;background:#111;border:0.5px solid #333;border-radius:8px;color:#888;font-size:11px;cursor:pointer;">⬇ Export</button>
+  </div>
 </div>
 <div class="modules">
 
@@ -642,6 +650,107 @@ function openApiModal(){
 }
 function closeApiModal(){document.getElementById('api-modal-overlay').style.display='none';}
 
+
+// ── GITHUB SYNC ──────────────────────────────────────────────────────────────
+function getGHToken(){ return localStorage.getItem('atlas_gh_token')||''; }
+function getGHRepo(){ return 'felixjcmr/atlas'; }
+var _syncTimer = null;
+
+// Auto-sync toutes les 30s si token présent + à chaque changement majeur
+function scheduleSync(){
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(syncToGitHub, 5000); // 5s après la dernière modif
+}
+
+async function syncToGitHub(){
+  const token = getGHToken();
+  if(!token) return;
+  try {
+    // Collecter toutes les données localStorage
+    const data = {};
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k === 'atlas_gh_token') continue; // Ne pas sauvegarder le token lui-même
+      data[k] = localStorage.getItem(k);
+    }
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    // Récupérer le SHA actuel du fichier si il existe
+    let sha = '';
+    try {
+      const r = await fetch('https://api.github.com/repos/'+getGHRepo()+'/contents/atlas-data.json',
+        { headers: { 'Authorization': 'token '+token, 'Accept': 'application/vnd.github.v3+json' }});
+      if(r.ok){ const j = await r.json(); sha = j.sha || ''; }
+    } catch(e){}
+    // Écrire le fichier
+    const body = { message: 'Atlas auto-sync '+new Date().toISOString(), content: content };
+    if(sha) body.sha = sha;
+    const res = await fetch('https://api.github.com/repos/'+getGHRepo()+'/contents/atlas-data.json', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token '+token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify(body)
+    });
+    if(res.ok){
+      localStorage.setItem('atlas_last_backup', new Date().toISOString());
+      updateBackupBanner();
+      document.getElementById('sync-status').textContent = '☁️ Sync GitHub OK — ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      document.getElementById('sync-status').style.color = '#22C55E';
+    }
+  } catch(e) {
+    document.getElementById('sync-status').textContent = '⚠️ Sync échouée';
+    document.getElementById('sync-status').style.color = '#EF4444';
+  }
+}
+
+async function restoreFromGitHub(){
+  const token = getGHToken();
+  if(!token){ alert('Configure ton token GitHub dabord.'); return; }
+  try {
+    document.getElementById('sync-status').textContent = '⏳ Restauration en cours...';
+    const r = await fetch('https://api.github.com/repos/'+getGHRepo()+'/contents/atlas-data.json',
+      { headers: { 'Authorization': 'token '+token, 'Accept': 'application/vnd.github.v3+json' }});
+    if(!r.ok){ document.getElementById('sync-status').textContent = '❌ Aucune sauvegarde trouvée'; return; }
+    const j = await r.json();
+    const data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
+    if(!confirm('Restaurer toutes tes données depuis GitHub ?')) return;
+    Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+    document.getElementById('sync-status').textContent = '✅ Restauré !';
+    setTimeout(() => location.reload(), 1200);
+  } catch(e) {
+    document.getElementById('sync-status').textContent = '❌ Erreur restauration';
+  }
+}
+
+function saveGHToken(){
+  const t = document.getElementById('gh-token-input').value.trim();
+  if(!t){ alert('Entre ton token GitHub.'); return; }
+  localStorage.setItem('atlas_gh_token', t);
+  document.getElementById('gh-token-status').textContent = '✓ Token enregistré — sync active';
+  document.getElementById('gh-token-status').style.color = '#22C55E';
+  syncToGitHub(); // Sync immédiate
+  setTimeout(closeGHModal, 1500);
+}
+
+function openGHModal(){
+  const t = getGHToken();
+  document.getElementById('gh-token-input').value = t || '';
+  document.getElementById('gh-token-status').textContent = t ? '✓ Token configuré' : 'Aucun token';
+  document.getElementById('gh-token-status').style.color = t ? '#22C55E' : '#555';
+  document.getElementById('gh-modal').style.display = 'flex';
+}
+function closeGHModal(){
+  document.getElementById('gh-modal').style.display = 'none';
+}
+
+// Intercepter localStorage pour auto-sync sur chaque write important
+const _origSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value){
+  _origSetItem(key, value);
+  // Déclencher sync sur les clés importantes (pas les clés temporaires)
+  if(key && !key.includes('_tmp') && !key.includes('atlas_last_backup') && getGHToken()){
+    scheduleSync();
+  }
+};
+
 function exportData(){ exportDataNow(); }
 
 function exportDataNow(){
@@ -705,6 +814,8 @@ function saveApiKey(){
 </script>
 <script>
 updateBackupBanner();
+// Auto-sync au démarrage si token présent
+if(getGHToken()) setTimeout(syncToGitHub, 3000);
 if("serviceWorker" in navigator){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("sw.js").then(function(reg){
@@ -713,5 +824,23 @@ if("serviceWorker" in navigator){
   });
 }
 </script>
+
+<!-- ── MODAL GITHUB TOKEN ──────────────────────────────────────── -->
+<div id="gh-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeGHModal()">
+  <div style="background:#111;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:24px 20px 36px;border-top:0.5px solid #2a2a2a;">
+    <div style="font-size:14px;font-weight:700;color:#e8e8e8;margin-bottom:4px;">☁️ Sync GitHub</div>
+    <div style="font-size:11px;color:#555;margin-bottom:16px;">Tes données sont sauvegardées automatiquement dans ton repo GitHub. Même si tu supprimes l'app, tout est récupérable.</div>
+    <div style="font-size:11px;color:#7B72E9;margin-bottom:8px;font-weight:600;">Comment obtenir ton token :</div>
+    <div style="font-size:10px;color:#444;margin-bottom:14px;line-height:1.6;">github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token → coche "repo" → Copie le token</div>
+    <input id="gh-token-input" type="password" placeholder="ghp_xxxxxxxxxxxx"
+      style="width:100%;box-sizing:border-box;background:#0d0d0d;border:0.5px solid #2a2a2a;border-radius:10px;color:#e8e8e8;font-size:12px;padding:12px 14px;font-family:monospace;outline:none;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button onclick="saveGHToken()" style="flex:1;padding:13px;background:#7B72E9;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Enregistrer</button>
+      <button onclick="restoreFromGitHub()" style="flex:1;padding:13px;background:#0d1f17;border:0.5px solid #166534;border-radius:10px;color:#22C55E;font-size:13px;font-weight:600;cursor:pointer;">↩ Restaurer</button>
+    </div>
+    <div id="gh-token-status" style="font-size:11px;text-align:center;color:#555;min-height:16px;"></div>
+  </div>
+</div>
+
 </body>
 </html>

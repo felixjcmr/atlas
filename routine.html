@@ -531,88 +531,18 @@ function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 
 var JOURS   = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 var SFR     = ['L','M','M','J','V','S','D'];
-var SEANCES = ['Push','Pull','Lower','Sprint & Plio','Chest / Back','Shoulders / Arms','Footing'];
-var SEANCE_COL = ['#7B72E9','#22C55E','#F59E0B','#555','#EF4444','#E879F9','#34D399'];
+var SEANCES = ['Chest / Back','Shoulders / Arms','Lower','Push','Pull','Sprint & Plio','Footing'];
+var SEANCE_COL = ['#EF4444','#E879F9','#F59E0B','#7B72E9','#22C55E','#555','#34D399'];
 
 // ── DONNÉES SEMAINE COMPLÈTE ─────────────────────────────────────
 var WEEK = {
-  0: { // Lundi - Push
-    matin:[
-      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
-      {n:'Step', dur:'1h+', type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
-    ],
-    aprem:[
-      {n:'Libre',       dur:'',     type:'taf'},
-      {n:'Street Push', dur:'30mn', type:'sport'},
-    ], steps:true
-  },
-  1: { // Mardi - Pull
-    matin:[
-      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
-      {n:'Step', dur:'1h+', type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
-    ],
-    aprem:[
-      {n:'Libre',       dur:'',     type:'taf'},
-      {n:'Street Pull', dur:'30mn', type:'sport'},
-    ], steps:true
-  },
-  2: { // Mercredi - Lower
-    matin:[
-      {n:'Mobilité',  dur:'20mn',  type:'mobi'},
-      {n:'Step', dur:'1h+', type:'step'},
-      {n:'Gym',       dur:'90mn',  type:'muscu'},
-    ],
-    aprem:[
-      {n:'Libre',         dur:'',     type:'taf'},
-      {n:'Corde',         dur:'15mn', type:'corde'},
-      {n:'Sac de frappe', dur:'15mn', type:'sac'},
-    ], steps:true
-  },
-  3: { // Jeudi - Sprint & Plio
-    matin:[
-      {n:'Mobilité',  dur:'20mn', type:'mobi'},
-      {n:'Step', dur:'1h+', type:'step'},
-    ],
-    aprem:[
-      {n:'Libre',       dur:'',     type:'taf'},
-      {n:'Pliométrie',  dur:'20mn', type:'plio'},
-      {n:'Sprint',      dur:'30mn', type:'sprint'},
-    ], steps:true
-  },
-  4: { // Vendredi - Chest/Back
-    matin:[
-      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
-      {n:'Step', dur:'1h+', type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
-    ],
-    aprem:[
-      {n:'Libre', dur:'',  type:'taf'},
-      {n:'Step', dur:'1h+', type:'step'},
-    ], steps:true
-  },
-  5: { // Samedi - Shoulders/Arms
-    matin:[
-      {n:'Mobilité',              dur:'20mn',           type:'mobi'},
-      {n:'Step', dur:'1h+', type:'step'},
-      {n:'Gym + Marche inclinée', dur:'90mn + 20mn',   type:'muscu'},
-    ],
-    aprem:[
-      {n:'Libre', dur:'',  type:'taf'},
-      {n:'Step', dur:'1h+', type:'step'},
-    ], steps:true
-  },
-  6: { // Dimanche - Footing récup
-    matin:[
-      {n:'Mobilité', dur:'20mn', type:'mobi'},
-      {n:'Footing',  dur:'10km', type:'sport'},
-    ],
-    aprem:[
-      {n:'Libre — famille', dur:'',  type:'taf'},
-      {n:'Step',            dur:'1h+', type:'step'},
-    ], steps:false
-  }
+  0: { seances:[{n:'Chest / Back',    dur:'90mn + 20mn marche', type:'muscu'}], steps:12 },
+  1: { seances:[{n:'Shoulders / Arms',dur:'90mn + 20mn marche', type:'muscu'}], steps:12 },
+  2: { seances:[{n:'Lower',           dur:'90mn',               type:'muscu'}, {n:'Corde + Sac',dur:'2×15mn',type:'corde'}], steps:12 },
+  3: { seances:[{n:'Push',            dur:'90mn + 20mn marche', type:'muscu'}, {n:'Street Push', dur:'30mn',type:'sport'}], steps:12 },
+  4: { seances:[{n:'Pull',            dur:'90mn + 20mn marche', type:'muscu'}, {n:'Street Pull', dur:'30mn',type:'sport'}], steps:12 },
+  5: { seances:[{n:'Sprint & Plio',   dur:'1h',                 type:'sprint'}], steps:12 },
+  6: { seances:[{n:'Footing 10km',    dur:'zone 2',             type:'sport'}], steps:12 },
 };
 
 
@@ -640,7 +570,7 @@ var COL = {
 function toMin(h,m){return h*60+(m||0);}
 
 function getTimelineBlocs(d2){
-  var muscu_detail = ['Footing','Push','Pull','Lower','Sprint/Plio','Chest/Back','Shoulders/Arms'];
+  var muscu_detail = ['Chest/Back','Shoulders/Arms','Lower','Push','Pull','Sprint/Plio','Footing'];
   var blocs = [];
 
   // ─ MATIN commun ─
@@ -649,8 +579,8 @@ function getTimelineBlocs(d2){
   blocs.push({h:'9h00', m:9*60,    name:'Step / Marche', detail:'1h — marche, activation, lumière naturelle', type:'step'});
   blocs.push({h:'10h00',m:10*60,   name:'En-cas pré-training', detail:'Fromage blanc 250g · 2 bananes · graines grenade', type:'nutri'});
 
-  if(d2===3){
-    // Jeudi — Sprint & Pliométrie
+  if(d2===5){
+    // Samedi — Sprint & Pliométrie
     blocs.push({h:'10h30',m:10*60+30, name:'Libre',            detail:'Récupération active · taf · sortie', type:'taf'});
     blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',         detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
     blocs.push({h:'15h00',m:15*60,    name:'Échauffement',     detail:'5min footing · éducatifs athlétisme', type:'sport'});
@@ -672,16 +602,16 @@ function getTimelineBlocs(d2){
     blocs.push({h:'17h30',m:17*60+30, name:'Corde à sauter',         detail:'15mn · allure modérée', type:'corde'});
     blocs.push({h:'17h45',m:17*60+45, name:'Sac de frappe',          detail:'15mn · combinaisons libres', type:'sac'});
     blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
-  } else if(d2===0){
-    // Lundi — Push + Street Push soir
+  } else if(d2===3){
+    // Jeudi — Push + Street Push soir
     blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Push — 2h salle (marche inclinée incluse)', type:'muscu'});
     blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
     blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Taf · étapes · lumière naturelle', type:'taf'});
     blocs.push({h:'18h00',m:18*60,    name:'En-cas pré-effort',       detail:'Banane 120g (si besoin)', type:'nutri'});
     blocs.push({h:'18h30',m:18*60+30, name:'Street Push',            detail:'30mn · Dips + Pompes larges + Déclinées + Diamant', type:'sport'});
     blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
-  } else if(d2===1){
-    // Mardi — Pull + Street Pull soir
+  } else if(d2===4){
+    // Vendredi — Pull + Street Pull soir
     blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Pull — 2h salle (marche inclinée incluse)', type:'muscu'});
     blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
     blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Taf · étapes · lumière naturelle', type:'taf'});
@@ -689,7 +619,7 @@ function getTimelineBlocs(d2){
     blocs.push({h:'18h30',m:18*60+30, name:'Street Pull',            detail:'30mn · Tractions + Australiennes + Isométrique', type:'sport'});
     blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
   } else {
-    // Vendredi & Samedi — muscu uniquement
+    // Lundi (Chest/Back) & Mardi (Shoulders/Arms) — muscu uniquement
     blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:muscu_detail[d2]+' — 2h salle (marche inclinée incluse)', type:'muscu'});
     blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
     blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Récupération · taf · lumière naturelle', type:'taf'});
@@ -764,27 +694,15 @@ function renderSemaine(){
     html += '<div class="jour-col-hdr">';
     html += '<div class="jour-col-name">'+JOURS[d2]+'</div>';
     var _dispSeance=_wkCustom[d2]||SEANCES[d2];
-    var _dispCol=typeof _dispSeance==='object'?_dispSeance.color:SEANCE_COL[d2];
     var _dispLbl=typeof _dispSeance==='object'?_dispSeance.label:_dispSeance;
     html += '<div class="jour-col-type" style="color:'+SEANCE_COL[d2]+';cursor:pointer;">'+_dispLbl+'</div>';
     html += '</div><div class="jour-col-body">';
-    if(w.matin.length>0){
-      html += '<div class="jour-section">Matin</div>';
-      w.matin.forEach(function(b){
-        var c=COL[b.type]||COL.walk;
-        html += '<div class="bloc-pill '+c.tag+'">'+b.n+(b.dur?' <span style="opacity:0.7">'+b.dur+'</span>':'')+'</div>';
-      });
-    }
-    if(w.aprem.length>0){
-      html += '<div class="jour-section">Après-midi</div>';
-      w.aprem.forEach(function(b){
-        var c=COL[b.type]||COL.walk;
-        html += '<div class="bloc-pill '+c.tag+'">'+b.n+(b.dur?' <span style="opacity:0.7">'+b.dur+'</span>':'')+'</div>';
-      });
-    }
-    if(w.steps){
-      html += '<div class="steps-row"><div class="steps-lbl" style="font-size:8px;color:#444;margin-top:4px;">↑ Rester actif · ~3k steps supplémentaires</div></div>';
-    }
+    w.seances.forEach(function(b){
+      var c=COL[b.type]||COL.walk;
+      html += '<div class="bloc-pill '+c.tag+'">'+b.n+(b.dur?' <span style="opacity:0.7;font-size:9px;"> · '+b.dur+'</span>':'')+'</div>';
+    });
+    var stepsK = w.steps||12;
+    html += '<div style="font-size:8px;color:#555;margin-top:5px;padding:3px 0;">👟 '+stepsK+'k steps min</div>';
     html += '</div></div>';
   }
   document.getElementById('semaine-grid').innerHTML = html;
@@ -1391,9 +1309,9 @@ var _PROGRAM_MUSCU = {
   ],
 };
 
-var _SEANCE_MAP = {1:'push',2:'pull',3:'lower',5:'chestback',6:'shoulderarms'};
-var _SEANCE_COLORS = {1:'#7B72E9',2:'#22C55E',3:'#F59E0B',5:'#EF4444',6:'#E879F9'};
-var _SEANCE_LABELS = {1:'Push',2:'Pull',3:'Lower + Lat. Raises',5:'Chest / Back',6:'Shoulders / Arms'};
+var _SEANCE_MAP = {0:'footing',1:'chestback',2:'shoulderarms',3:'lower',4:'push',5:'pull'}; // 6=Sam=Sprint (pas de muscu)
+var _SEANCE_COLORS = {0:'#34D399',1:'#EF4444',2:'#E879F9',3:'#F59E0B',4:'#7B72E9',5:'#22C55E',6:'#555'};
+var _SEANCE_LABELS = {0:'Footing',1:'Chest / Back',2:'Shoulders / Arms',3:'Lower',4:'Push',5:'Pull',6:'Sprint & Plio'};
 
 function _getKgRefSync(exoId, fallback){
   try{var r=JSON.parse(localStorage.getItem('train_kgRefs')||'{}');return r[exoId]!==undefined?r[exoId]:fallback;}catch(e){return fallback;}
@@ -1455,34 +1373,35 @@ var PROG_MUSCU = {
 };
 
 var PROG_SW = {
-  0:{label:'Street Push',color:'#7B72E9',items:[
+  // clés = getDay() : 0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam
+  0:{label:'Footing récupération',color:'#34D399',items:[
+    {ico:'🏃',n:'Footing 10km',d:'Allure zone 2 — conversation possible · ~55-60min'},
+    {ico:'🧘',n:'Retour au calme',d:'Marche lente · Étirements ischio · quadriceps · mollets'},
+  ]},
+  1:{label:'Chest / Back',color:'#EF4444',items:[]},
+  2:{label:'Shoulders / Arms',color:'#E879F9',items:[]},
+  3:{label:'Corde & Sac',color:'#F59E0B',items:[
+    {ico:'🪢',n:'Corde à sauter',d:'15mn · allure modérée'},
+    {ico:'🥊',n:'Sac de frappe',d:'15mn · combinaisons libres'},
+  ]},
+  4:{label:'Street Push',color:'#7B72E9',items:[
     {ico:'🏋️',n:'Élévations latérales',d:'4×20 · 45s repos · haltères 2-4kg'},
     {ico:'🤸',n:'Dips',d:'4×10 · 60s repos · barres parallèles'},
     {ico:'💪',n:'Pompes larges',d:'4×8 · 60s repos'},
     {ico:'📐',n:'Pompes déclinées',d:'4×8 · 60s repos · pieds sur chaise'},
     {ico:'💎',n:'Pompes diamant',d:'4×8 · 60s repos · mains en triangle'},
   ]},
-  1:{label:'Street Pull',color:'#22C55E',items:[
+  5:{label:'Street Pull',color:'#22C55E',items:[
     {ico:'🔝',n:'Tractions pronation large',d:'4×6 · 90s repos'},
     {ico:'🔙',n:'Tractions supination serrée',d:'4×6 · 90s repos'},
     {ico:'📊',n:'Australiennes sur table',d:'4×6 · 90s repos'},
     {ico:'⏸️',n:'Isométrique mi-parcours',d:'4×10s · 60s repos'},
   ]},
-  2:{label:'Corde & Sac',color:'#F59E0B',items:[
-    {ico:'🪢',n:'Corde à sauter',d:'15mn continu ou intervalles · allure modérée'},
-    {ico:'🥊',n:'Sac de frappe',d:'15mn · combinaisons libres · récup active entre rounds'},
-  ]},
-  3:{label:'Sprint & Pliométrie',color:'#F97316',items:[
-    {ico:'🔥',n:'Échauffement',d:'5min footing · Montées genoux 2×20m · Talons-fesses 2×20m · Fentes marchées 2×10 · Jambes tendues 2×20m · Accélérations 3×30m'},
+  6:{label:'Sprint & Pliométrie',color:'#F97316',items:[
+    {ico:'🔥',n:'Échauffement',d:'5min footing · Montées genoux 2×20m · Talons-fesses 2×20m · Fentes marchées 2×10 · Accélérations 3×30m'},
     {ico:'⚡',n:'Pliométrie',d:'Squat jumps 3×8 · Frog jumps 3×6 · Bounding 3×20m · Lateral bounds 3×10'},
     {ico:'💨',n:'8 Sprints × 60m',d:'Effort maximal · 3min récup marche entre chaque'},
     {ico:'🧘',n:'Retour calme',d:'3min footing lent · Étirements ischio · quadri · mollets'},
-  ]},
-  4:{label:'Chest/Back',color:'#EF4444',items:[]},
-  5:{label:'Shoulders/Arms',color:'#E879F9',items:[]},
-  6:{label:'Footing récupération',color:'#34D399',items:[
-    {ico:'🏃',n:'Footing 10km',d:'Allure zone 2 — conversation possible · ~55-60min'},
-    {ico:'🧘',n:'Retour au calme — 5min',d:'Marche lente · Étirements ischio · quadriceps · mollets'},
   ]},
 };
 
@@ -1519,6 +1438,7 @@ function openTrainingDay(d2){
   showTrainingModal(JOURS_FR[d2], html);
 }
 
+function closeTrainingModal(){var m=document.getElementById("training-modal");if(m)m.remove();}
 function showTrainingModal(title, content){
   var existing=document.getElementById('training-modal');
   if(existing) existing.remove();
@@ -1527,18 +1447,12 @@ function showTrainingModal(title, content){
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:flex-end;justify-content:center;';
   var inner=document.createElement('div');
   inner.style.cssText='background:#0a0a0a;border:0.5px solid #1a1a1a;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 18px 40px;';
-  var hdr=document.createElement('div');
-  hdr.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;';
-  var ttl=document.createElement('div');
-  ttl.style.cssText='font-size:14px;font-weight:600;color:#e8e8e8;';
-  ttl.textContent=title;
-  var closeBtn=document.createElement('button');
-  closeBtn.textContent='✕';
-  closeBtn.style.cssText='background:none;border:none;color:#555;font-size:18px;cursor:pointer;';
-  closeBtn.onclick=function(){modal.remove();};
-  hdr.appendChild(ttl);hdr.appendChild(closeBtn);
-  inner.appendChild(hdr);
-  inner.innerHTML+=content;
+  inner.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    +'<div style="font-size:14px;font-weight:600;color:#e8e8e8;">'+title+'</div>'
+    +'<button onclick="closeTrainingModal()" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;">✕</button>'
+    +'</div>'
+    +content;
   modal.appendChild(inner);
   modal.onclick=function(e){if(e.target===modal)modal.remove();};
   document.body.appendChild(modal);
@@ -1886,7 +1800,8 @@ function deletePhysiqueEntry(dkStr){
 }
 
 // Init au chargement
-document.addEventListener("DOMContentLoaded", function(){ switchView("semaine"); });
+// Init direct — DOM déjà prêt à ce stade
+try { switchView("semaine"); } catch(e){ console.error("routine init:",e); }
 </script>
 </body>
 </html>

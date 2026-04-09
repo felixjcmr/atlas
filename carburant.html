@@ -2801,6 +2801,8 @@ function liveExtraQty(ri, idx, qty){
   const rm=extTot;
   const rkEl=document.getElementById('rk_'+ri);
   if(rkEl) rkEl.textContent=Math.round(rm.k)+' kcal';
+  const rhEl=document.getElementById('rh-kcal-'+ri);
+  if(rhEl) rhEl.innerHTML='<span class="repas-kcal">'+Math.round(rm.k)+'</span><span class="repas-kcal-unit"> kcal</span>';
   const rmEl=document.getElementById('rm_'+ri);
   if(rmEl) rmEl.innerHTML=macRow(rm);
   // Màj carte totale - debounced
@@ -2822,6 +2824,8 @@ function updateExtraQty(ri, idx, qty){
   const rm=repasMac(ri);
   const rkEl=document.getElementById('rk_'+ri);
   if(rkEl) rkEl.textContent=Math.round(rm.k)+' kcal';
+  const rhEl=document.getElementById('rh-kcal-'+ri);
+  if(rhEl) rhEl.innerHTML='<span class="repas-kcal">'+Math.round(rm.k)+'</span><span class="repas-kcal-unit"> kcal</span>';
   const rmEl=document.getElementById('rm_'+ri);
   if(rmEl) rmEl.innerHTML=macRow(rm);
   // Mise à jour carte totale
