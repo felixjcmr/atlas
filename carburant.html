@@ -161,6 +161,8 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 .swap-overlay.open{display:flex;}
 .swap-sheet{background:#111;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:18px 18px 28px;border-top:0.5px solid #2a2a2a;}
 .swap-modal{background:#111;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;border-top:0.5px solid #2a2a2a;}
+#add-overlay{align-items:flex-start;padding-top:env(safe-area-inset-top,0px);}
+#add-overlay .swap-modal{border-radius:0 0 20px 20px;border-top:none;border-bottom:0.5px solid #2a2a2a;max-height:70vh;}
 .swap-modal-hdr{padding:16px 18px 12px;border-bottom:0.5px solid #1a1a1a;flex-shrink:0;}
 .swap-modal-title{font-size:13px;font-weight:500;color:#e8e8e8;margin-bottom:10px;}
 .swap-search{width:100%;padding:9px 12px 9px 32px;background:#0d0d0d;border:0.5px solid #2a2a2a;border-radius:10px;color:#c0c0c0;font-size:12px;font-family:inherit;}
@@ -3468,8 +3470,10 @@ if(document.querySelector('.tab[data-v="micro"].active')) renderMicro();
     </div>
     <div class="swap-cats" id="add-cats"></div>
     <div class="swap-list" id="add-list"></div>
-    <div class="swap-cancel">
-      <button class="swap-cancel-btn" onclick="closeAddModal()">Annuler</button>
+    <div class="swap-cancel" style="display:flex;gap:8px;">
+      <span id="add-count-badge" style="flex:1;text-align:center;font-size:11px;color:#7B72E9;font-weight:600;padding:10px 0;align-self:center;"></span>
+      <button class="swap-cancel-btn" onclick="closeAddModal()" style="flex:1;">Annuler</button>
+      <button onclick="confirmAddClose()" style="flex:1;padding:12px;background:#7B72E9;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">Valider</button>
     </div>
   </div>
 </div>
@@ -3505,6 +3509,9 @@ function closeAddModal(e){
   if(e&&e.target!==document.getElementById('add-overlay'))return;
   document.getElementById('add-overlay').classList.remove('open');
   if(_extraPickerOpen!==-99) _extraPickerOpen=-1;
+  _addedCount=0;
+  const cntEl=document.getElementById('add-count-badge');
+  if(cntEl) cntEl.textContent='';
   _offResults=[];
 }
 
@@ -3622,6 +3629,7 @@ function selectAddOFF(idx){
     ao.classList.remove('open');
     ao.style.zIndex='';
     _offResults=[];
+    _addedCount=0;
     renderBuilderItems();
     return;
   }
@@ -3635,9 +3643,17 @@ function selectAddOFF(idx){
   offDB[id]={n:item.n,mac:mac};
   saveOFFDb(offDB);
   addExtraItem(_extraPickerOpen,id,item.n,qty);
-  document.getElementById('add-overlay').classList.remove('open');
-  _offResults=[];_extraPickerOpen=-1;
+  _addedCount++;
+  const cntElOff=document.getElementById('add-count-badge');
+  if(cntElOff) cntElOff.textContent=_addedCount+' ajouté'+(+_addedCount>1?'s':'');
+  document.getElementById('add-qty').value='100';
+  document.getElementById('add-srch').value='';
+  _offResults=[];
+  _addCat='Tout';
+  renderAddCats();renderAddList();
 }
+var _addedCount = 0; // compteur aliments ajoutés en mode multi
+
 function selectAdd(foodId){
   const lbl=DB_LABELS[foodId];
   if(!lbl)return;
@@ -3653,10 +3669,20 @@ function selectAdd(foodId){
   }
   if(_extraPickerOpen<0)return;
   addExtraItem(_extraPickerOpen,foodId,lbl.n,qty);
+  _addedCount++;
+  // Mettre à jour le compteur et garder le picker ouvert
+  const cntEl=document.getElementById('add-count-badge');
+  if(cntEl) cntEl.textContent=_addedCount+' ajouté'+(+_addedCount>1?'s':'');
+  // Reset quantité à 100g pour le prochain
+  document.getElementById('add-qty').value='100';
+  document.getElementById('add-srch').value='';
+  _addCat='Tout';
+  renderAddCats();renderAddList();
+}
+
+function confirmAddClose(){
   document.getElementById('add-overlay').classList.remove('open');
-  // Flash repas header
-  const rHead=document.getElementById('rh_'+_extraPickerOpen);
-  if(rHead){rHead.style.borderColor='#7B72E9';rHead.style.borderRadius='12px';setTimeout(()=>{rHead.style.borderColor='';rHead.style.borderRadius='';},800);}
+  _addedCount=0;
   _extraPickerOpen=-1;
 }
 

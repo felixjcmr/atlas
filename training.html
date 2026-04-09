@@ -615,7 +615,7 @@ function renderSeance(){
   if(_sw && _sw.items && _sw.items.length){
     const _borderCol=_sw.type==="natation"?"#1e3a5f":_sw.type==="corde_sac"?"#2a1a0a":_sw.type==="sprint"?"#3a1f0d":_sw.type==="footing"?"#0d2a1a":_sw.type==="street_push"?"#1a1628":_sw.type==="street_pull"?"#0d1f0d":"#141414";
     const _accentCol=_sw.type==="natation"?"#60A5FA":_sw.type==="corde_sac"?"#F59E0B":_sw.type==="sprint"?"#F97316":_sw.type==="footing"?"#34D399":_sw.type==="street_push"?"#7B72E9":_sw.type==="street_pull"?"#22C55E":"#F59E0B";
-    const _titleLbl=_sw.type==="natation"?"🏊 Natation":_sw.type==="corde_sac"?"🪢 Corde + Sac — Mercredi":_sw.type==="sprint"?"💨 Sprint & Pliométrie":_sw.type==="footing"?"🏃 Footing":_sw.type==="street_push"?"💪 Street Push — Lundi soir":_sw.type==="street_pull"?"🔝 Street Pull — Mardi soir":"🌅 Street Workout";
+    const _titleLbl=_sw.type==="natation"?"🏊 Natation":_sw.type==="corde_sac"?"🪢 Corde + Sac — Mercredi":_sw.type==="sprint"?"💨 Sprint & Pliométrie":_sw.type==="footing"?"🏃 Footing":_sw.type==="street_push"?"💪 Street Push — Jeudi soir":_sw.type==="street_pull"?"🔝 Street Pull — Vendredi soir":"🌅 Street Workout";
     swHtml += `<div style="margin:12px 14px 6px;background:#0d0d0d;border:0.5px solid ${_borderCol};border-radius:12px;padding:12px 14px;border-left:3px solid ${_accentCol};">
       <div style="font-size:9px;color:${_accentCol};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">${_titleLbl}</div>`;
     _sw.items.forEach(item=>{
@@ -665,7 +665,7 @@ function renderSeance(){
           </div>
         </div>
         <div style="display:flex;gap:5px;align-items:center;">
-
+          <button onclick="event.stopPropagation();deleteExo('${curSeanceId}','${exo.id}')" style="background:none;border:none;color:#2a2a2a;font-size:14px;cursor:pointer;padding:2px 4px;" title="Supprimer">🗑️</button>
           <span class="exo-tag${allDone?' done':''}">${allDone?'✓':doneSets+'/'+nbSets}</span>
         </div>
       </div>
@@ -939,6 +939,18 @@ function moveExo(seanceId, exoId, dir){
 function getExoName(exoId, fallback){
   try{const r=JSON.parse(localStorage.getItem('train_names')||'{}');return r[exoId]||fallback;}catch(e){return fallback;}
 }
+function deleteExo(seanceId, exoId){
+  if(!confirm('Supprimer cet exercice de la séance ?')) return;
+  // Supprimer de l ordre
+  const defaultOrder = (PROGRAM[seanceId]||[]).map(e=>e.id);
+  const order = getExoOrder(seanceId, defaultOrder);
+  const newOrder = order.filter(id => id !== exoId);
+  saveExoOrder(seanceId, newOrder);
+  // Supprimer les données de l exercice
+  const o = loadExoOverrides(); delete o[seanceId+'_'+exoId]; saveExoOverrides(o);
+  renderSeance();
+}
+
 function saveExoName(exoId, name){
   try{const r=JSON.parse(localStorage.getItem('train_names')||'{}');r[exoId]=name;localStorage.setItem('train_names',JSON.stringify(r));}catch(e){}
 }

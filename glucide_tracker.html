@@ -380,23 +380,6 @@ button{cursor:pointer;font-family:inherit;}input,textarea{font-family:inherit;}
     <div class="gluc-hero-vs" id="gluc-hero-vs"></div>
   </div>
 
-  <!-- DÉPENSE TOTALE -->
-  <div style="margin:0 0 8px;background:#0d0d0d;border:0.5px solid #141414;border-radius:14px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
-    <div>
-      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Dépense totale</div>
-      <div style="display:flex;align-items:baseline;gap:5px;">
-        <span style="font-size:32px;font-weight:600;letter-spacing:-0.02em;line-height:1;" id="dep-big">—</span>
-        <span style="font-size:13px;color:#444;">kcal</span>
-      </div>
-      <div id="dep-ref-lbl" style="display:none;font-size:9px;color:#3a3a3a;margin-top:3px;font-style:italic;">estimation preset · non tracké</div>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-size:9px;color:#444;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;">Apport cible</div>
-      <div style="font-size:22px;font-weight:600;line-height:1;" id="apport-big">—</div>
-      <div style="font-size:9px;color:#333;margin-top:2px;">kcal</div>
-    </div>
-  </div>
-
   <div class="sec-div"></div>
 
   <div class="prog-chips-wrap">
@@ -805,10 +788,14 @@ function showCal(){
   renderCal();updateStreak();
 }
 function showWeightView(){
-  autoSaveNote(curDate);
-  ["view-cal","view-day","view-weight"].forEach(id=>document.getElementById(id).classList.remove("active"));
-  document.getElementById("view-weight").classList.add("active");
-  renderWeightFull();
+  try{autoSaveNote(curDate);}catch(e){}
+  ["view-cal","view-day","view-weight"].forEach(id=>{
+    var el=document.getElementById(id);
+    if(el) el.classList.remove("active");
+  });
+  var vw=document.getElementById("view-weight");
+  if(vw) vw.classList.add("active");
+  try{renderWeightFull();}catch(e){console.error("renderWeightFull:",e);}
 }
 function prevMonth(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
 function nextMonth(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
