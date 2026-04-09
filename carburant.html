@@ -2990,7 +2990,7 @@ function repasHTML(ri){
         <div class="repas-ico-wrap" style="${done?'border-color:#166534;background:#071a0a;':''}">${r.ico}</div>
         <div class="repas-info">
           <div class="repas-name" style="${done?'color:#22C55E;':''}">${r.name}</div>
-          <div class="repas-time">${r.time}${done?' · ✓ Validé':hasItems?' · '+ex[ri].length+' aliment'+(ex[ri].length>1?'s':''):' · Vide'}</div>
+          <div class="repas-time">${done?'✓ Validé':hasItems?ex[ri].length+' aliment'+(ex[ri].length>1?'s':''):'Vide'}</div>
         </div>
       </div>
       <div class="repas-right">
