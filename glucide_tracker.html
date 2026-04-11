@@ -351,9 +351,7 @@ button{cursor:pointer;font-family:inherit;}input,textarea{font-family:inherit;}
       <span id="validate-icon">○</span>
       <span id="validate-text">Valider la journée</span>
     </button>
-    <div id="plan-link-wrap" style="display:none;margin-top:6px;text-align:center;">
-      <button onclick="location.href='carburant.html#plan'" style="font-size:11px;color:#22C55E;background:transparent;border:0.5px solid #166534;border-radius:20px;padding:6px 16px;cursor:pointer;width:100%;">🌿 Voir mon plan alimentaire adapté →</button>
-    </div>
+    
   </div>
 
   <div class="alert-strip alert-floor" id="alert-floor">
@@ -872,8 +870,7 @@ function renderCal(){
 
 function openDay(){
   // Masquer le lien plan — ne s'affiche que si dépense saisie
-  const _plwReset=document.getElementById("plan-link-wrap");if(_plwReset){const _hasDep=localStorage.getItem("gt5_dep_"+dk(curDate));_plwReset.style.display=_hasDep?"block":"none";}
-  hiddenActsOpen=false;
+    hiddenActsOpen=false;
   ["view-cal","view-day","view-weight"].forEach(id=>document.getElementById(id).classList.remove("active"));
   document.getElementById("view-day").classList.add("active");
   const opts={weekday:"long",day:"numeric",month:"long",year:"numeric"};
@@ -1111,7 +1108,7 @@ function compute(){
   document.getElementById("d-gluc").textContent=glucG+"g · "+fmt(glucG*4)+" kcal";
   document.getElementById("d-apport").textContent=fmt(apport)+" kcal"+(showFloor?" (plancher)":"");
 
-  const plw2=document.getElementById('plan-link-wrap');if(plw2)plw2.style.display='block';
+  
   // Ne pas écraser si journée déjà validée (garder les valeurs validées)
   const _val=loadValidation(curDate);
   if(!_val){
@@ -1595,7 +1592,7 @@ setInterval(function(){
 <div class="bnav">
   <div class="bn" onclick="location.href='dashboard.html'"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
   <div class="bn active"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
-  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Carburant</div></div>
+  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Aliments</div></div>
   <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
   <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
 </div>

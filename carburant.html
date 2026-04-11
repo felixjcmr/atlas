@@ -443,7 +443,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
     <div class="hdr-date" id="hdr-date"></div>
   </div>
   <div class="hdr-title">🌿 Carburant</div>
-  <div class="hdr-sub">Superaliments · Plan alimentaire · Utilisation</div>
+  <div class="hdr-sub">Superaliments · Guide d'utilisation</div>
 </div>
 
 <!-- prog-wrap caché — nécessaire pour le JS -->
@@ -453,13 +453,11 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
   <div class="prog-sub" id="prog-sub"></div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" data-v="plan" onclick="switchTab('plan')">📋 Plan alimentaire</div>
-  <div class="tab" data-v="micro" onclick="switchTab('micro')">🔬 Micro</div>
-  <div class="tab" data-v="aliments" onclick="switchTab('aliments')">🌿 Aliments</div>
+<div class="tabs" style="display:none;">
+  <div class="tab active" data-v="aliments" onclick="switchTab('aliments')">🌿 Aliments</div>
 </div>
 
-<div class="view" id="view-aliments">
+<div class="view active" id="view-aliments">
 
   <!-- STOCKS ESSENTIELS -->
   <div style="margin:12px 14px 4px;">
@@ -484,31 +482,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
   </div>
   <div id="foods-container"></div>
 </div>
-
-<div class="view active" id="view-plan">
-  <div class="plan-inner">
-  <!-- Navigation de date -->
-  <div id="carb-date-nav" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:8px 4px;"></div>
-
-  <div id="no-dep-banner" style="display:none;margin-bottom:12px;padding:10px 14px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#444;margin-bottom:8px;">Plan de base — saisis ta dépense pour personnaliser</div><button onclick="location.href='glucide_tracker.html'" style="background:#0d1f17;border:0.5px solid #166534;color:#22C55E;border-radius:16px;padding:6px 18px;font-size:11px;cursor:pointer;">⚡ Saisir →</button></div>
-    <div class="total-card" id="total-card">
-      <div class="total-title">Objectifs journaliers — Félix</div>
-      <div class="total-grid">
-        <div class="tg"><div class="tg-val">4 100</div><div class="tg-lbl">kcal</div></div>
-        <div class="tg"><div class="tg-val prot">196g</div><div class="tg-lbl">Protéines</div></div>
-        <div class="tg"><div class="tg-val lip" id="tc-lip">—</div><div class="tg-lbl">Lipides</div></div>
-        <div class="tg"><div class="tg-val gluc">550g</div><div class="tg-lbl">Glucides</div></div>
-      </div>
-    </div>
-    <div id="repas-container"></div>
-
-  </div>
-</div>
-
-<div class="view" id="view-micro">
-  <div class="micro-inner" id="micro-inner"></div>
-</div>
-
 
 <!-- MODAL AJOUT MANUEL -->
 <div class="manual-modal-overlay" id="manual-modal-overlay" onclick="closeManualModal(event)">
@@ -541,7 +514,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 <div class="bnav">
   <div class="bn" onclick="location.href='dashboard.html'"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
   <div class="bn" onclick="location.href='glucide_tracker.html'"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
-  <div class="bn active"><div class="bn-ico">🌿</div><div class="bn-lbl">Carburant</div></div>
+  <div class="bn active"><div class="bn-ico">🌿</div><div class="bn-lbl">Aliments</div></div>
   <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
   <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
 </div>
@@ -3436,9 +3409,7 @@ renderFoods();updateProgress();renderPlan();renderStocks();renderCarbDateNav();
 // Auto-switch vers l'onglet demandé via le hash, sinon Plan par défaut
 (function(){
   var hash=location.hash;
-  if(hash==="#micro"){switchTab("micro");history.replaceState(null,"",location.pathname);}
-  else if(hash==="#aliments"){switchTab("aliments");history.replaceState(null,"",location.pathname);}
-  else{switchTab("plan");}
+  if(hash==="#aliments"||true){switchTab("aliments");history.replaceState(null,"",location.pathname);}
 })();
 
 // ── ALIMENTS MANUELS ─────────────────────────────────────────────

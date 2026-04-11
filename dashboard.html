@@ -200,17 +200,14 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 </div>
 <div class="modules">
 
-  <div class="mod nutrition" style="cursor:default;">
-    <div class="mod-ico">🥗</div>
+  <div class="mod nutrition" onclick="location.href='glucide_tracker.html'" style="cursor:pointer;">
+    <div class="mod-ico">⚡</div>
     <div class="mod-body">
-      <div class="mod-title">Nutrition</div>
-      <div class="mod-desc">Dépense calorique · Plan alimentaire</div>
+      <div class="mod-title">Énergie</div>
+      <div class="mod-desc">Dépense calorique · Glucides · Poids</div>
       <div class="mod-stat" id="mm-nutrition"></div>
-      <div class="mod-sub-btns">
-        <button class="sub-btn energie" onclick="event.stopPropagation();location.href='glucide_tracker.html'">⚡ Dépense calorique →</button>
-        <button class="sub-btn carburant" onclick="event.stopPropagation();location.href='carburant.html'">🌿 Plan alimentaire →</button>
-      </div>
     </div>
+    <div class="mod-arrow">›</div>
   </div>
 
   <div class="mod seances" onclick="location.href='training.html'">
@@ -304,7 +301,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 <div class="bnav">
   <div class="bn active"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
   <div class="bn" onclick="location.href='glucide_tracker.html'"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
-  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Carburant</div></div>
+  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Aliments</div></div>
   <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
   <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
 </div>
