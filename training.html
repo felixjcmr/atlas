@@ -706,8 +706,8 @@ function renderSeance(){
         <div>
           <div style="display:flex;align-items:center;gap:6px;">
             <div style="display:flex;flex-direction:column;gap:1px;" onclick="event.stopPropagation()">
-              <button onclick="moveExo('${curSeanceId}','${exo.id}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;">▲</button>
-              <button onclick="moveExo('${curSeanceId}','${exo.id}',1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;">▼</button>
+              <button onclick="event.stopPropagation();event.preventDefault();moveExo('${curSeanceId}','${exo.id}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;" ontouchend="event.stopPropagation()">▲</button>
+              <button onclick="event.stopPropagation();event.preventDefault();moveExo('${curSeanceId}','${exo.id}',1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;" ontouchend="event.stopPropagation()">▼</button>
             </div>
             <span class="exo-name" id="exoname_${exo.id}" onclick="event.stopPropagation();startRenameExo('${curSeanceId}','${exo.id}',this)">${getExoName(exo.id,exo.name)}</span>
             ${lastDeg?'<span class="deg-badge">↘ Dég.</span>':''}
@@ -807,9 +807,9 @@ function renderSeance(){
       <div class="exo-hdr" onclick="toggleExo('_custom_${cid}')">
         <div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <div style="display:flex;flex-direction:column;gap:1px;" onclick="event.stopPropagation()">
-              <button onclick="moveCustomExo('${curSeanceId}','${cid}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;">▲</button>
-              <button onclick="moveCustomExo('${curSeanceId}','${cid}',1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;">▼</button>
+            <div style="display:flex;flex-direction:column;gap:1px;">
+              <button onclick="event.stopPropagation();event.preventDefault();moveCustomExo('${curSeanceId}','${cid}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;" ontouchend="event.stopPropagation()">▲</button>
+              <button onclick="event.stopPropagation();event.preventDefault();moveCustomExo('${curSeanceId}','${cid}',1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;" ontouchend="event.stopPropagation()">▼</button>
             </div>
             <input type="text" value="${cexo.name}" placeholder="Nom de l'exercice"
               class="exo-name" onclick="event.stopPropagation()"
