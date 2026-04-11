@@ -1182,11 +1182,16 @@ function saveLink(exoId){
 // ── EXERCICES CUSTOM ─────────────────────────────────────────────
 // ── CUSTOM EXERCICES (persistants par séance, pas par date) ──────
 function loadCustomExos(seanceId){
-  // Migration ancienne clé date+seance
   try{
     const key='train_custom_exos_'+seanceId;
     const existing=JSON.parse(localStorage.getItem(key)||'[]');
-    return existing.map(function(e){if(!e.id)e.id='_c'+Math.random().toString(36).substr(2,8);return e;});
+    let dirty=false;
+    const result=existing.map(function(e){
+      if(!e.id){e.id='_c'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);dirty=true;}
+      return e;
+    });
+    if(dirty) localStorage.setItem(key,JSON.stringify(result));
+    return result;
   }catch(e){return[];}
 }
 function saveCustomExos(seanceId,exos){
