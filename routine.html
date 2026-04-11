@@ -164,17 +164,10 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 
 <div class="hdr">
   <div>
-    <div class="hdr-title">🗓 Routine</div>
+    <div class="hdr-title">📅 Emploi du temps</div>
     <div class="hdr-date" id="hdr-date"></div>
   </div>
   <div class="hdr-badge" id="seance-badge">—</div>
-</div>
-
-<div class="tabs">
-  <button class="tab-btn" onclick="switchView('trame')">Trame</button>
-  <button class="tab-btn active" onclick="switchView('semaine')">Semaine</button>
-  <button class="tab-btn" onclick="switchView('journal')">Journal</button>
-  <button class="tab-btn" onclick="switchView('objectifs')">Objectifs</button>
 </div>
 
 <div id="view-semaine" style="display:block;">
@@ -191,12 +184,8 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
     <div class="semaine-grid" id="semaine-grid"></div>
   </div>
 
-  <div style="height:80px;"></div>
-</div>
-
-<!-- VUE TRAME -->
-<div id="view-trame" style="display:none;">
-  <div style="margin:14px 18px 0;">
+  <!-- TRAME DE LA SEMAINE -->
+  <div style="margin:16px 18px 0;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;">📋 Trame de la semaine</div>
       <button onclick="resetTrame()" style="font-size:9px;color:#333;border:0.5px solid #1a1a1a;border-radius:8px;padding:2px 8px;background:none;cursor:pointer;">Reset</button>
@@ -207,248 +196,11 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 </div>
 
 
-<div id="view-journal" style="display:none;">
-  <!-- SOMMEIL intégré en haut -->
-  <div style="margin:12px 18px 0;">
-    <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-      <span>💤 Sommeil</span>
-      <div style="display:flex;gap:6px;">
-        <button onclick="deleteSleepDay()" style="font-size:11px;color:#333;background:none;border:none;cursor:pointer;padding:2px 4px;">🗑</button>
-        <button onclick="resetAllSleep()" style="font-size:9px;color:#333;border:0.5px solid #1a1a1a;border-radius:8px;padding:2px 8px;background:none;cursor:pointer;">Reset tout</button>
-      </div>
-    </div>
-  </div>
-  <div class="sleep-card" style="margin:0 18px;">
-    <div class="sleep-hdr">
-      <div>
-        <div class="sleep-hdr-title">Nuit du</div>
-        <div class="sleep-dur-sub" id="sleep-date-lbl">—</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="sleep-hdr-dur" id="sleep-dur-val">—</div>
-        <div class="sleep-dur-sub" id="sleep-dur-sub">cible : 8h–8h30</div>
-      </div>
-    </div>
-    <div class="sleep-inputs">
-      <div class="sleep-input-wrap">
-        <div class="sleep-lbl">Endormi à</div>
-        <input class="sleep-input" id="sleep-in" type="text" placeholder="22:30" inputmode="numeric" maxlength="5" oninput="fmtTime(this);calcSleep()">
-      </div>
-      <div class="sleep-input-wrap">
-        <div class="sleep-lbl">Réveil à</div>
-        <input class="sleep-input" id="sleep-out" type="text" placeholder="08:30" inputmode="numeric" maxlength="5" oninput="fmtTime(this);calcSleep()">
-      </div>
-    </div>
-    <div class="sleep-bar-wrap">
-      <div class="sleep-bar-fill" id="sleep-bar" style="width:0%;background:#22C55E;"></div>
-    </div>
-    <div class="sleep-tips" id="sleep-tips"></div>
-    <!-- RESSENTI -->
-    <div style="border-top:0.5px solid #141414;padding:10px 14px;">
-      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Ressenti matin</div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;" id="sleep-feel-matin">
-        <button onclick="setSleepFeel('matin',1)" class="feel-btn" data-feel="matin" data-v="1" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😫</button>
-        <button onclick="setSleepFeel('matin',2)" class="feel-btn" data-feel="matin" data-v="2" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😕</button>
-        <button onclick="setSleepFeel('matin',3)" class="feel-btn" data-feel="matin" data-v="3" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😐</button>
-        <button onclick="setSleepFeel('matin',4)" class="feel-btn" data-feel="matin" data-v="4" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">🙂</button>
-        <button onclick="setSleepFeel('matin',5)" class="feel-btn" data-feel="matin" data-v="5" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😄</button>
-      </div>
-      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Ressenti soir</div>
-      <div style="display:flex;gap:6px;" id="sleep-feel-soir">
-        <button onclick="setSleepFeel('soir',1)" class="feel-btn" data-feel="soir" data-v="1" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😫</button>
-        <button onclick="setSleepFeel('soir',2)" class="feel-btn" data-feel="soir" data-v="2" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😕</button>
-        <button onclick="setSleepFeel('soir',3)" class="feel-btn" data-feel="soir" data-v="3" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😐</button>
-        <button onclick="setSleepFeel('soir',4)" class="feel-btn" data-feel="soir" data-v="4" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">🙂</button>
-        <button onclick="setSleepFeel('soir',5)" class="feel-btn" data-feel="soir" data-v="5" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😄</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats sommeil -->
-  <div style="margin:8px 18px 0;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;">Moyenne</div>
-      <div style="display:flex;gap:6px;">
-        <button onclick="setSleepRange(7)" id="sr-7" style="font-size:9px;padding:2px 8px;border-radius:10px;background:#100e2e;color:#7B72E9;border:0.5px solid #2e2b6e;cursor:pointer;">7j</button>
-        <button onclick="setSleepRange(30)" id="sr-30" style="font-size:9px;padding:2px 8px;border-radius:10px;background:#111;color:#444;border:0.5px solid #1a1a1a;cursor:pointer;">30j</button>
-      </div>
-    </div>
-    <div id="sleep-avg-val" style="font-size:20px;font-weight:600;color:#e8e8e8;">—</div>
-    <div id="sleep-avg-sub" style="font-size:10px;color:#444;margin-bottom:10px;">de sommeil en moyenne</div>
-    <div id="sleep-weekly-chart" style="display:flex;align-items:flex-end;gap:3px;height:40px;"></div>
-    <div id="sleep-weekly-labels" style="display:flex;gap:3px;margin-top:4px;"></div>
-  </div>
-  <div style="margin:8px 18px 0;">
-    <div id="sleep-history" style="display:flex;flex-direction:column;gap:4px;"></div>
-  </div>
-
-  <!-- SÉPARATEUR JOURNAL -->
-  <div style="margin:16px 18px 8px;display:flex;align-items:center;gap:8px;">
-    <div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;">📓 Journal</div>
-    <div style="flex:1;height:0.5px;background:#141414;"></div>
-    <div style="display:flex;gap:6px;">
-      <button onclick="resetAllJournal()" style="font-size:9px;color:#333;border:0.5px solid #1a1a1a;border-radius:8px;padding:2px 8px;background:none;cursor:pointer;">Reset tout</button>
-      <button onclick="deleteJournalDay()" style="font-size:11px;color:#333;background:none;border:none;cursor:pointer;padding:2px 4px;">🗑</button>
-    </div>
-  </div>
-
-  <div style="margin:0 18px;">
-    <!-- DATE NAV -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <button onclick="jNavDay(-1)" style="color:#555;font-size:18px;padding:4px 8px;">‹</button>
-      <div id="journal-date-lbl" style="font-size:12px;color:#e8e8e8;font-weight:500;"></div>
-      <button onclick="jNavDay(1)" style="color:#555;font-size:18px;padding:4px 8px;">›</button>
-    </div>
-
-    <!-- CE QUI A BIEN MARCHÉ -->
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
-      <div style="font-size:9px;color:#22C55E;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">✓ Ce qui a bien marché</div>
-      <textarea id="j-good" placeholder="Ex: Séance muscu complète, nutrition au point, 8h de sommeil, 12 000 steps, taf avancé..." style="width:100%;background:none;border:none;color:#c0c0c0;font-size:12px;font-family:inherit;resize:none;outline:none;line-height:1.6;min-height:60px;" oninput="autoResize(this);saveJournal()"></textarea>
-    </div>
-
-    <!-- CE QUI N'A PAS MARCHÉ -->
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
-      <div style="font-size:9px;color:#EF4444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">✗ Ce qui n'a pas marché / retard</div>
-      <textarea id="j-bad" placeholder="Ex: Séance sautée, mauvaise nutrition, procrastination, couché trop tard, manque d'énergie..." style="width:100%;background:none;border:none;color:#c0c0c0;font-size:12px;font-family:inherit;resize:none;outline:none;line-height:1.6;min-height:60px;" oninput="autoResize(this);saveJournal()"></textarea>
-    </div>
-
-    <!-- OBJECTIF DEMAIN -->
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
-      <div style="font-size:9px;color:#38BDF8;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">→ Objectif principal demain</div>
-      <textarea id="j-next" placeholder="Sois précis : pas 'faire de sport' mais 'Push 1h30 + 12 000 steps'..." style="width:100%;background:none;border:none;color:#c0c0c0;font-size:12px;font-family:inherit;resize:none;outline:none;line-height:1.6;min-height:44px;" oninput="autoResize(this);saveJournal()"></textarea>
-    </div>
-
-    <!-- ÉNERGIE DU JOUR -->
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
-      <div style="font-size:9px;color:#A78BFA;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">💡 Ce qui m'a motivé / inspiré</div>
-      <textarea id="j-inspi" placeholder="Une pensée, une citation, un momentum..." style="width:100%;background:none;border:none;color:#c0c0c0;font-size:12px;font-family:inherit;resize:none;outline:none;line-height:1.6;min-height:44px;" oninput="autoResize(this);saveJournal()"></textarea>
-    </div>
-
-    <!-- NOTE GLOBALE JOURNÉE -->
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
-      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Note de la journée</div>
-      <div style="display:flex;gap:8px;justify-content:center;" id="j-rating-btns">
-        <button onclick="setJRating(1)" class="j-rating-btn" data-v="1" style="font-size:18px;opacity:0.3;background:none;border:none;cursor:pointer;">😫</button>
-        <button onclick="setJRating(2)" class="j-rating-btn" data-v="2" style="font-size:18px;opacity:0.3;background:none;border:none;cursor:pointer;">😕</button>
-        <button onclick="setJRating(3)" class="j-rating-btn" data-v="3" style="font-size:18px;opacity:0.3;background:none;border:none;cursor:pointer;">😐</button>
-        <button onclick="setJRating(4)" class="j-rating-btn" data-v="4" style="font-size:18px;opacity:0.3;background:none;border:none;cursor:pointer;">🙂</button>
-        <button onclick="setJRating(5)" class="j-rating-btn" data-v="5" style="font-size:18px;opacity:0.3;background:none;border:none;cursor:pointer;">🤩</button>
-      </div>
-    </div>
-
-    <!-- HISTORIQUE JOURNAL -->
-    <div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;">Historique 7 jours</div>
-    <div id="journal-history" style="display:flex;flex-direction:column;gap:6px;"></div>
-
-    <!-- CHECK-IN PHYSIQUE -->
-    <div style="margin:16px 0 8px;display:flex;align-items:center;gap:8px;">
-      <div style="font-size:9px;color:#333;letter-spacing:0.08em;text-transform:uppercase;">📸 Check-in physique</div>
-      <div style="flex:1;height:0.5px;background:#141414;"></div>
-    </div>
-    <div id="view-physique-inline">
-      <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:14px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:11px;color:#555;margin-bottom:14px;line-height:1.6;">Même angle, même lumière, sans vêtements. Chaque lundi de préférence.</div>
-        <label id="photo-label" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;border:1px dashed #2a2a2a;border-radius:12px;cursor:pointer;background:#0a0a0a;">
-          <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="onPhotoSelected(event)">
-          <div id="photo-preview-wrap" style="display:none;width:100%;">
-            <img id="photo-preview" style="width:100%;border-radius:10px;max-height:300px;object-fit:cover;" />
-          </div>
-          <div id="photo-placeholder" style="text-align:center;">
-            <div style="font-size:28px;margin-bottom:6px;">📷</div>
-            <div style="font-size:12px;color:#555;">Appuie pour choisir une photo</div>
-            <div style="font-size:10px;color:#333;margin-top:3px;">depuis ta pellicule</div>
-          </div>
-        </label>
-        <button id="btn-analyze" onclick="analyzePhoto()" style="display:none;width:100%;margin-top:12px;padding:14px;background:#100e2e;border:0.5px solid #2e2b6e;border-radius:12px;color:#7B72E9;font-size:13px;font-weight:500;cursor:pointer;">✦ Analyser avec Claude</button>
-        <button id="btn-change-photo" onclick="resetPhoto()" style="display:none;width:100%;margin-top:6px;padding:10px;background:none;border:0.5px solid #1a1a1a;border-radius:12px;color:#444;font-size:11px;cursor:pointer;">Changer la photo</button>
-      </div>
-      <div id="physique-result" style="display:none;">
-        <div style="background:#0d0d0d;border:0.5px solid #2e2b6e;border-radius:14px;padding:14px;margin-bottom:12px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div style="font-size:9px;color:#7B72E9;letter-spacing:0.08em;text-transform:uppercase;">Analyse Claude</div>
-            <div id="physique-date" style="font-size:10px;color:#444;"></div>
-          </div>
-          <div id="physique-text" style="font-size:12px;color:#c0c0c0;line-height:1.7;white-space:pre-wrap;"></div>
-        </div>
-        <button onclick="saveAnalysis()" id="btn-save-analysis" style="width:100%;padding:12px;background:#071a0a;border:0.5px solid #166534;border-radius:12px;color:#22C55E;font-size:12px;font-weight:500;cursor:pointer;">💾 Sauvegarder cette analyse</button>
-      </div>
-      <div id="physique-loader" style="display:none;text-align:center;padding:30px;">
-        <div style="font-size:24px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⟳</div>
-        <div style="font-size:11px;color:#555;">Analyse en cours...</div>
-      </div>
-      <div id="physique-history"></div>
-    </div>
-  </div>
-  <div style="height:80px;"></div>
-</div>
-<div id="view-objectifs" style="display:none;padding:14px 18px 100px;">
-
-  <!-- HEADER -->
-  <div style="margin-bottom:18px;">
-    <div style="font-size:18px;font-weight:700;color:#e8e8e8;letter-spacing:-0.02em;">Objectifs</div>
-    <div style="font-size:11px;color:#444;margin-top:3px;">Ce qui compte vraiment, sur toutes les échelles de temps.</div>
-  </div>
-
-  <!-- JOURNALIER -->
-  <div class="obj-section" id="obj-daily">
-    <div class="obj-section-hdr">
-      <div class="obj-section-ico">🌅</div>
-      <div>
-        <div class="obj-section-title">Demain</div>
-        <div class="obj-section-sub">Ce que tu veux accomplir demain</div>
-      </div>
-      <button class="obj-add-btn" onclick="addObj('daily')">+</button>
-    </div>
-    <div class="obj-list" id="obj-list-daily"></div>
-  </div>
-
-  <!-- SEMAINE -->
-  <div class="obj-section" id="obj-weekly">
-    <div class="obj-section-hdr">
-      <div class="obj-section-ico">📅</div>
-      <div>
-        <div class="obj-section-title">Cette semaine</div>
-        <div class="obj-section-sub">Objectifs des 7 prochains jours</div>
-      </div>
-      <button class="obj-add-btn" onclick="addObj('weekly')">+</button>
-    </div>
-    <div class="obj-list" id="obj-list-weekly"></div>
-  </div>
-
-  <!-- MENSUEL -->
-  <div class="obj-section" id="obj-monthly">
-    <div class="obj-section-hdr">
-      <div class="obj-section-ico">🗓</div>
-      <div>
-        <div class="obj-section-title">Ce mois</div>
-        <div class="obj-section-sub">Vision à 30 jours</div>
-      </div>
-      <button class="obj-add-btn" onclick="addObj('monthly')">+</button>
-    </div>
-    <div class="obj-list" id="obj-list-monthly"></div>
-  </div>
-
-  <!-- ANNUEL -->
-  <div class="obj-section" id="obj-yearly">
-    <div class="obj-section-hdr">
-      <div class="obj-section-ico">🎯</div>
-      <div>
-        <div class="obj-section-title">Cette année</div>
-        <div class="obj-section-sub">Objectifs long terme</div>
-      </div>
-      <button class="obj-add-btn" onclick="addObj('yearly')">+</button>
-    </div>
-    <div class="obj-list" id="obj-list-yearly"></div>
-  </div>
-
-</div>
-
 <div class="bnav">
   <div class="bn" onclick="location.href='dashboard.html'"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
   <div class="bn" onclick="location.href='glucide_tracker.html'"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
-  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Aliments</div></div>
-  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
-  <div class="bn active"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
+  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Exercice</div></div>
+  <div class="bn active"><div class="bn-ico">📅</div><div class="bn-lbl">Emploi du temps</div></div>
 </div>
 <script>
 var LS_PRE = 'rt5_';
@@ -706,16 +458,29 @@ function renderSemaine(){
   var today = new Date(); today.setHours(0,0,0,0);
   var todayDow = dow(today);
   var _wkCustom=loadWeekCustom();
+  // Calculer le décalage global depuis la custom (combien de jours ont été décalés)
+  var _shift=0;
+  if(_wkCustom[0]){
+    var _lbl0=typeof _wkCustom[0]==='object'?_wkCustom[0].label:_wkCustom[0];
+    var _orig=SEANCES.indexOf(_lbl0);
+    if(_orig>=0) _shift=_orig; // décalage = index original maintenant en position 0
+  }
   var html = '';
   for(var d2=0;d2<7;d2++){
-    var w = WEEK[d2];
+    // Source des données WEEK selon le décalage
+    var _entry = _wkCustom[d2];
+    var srcD2 = (_entry && typeof _entry==='object' && _entry.weekSrc!=null) ? _entry.weekSrc : d2;
+    var w = WEEK[srcD2] || WEEK[d2];
     var isT = d2===todayDow;
     html += '<div class="jour-col'+(isT?' today':'')+'" id="jcol_'+d2+'" onclick="openTrainingDay('+((d2+1)%7)+')" style="cursor:pointer;">';
     html += '<div class="jour-col-hdr">';
     html += '<div class="jour-col-name">'+JOURS[d2]+'</div>';
     var _dispSeance=_wkCustom[d2]||SEANCES[d2];
     var _dispLbl=typeof _dispSeance==='object'?_dispSeance.label:_dispSeance;
-    html += '<div class="jour-col-type" style="color:'+SEANCE_COL[d2]+';cursor:pointer;">'+_dispLbl+'</div>';
+    // Couleur selon la séance affichée
+    var _colIdx=SEANCES.indexOf(_dispLbl);
+    var _col=_colIdx>=0?SEANCE_COL[_colIdx]:SEANCE_COL[d2];
+    html += '<div class="jour-col-type" style="color:'+_col+';cursor:pointer;">'+_dispLbl+'</div>';
     html += '</div><div class="jour-col-body">';
     w.seances.forEach(function(b){
       var c=COL[b.type]||COL.walk;
@@ -1283,8 +1048,21 @@ function deleteObj(scope, idx){
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
-renderToday();
-setInterval(updateDayProgress, 60000);
+(function(){
+  try {
+    var today=new Date();today.setHours(0,0,0,0);
+    var opts={weekday:'long',day:'numeric',month:'long'};
+    var dateStr=today.toLocaleDateString('fr-FR',opts);
+    var hdrDate=document.getElementById('hdr-date');
+    if(hdrDate) hdrDate.textContent=dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
+    var d2=dow(today);
+    var badge=document.getElementById('seance-badge');
+    if(badge){badge.textContent=SEANCES[d2]||'';badge.style.color=SEANCE_COL[d2]||'#888';}
+    renderSemaine();
+    renderTrame();
+    document.getElementById('view-semaine').style.display='block';
+  } catch(e){ console.error('init:',e); }
+})();
 
 // ── DÉTAIL PROGRAMME PAR JOUR ─────────────────────────────────
 // Programme muscu
@@ -1501,10 +1279,11 @@ function resetWeekCustom(){localStorage.removeItem('rt5_week_custom');renderSema
 function shiftWeekPlan(delta){
   var custom = loadWeekCustom();
   var shifted = {};
-  // Décaler toutes les étiquettes de delta jours
   for(var d=0;d<7;d++){
     var src = ((d - delta) % 7 + 7) % 7;
-    shifted[d] = custom[src] || SEANCES[src];
+    var prevEntry = custom[src] || {label: SEANCES[src], weekSrc: src};
+    var prevSrc = typeof prevEntry==='object' && prevEntry.weekSrc!=null ? prevEntry.weekSrc : src;
+    shifted[d] = {label: typeof prevEntry==='object'?prevEntry.label:prevEntry, weekSrc: prevSrc};
   }
   saveWeekCustom(shifted);
   renderSemaine();
@@ -1839,20 +1618,8 @@ function deletePhysiqueEntry(dkStr){
   renderPhysiqueHistory();
 }
 
-// Init au chargement
-try {
-  renderSemaine();
-  renderObjectifs();
-  renderTrame();
-  ['trame','journal','objectifs'].forEach(function(id){
-    var el=document.getElementById('view-'+id);
-    if(el) el.style.display='none';
-  });
-  document.getElementById('view-semaine').style.display='block';
-  document.querySelectorAll('.tab-btn').forEach(function(b,i){
-    b.classList.toggle('active',['trame','semaine','journal','objectifs'][i]==='semaine');
-  });
-} catch(e){ console.error("routine init:",e); }
+// Init au chargement — géré plus haut
+
 </script>
 </body>
 </html>

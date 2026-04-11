@@ -687,14 +687,14 @@ function loadState(date){
       const matchPreset=PRESETS.find(p=>p.name===movedLabel||p.name===PRESET_NAMES[movedLabel]);
       if(matchPreset){
         const s={};
-        ACTS.forEach(a=>{s[a.id]=matchPreset.acts[a.id]?{c:!!matchPreset.acts[a.id].c,v:getPresetActVal(matchPreset.name,a)}:{c:false,v:getActDef(a)};});
+        ACTS.forEach(a=>{s[a.id]={c:false,v:getActDef(a)};});
         if(!s.gestes_quotidien||!s.gestes_quotidien.c) s.gestes_quotidien={c:true,v:100};
         return s;
       }
     }
   }catch(e){}
   const p=PRESETS[d2];const s={};
-  ACTS.forEach(a=>{s[a.id]=p.acts[a.id]?{c:!!p.acts[a.id].c,v:getPresetActVal(p.name,a)}:{c:false,v:getActDef(a)};});
+  ACTS.forEach(a=>{s[a.id]={c:false,v:getActDef(a)};});
   if(!s.gestes_quotidien||!s.gestes_quotidien.c) s.gestes_quotidien={c:true,v:100};
   return s;
 }
@@ -1592,9 +1592,8 @@ setInterval(function(){
 <div class="bnav">
   <div class="bn" onclick="location.href='dashboard.html'"><div class="bn-ico">⊞</div><div class="bn-lbl">Home</div></div>
   <div class="bn active"><div class="bn-ico">⚡</div><div class="bn-lbl">Énergie</div></div>
-  <div class="bn" onclick="location.href='carburant.html'"><div class="bn-ico">🌿</div><div class="bn-lbl">Aliments</div></div>
-  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Training</div></div>
-  <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">🗓</div><div class="bn-lbl">Routine</div></div>
+  <div class="bn" onclick="location.href='training.html'"><div class="bn-ico">🏋️</div><div class="bn-lbl">Exercice</div></div>
+  <div class="bn" onclick="location.href='routine.html'"><div class="bn-ico">📅</div><div class="bn-lbl">Emploi du temps</div></div>
 </div>
 </body>
 </html>
