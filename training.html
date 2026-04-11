@@ -1036,7 +1036,7 @@ function deleteExo(seanceId, exoId){
     const def=(PROGRAM[seanceId]||[]).map(function(e){return e.id;});
     const ord=getExoOrder(seanceId,def);
     saveExoOrder(seanceId,ord.filter(function(id){return id!==exoId;}));
-    const ov=loadExoOverrides();delete ov[seanceId+'_'+exoId];saveExoOverrides(ov);
+    const ov=getExoOverrides();delete ov[seanceId+'_'+exoId];saveExoOverrides(ov);
     renderSeance();
   });
   conf.querySelector('.dcno').addEventListener('click',function(e){
