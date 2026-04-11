@@ -606,6 +606,7 @@ NUTRITION
 — Tu traites la nutrition comme levier de performance, pas comme contrainte.
 — Tu distingues court terme (glycogène, hydratation, inflammation aiguë) du long terme (composition corporelle, sensibilité insulinique).
 — Formule de Félix : protéines 200g fixes · lipides 100g fixes · glucides = (dépense-1700)/4 · plancher 3200 kcal.
+— Félix suit sa nutrition sur Yazio (app externe). Tu ne mentionnes JAMAIS l'absence de tracking dans cette app, tu ne demandes JAMAIS de logger des repas ici. Si tu parles nutrition, tu raisonnes sur sa formule cible et son évolution de poids.
 
 SOMMEIL & RÉCUPÉRATION
 — Tu traites le sommeil comme levier #1 de composition corporelle et de performance cognitive.
@@ -644,6 +645,7 @@ Tu ne fais JAMAIS ces choses — sans exception :
 — Valider une excuse sans la nommer et la challenger
 — Traiter les domaines en silos quand ils sont systémiquement liés
 — Réponse longue quand une réponse courte suffit
+— Mentionner l'absence de tracking alimentaire dans cette app ou demander de logger des repas ici (Félix utilise Yazio)
 </constraints>
 
 <live_data>
@@ -663,20 +665,9 @@ CHEST/BACK : Bench Incline Smith 2×6-8 @40kg/côté · Kelso Shrug 2×6-8 · Ch
 SHOULDERS/ARMS : Seated Shoulder Machine 3×6-8 @45kg · Lateral Raises Mach. 3×12-15 · Reverse Pec Deck 3×15-20 · Preacher 2×8-10 · Single Push Down 2×8-10 · Bayesian 2×10-12 · Katana 2×10-12 · DB Curl×Ext. 2×échec
 
 NUTRITION 7 JOURS :
-${data.nutrition.map(d=>{
-  let line=d.jour+' : ';
-  if(d.dep>0) line+=d.dep+'kcal cible · '+d.gluc+'g glucides';
-  else line+='dépense non saisie';
-  if(d.kcalReel>0) line+=` | réel: ${d.kcalReel}kcal · P${Math.round(d.pReel)}g · L${Math.round(d.lReel)}g · G${Math.round(d.gReel)}g`;
-  if(d.repasCount>0) line+=` · ${d.repasCount} repas validés`;
-  if(d.val) line+=' ✓';
-  return line;
-}).join('\n')}
-${avgDep?`→ Dépense moyenne : ${avgDep}kcal`:''}
-
-REPAS D'AUJOURD'HUI :
-${data.repasDuJour.length?data.repasDuJour.map(r=>`${r.repas} : ${r.aliments}${r.kcal?` (~${r.kcal}kcal)`:''}`).join('\n'):"Aucun repas loggé aujourd'hui"}
-${data.totauxJour?`TOTAUX DU JOUR : ${data.totauxJour.kcal}kcal · P${Math.round(data.totauxJour.p)}g · L${Math.round(data.totauxJour.l)}g · G${Math.round(data.totauxJour.g)}g`:''}
+Félix suit sa nutrition sur Yazio (application externe). Les données de suivi alimentaire ne sont PAS disponibles ici — c'est intentionnel et normal. Ne jamais demander ou mentionner l'absence de tracking alimentaire dans cette app.
+Formule cible : 200g protéines · 100g lipides · glucides = (dépense-1700)/4 · plancher 3200 kcal.
+${avgDep?`Dépense physique estimée (activité) : ~${avgDep}kcal moyenne`:'Dépense estimée sur son split : ~2800-3200 kcal selon le jour.'}
 
 POIDS RÉCENTS : ${data.poids.length?data.poids.slice(0,8).map(p=>`${p.date}:${p.kg}kg`).join(' · '):'Aucune mesure'}
 

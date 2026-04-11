@@ -437,7 +437,7 @@ function renderInsights(days,prevDays){
   if(tracked2.length>=4&&pw.length>=3){
     const avgDep2=tracked2.reduce((a,b)=>a+b.dep,0)/tracked2.length;
     const delta2=pw[pw.length-1]-pw[0];
-    if(avgDep2>=3600&&delta2<0.1)insights.push({ico:'🔍',type:'highlight',title:'Dépense élevée, poids stagnant',text:`Dépense moy. ${fmt(Math.round(avgDep2))} kcal mais poids quasi stable. Possible sous-estimation des apports réels — extras non trackés comptent.`});
+    if(avgDep2>=3600&&delta2<0.1)insights.push({ico:'🔍',type:'highlight',title:'Dépense élevée, poids stagnant',text:`Dépense moy. ${fmt(Math.round(avgDep2))} kcal. Poids quasi stable — surveille les apports réels sur Yazio.`});
   }
   const ratings=past.filter(d=>d.jRating).map(d=>d.jRating);
   if(ratings.length>=3){const avg=ratings.reduce((a,b)=>a+b,0)/ratings.length;if(avg<3&&!insights.some(i=>i.title.includes('sommeil')))insights.push({ico:'🧠',type:'warn',title:'Fatigue mentale',text:`Humeur moyenne ${avg.toFixed(1)}/5. La fatigue mentale réduit la qualité des séances et la progression. Identifie la source.`});}
@@ -460,22 +460,18 @@ async function genererAnalyse(){
   const tracked=days.filter(d=>!d.isFuture&&d.dep>0);
   const avgDepTrack=tracked.length?Math.round(tracked.reduce((a,b)=>a+b.dep,0)/tracked.length):3500;
   const nonTracked=days.filter(d=>!d.isFuture&&d.dep===0).length;
-  let ctx=`PROFIL : Félix — 19 ans, 189cm, lean bulk. Objectif : +0,2 à +0,5kg/sem. Protéines 200g fixes, lipides 100g fixes, glucides = (dep-1700)/4, plancher 3200 kcal.\n\n`;
+  let ctx=`PROFIL : Félix — 19 ans, 189cm, lean bulk. Objectif : +0,2 à +0,5kg/sem. Protéines 200g fixes, lipides 100g fixes, glucides = (dep-1700)/4, plancher 3200 kcal.
+NOTE : Félix suit sa nutrition sur Yazio (app externe). L'absence de données alimentaires dans cette app est NORMALE et intentionnelle — ne jamais le mentionner comme un problème ou un manque.\n\n`;
   ctx+=`SCORE : ${score.total}/10 | Lean bulk: ${score.details[0]?.score||0}/40 | Énergie: ${score.details[1]?.score||0}/35 | Sommeil: ${score.details[2]?.score||0}/25\n`;
   if(prevScore.total>0)ctx+=`Score semaine précédente : ${prevScore.total}/10\n`;
-  if(nonTracked>0)ctx+=`\n⚠️ RÈGLE : ${nonTracked} jour(s) non tracké(s) = pas de saisie dans l'app, PAS un jour sans manger. Ne pas analyser comme déficit nutritionnel.\n`;
   ctx+=`\nDONNÉES :\n`;
   days.filter(d=>!d.isFuture).forEach(d=>{
     ctx+=`${DAYS[d.i]} : `;const parts=[];
-    if(d.dep>0){
-      parts.push(`${d.dep} kcal cible · ${d.gluc}g glucides cibles — tracké`);
-      if(d.kcalReel>0) parts.push(`réel: ${d.kcalReel}kcal · P${Math.round(d.pReel)}g · L${Math.round(d.lReel)}g · G${Math.round(d.gReel)}g`);
-    }
-    else{const glucEst=Math.max(0,Math.round((avgDepTrack-FIXED)/4));parts.push(`non tracké (supposé ~${avgDepTrack} kcal · ~${glucEst}g glucides)`);}
     if(d.poids)parts.push(`poids ${d.poids}kg`);
     if(d.sleep)parts.push(`sommeil ${fmtSleep(d.sleep)}${d.feelMatin?` (matin ${d.feelMatin}/5)`:''}`);
     if(d.jRating){parts.push(`humeur ${d.jRating}/5`);if(d.jGood)parts.push(`✓ "${d.jGood.substring(0,50)}"`);if(d.jBad)parts.push(`✗ "${d.jBad.substring(0,50)}"`);}
     if(d.exosDone>0)parts.push(`séance ${d.sid} (${d.exosDone} exos)`);
+    if(d.dep>0)parts.push(`dépense estimée ${d.dep} kcal · ${d.gluc}g glucides cibles`);
     if(d.val)parts.push(`validé ✓`);
     ctx+=parts.join(' · ')+'\n';
   });
