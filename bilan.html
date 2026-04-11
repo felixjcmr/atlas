@@ -219,7 +219,7 @@ const TODAY=new Date();TODAY.setHours(0,0,0,0);
 const SFR=['L','M','M','J','V','S','D'];
 const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const SEANCES_IDS=['push','pull','lower','repos','chestback','shoulderarms','footing'];
-const FLOOR=3200,FIXED=1790;
+const FLOOR=3200,FIXED=1700;
 function dk(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
 function dow(d){const w=d.getDay();return w===0?6:w-1;}
 function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
@@ -460,7 +460,7 @@ async function genererAnalyse(){
   const tracked=days.filter(d=>!d.isFuture&&d.dep>0);
   const avgDepTrack=tracked.length?Math.round(tracked.reduce((a,b)=>a+b.dep,0)/tracked.length):3500;
   const nonTracked=days.filter(d=>!d.isFuture&&d.dep===0).length;
-  let ctx=`PROFIL : Félix — 19 ans, 189cm, lean bulk. Objectif : +0,2 à +0,5kg/sem. Protéines 200g fixes, lipides 100g fixes, glucides = (dep-1790)/4, plancher 3200 kcal.\n\n`;
+  let ctx=`PROFIL : Félix — 19 ans, 189cm, lean bulk. Objectif : +0,2 à +0,5kg/sem. Protéines 200g fixes, lipides 100g fixes, glucides = (dep-1700)/4, plancher 3200 kcal.\n\n`;
   ctx+=`SCORE : ${score.total}/10 | Lean bulk: ${score.details[0]?.score||0}/40 | Énergie: ${score.details[1]?.score||0}/35 | Sommeil: ${score.details[2]?.score||0}/25\n`;
   if(prevScore.total>0)ctx+=`Score semaine précédente : ${prevScore.total}/10\n`;
   if(nonTracked>0)ctx+=`\n⚠️ RÈGLE : ${nonTracked} jour(s) non tracké(s) = pas de saisie dans l'app, PAS un jour sans manger. Ne pas analyser comme déficit nutritionnel.\n`;

@@ -171,18 +171,32 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 </div>
 
 <div class="tabs">
+  <button class="tab-btn" onclick="switchView('trame')">Trame</button>
   <button class="tab-btn active" onclick="switchView('semaine')">Semaine</button>
   <button class="tab-btn" onclick="switchView('journal')">Journal</button>
   <button class="tab-btn" onclick="switchView('objectifs')">Objectifs</button>
 </div>
 
 <div id="view-semaine" style="display:block;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 18px 0;">
+    <div style="font-size:9px;color:#333;letter-spacing:0.06em;text-transform:uppercase;">Planning semaine</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:9px;color:#333;">Décaler :</span>
+      <button onclick="shiftWeekPlan(-1)" style="font-size:10px;color:#555;border:0.5px solid #1a1a1a;border-radius:8px;padding:3px 10px;background:none;cursor:pointer;">← -1j</button>
+      <button onclick="shiftWeekPlan(1)" style="font-size:10px;color:#555;border:0.5px solid #1a1a1a;border-radius:8px;padding:3px 10px;background:none;cursor:pointer;">+1j →</button>
+      <button onclick="resetWeekCustom()" style="font-size:9px;color:#333;border:0.5px solid #1a1a1a;border-radius:8px;padding:3px 8px;background:none;cursor:pointer;">Reset</button>
+    </div>
+  </div>
   <div class="semaine-scroll">
     <div class="semaine-grid" id="semaine-grid"></div>
   </div>
 
-  <!-- TRAME DE LA SEMAINE -->
-  <div style="margin:16px 18px 0;">
+  <div style="height:80px;"></div>
+</div>
+
+<!-- VUE TRAME -->
+<div id="view-trame" style="display:none;">
+  <div style="margin:14px 18px 0;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;">📋 Trame de la semaine</div>
       <button onclick="resetTrame()" style="font-size:9px;color:#333;border:0.5px solid #1a1a1a;border-radius:8px;padding:2px 8px;background:none;cursor:pointer;">Reset</button>
@@ -231,21 +245,21 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
     <div class="sleep-tips" id="sleep-tips"></div>
     <!-- RESSENTI -->
     <div style="border-top:0.5px solid #141414;padding:10px 14px;">
-      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Ressenti soir</div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;" id="sleep-feel-soir">
-        <button onclick="setSleepFeel('soir',1)" class="feel-btn" data-feel="soir" data-v="1" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😫</button>
-        <button onclick="setSleepFeel('soir',2)" class="feel-btn" data-feel="soir" data-v="2" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😕</button>
-        <button onclick="setSleepFeel('soir',3)" class="feel-btn" data-feel="soir" data-v="3" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😐</button>
-        <button onclick="setSleepFeel('soir',4)" class="feel-btn" data-feel="soir" data-v="4" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">🙂</button>
-        <button onclick="setSleepFeel('soir',5)" class="feel-btn" data-feel="soir" data-v="5" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😄</button>
-      </div>
       <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Ressenti matin</div>
-      <div style="display:flex;gap:6px;" id="sleep-feel-matin">
+      <div style="display:flex;gap:6px;margin-bottom:10px;" id="sleep-feel-matin">
         <button onclick="setSleepFeel('matin',1)" class="feel-btn" data-feel="matin" data-v="1" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😫</button>
         <button onclick="setSleepFeel('matin',2)" class="feel-btn" data-feel="matin" data-v="2" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😕</button>
         <button onclick="setSleepFeel('matin',3)" class="feel-btn" data-feel="matin" data-v="3" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😐</button>
         <button onclick="setSleepFeel('matin',4)" class="feel-btn" data-feel="matin" data-v="4" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">🙂</button>
         <button onclick="setSleepFeel('matin',5)" class="feel-btn" data-feel="matin" data-v="5" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😄</button>
+      </div>
+      <div style="font-size:9px;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Ressenti soir</div>
+      <div style="display:flex;gap:6px;" id="sleep-feel-soir">
+        <button onclick="setSleepFeel('soir',1)" class="feel-btn" data-feel="soir" data-v="1" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😫</button>
+        <button onclick="setSleepFeel('soir',2)" class="feel-btn" data-feel="soir" data-v="2" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😕</button>
+        <button onclick="setSleepFeel('soir',3)" class="feel-btn" data-feel="soir" data-v="3" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😐</button>
+        <button onclick="setSleepFeel('soir',4)" class="feel-btn" data-feel="soir" data-v="4" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">🙂</button>
+        <button onclick="setSleepFeel('soir',5)" class="feel-btn" data-feel="soir" data-v="5" style="flex:1;padding:6px 4px;border-radius:8px;font-size:11px;background:#111;border:0.5px solid #1a1a1a;color:#555;cursor:pointer;">😄</button>
       </div>
     </div>
   </div>
@@ -302,12 +316,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
     <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
       <div style="font-size:9px;color:#38BDF8;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">→ Objectif principal demain</div>
       <textarea id="j-next" placeholder="Sois précis : pas 'faire de sport' mais 'Push 1h30 + 12 000 steps'..." style="width:100%;background:none;border:none;color:#c0c0c0;font-size:12px;font-family:inherit;resize:none;outline:none;line-height:1.6;min-height:44px;" oninput="autoResize(this);saveJournal()"></textarea>
-    </div>
-
-    <!-- INTENTION / FOCUS -->
-    <div style="background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;">
-      <div style="font-size:9px;color:#F59E0B;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">⚡ 1 chose sur laquelle me concentrer</div>
-      <textarea id="j-focus" placeholder="Un seul focus : nutrition, sommeil, productivité, mental..." style="width:100%;background:none;border:none;color:#c0c0c0;font-size:12px;font-family:inherit;resize:none;outline:none;line-height:1.6;min-height:44px;" oninput="autoResize(this);saveJournal()"></textarea>
     </div>
 
     <!-- ÉNERGIE DU JOUR -->
@@ -574,10 +582,13 @@ function getTimelineBlocs(d2){
   var blocs = [];
 
   // ─ MATIN commun ─
-  blocs.push({h:'7h30', m:7*60+30, name:'Réveil · Routine matinale', detail:'', type:'shot'});
-  blocs.push({h:'8h00', m:8*60,    name:'Petit-déjeuner · Compléments', detail:'', type:'nutri'});
+  blocs.push({h:'7h30', m:7*60+30, name:'Réveil · Routine matinale', detail:'Mobilité 10mn · Neck curl + Chin tuck · 50 crunchs + 2mn planche\nRoutine visage · Petit-déjeuner · Compléments', type:'shot'});
+  blocs.push({h:'7h30', m:7*60+30, name:'Mobilité — 10mn', detail:'Cat-cow · Thoracic rotation · Lunge stretch · Wall angel · Around the world · Shoulder stretch', type:'mobi'});
+  blocs.push({h:'7h40', m:7*60+40, name:'Cou — 5mn', detail:'Neck curl 2×15 · Chin tuck 2×20', type:'shot'});
+  blocs.push({h:'7h45', m:7*60+45, name:'Abdos — 5mn', detail:'50 crunchs classiques · 2mn planche', type:'sport'});
+  blocs.push({h:'8h00', m:8*60,    name:'Petit-déjeuner · Compléments', detail:'Fromage blanc 250g · 2 bananes · graines grenade · Magnésium · Créatine · D3 · Vit C', type:'nutri'});
   blocs.push({h:'9h00', m:9*60,    name:'Step / Marche', detail:'1h — marche, activation, lumière naturelle', type:'step'});
-  blocs.push({h:'10h00',m:10*60,   name:'En-cas pré-training', detail:'Fromage blanc 250g · 2 bananes · graines grenade', type:'nutri'});
+  blocs.push({h:'10h00',m:10*60,   name:'En-cas pré-training', detail:'Banane · Fromage blanc si besoin', type:'nutri'});
 
   if(d2===5){
     // Samedi — Sprint & Pliométrie
@@ -595,13 +606,11 @@ function getTimelineBlocs(d2){
     blocs.push({h:'14h00',m:14*60,    name:'Libre — famille',  detail:'Repos mental · journée famille', type:'taf'});
     blocs.push({h:'20h30',m:20*60+30, name:'Dîner',            detail:'Riz · Patate douce · Protéine + libre', type:'nutri'});
   } else if(d2===2){
-    // Mercredi — Lower + Corde & Sac
+    // Mercredi — Lower
     blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Lower — 2h salle (marche inclinée incluse)', type:'muscu'});
     blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
     blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Récupération · taf · lumière naturelle', type:'taf'});
-    blocs.push({h:'17h30',m:17*60+30, name:'Corde à sauter',         detail:'15mn · allure modérée', type:'corde'});
-    blocs.push({h:'17h45',m:17*60+45, name:'Sac de frappe',          detail:'15mn · combinaisons libres', type:'sac'});
-    blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
+    blocs.push({h:'20h30',m:20*60+30, name:'Dîner',                  detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
   } else if(d2===3){
     // Jeudi — Push + Street Push soir
     blocs.push({h:'10h30',m:10*60+30, name:'Muscu + Marche inclinée', detail:'Push — 2h salle (marche inclinée incluse)', type:'muscu'});
@@ -616,7 +625,7 @@ function getTimelineBlocs(d2){
     blocs.push({h:'13h30',m:13*60+30, name:'Déjeuner',               detail:'Sardines · Riz 100g · Patate douce 200g + libre', type:'nutri'});
     blocs.push({h:'14h00',m:14*60,    name:'Libre',                   detail:'Taf · étapes · lumière naturelle', type:'taf'});
     blocs.push({h:'18h00',m:18*60,    name:'En-cas pré-effort',       detail:'Banane 120g (si besoin)', type:'nutri'});
-    blocs.push({h:'18h30',m:18*60+30, name:'Street Pull',            detail:'30mn · Tractions + Australiennes + Isométrique', type:'sport'});
+    blocs.push({h:'18h30',m:18*60+30, name:'Street Pull',            detail:'30mn · Tractions pronation + Tractions neutres + Isométrique', type:'sport'});
     blocs.push({h:'20h30',m:20*60+30, name:'Dîner post-training',    detail:'Riz 100g · Patate douce 200g · Protéine + libre', type:'nutri'});
   } else {
     // Lundi (Chest/Back) & Mardi (Shoulders/Arms) — muscu uniquement
@@ -636,19 +645,30 @@ function getTimelineBlocs(d2){
 function renderToday(){
   var today = new Date(); today.setHours(0,0,0,0);
   var d2 = dow(today);
+
+  // Lire le décalage custom pour afficher le bon contenu de timeline
+  var timelineD2 = d2;
+  try{
+    var _wk=JSON.parse(localStorage.getItem('rt5_week_custom')||'{}');
+    if(_wk[d2]){
+      var _lbl=typeof _wk[d2]==='object'?_wk[d2].label:_wk[d2];
+      var _lmap={'Chest / Back':0,'Shoulders / Arms':1,'Lower':2,'Push':3,'Pull':4,'Sprint & Plio':5,'Footing':6};
+      if(_lmap[_lbl]!==undefined) timelineD2=_lmap[_lbl];
+    }
+  }catch(e){}
+
   var nowMin = new Date().getHours()*60+new Date().getMinutes();
   var opts = {weekday:'long',day:'numeric',month:'long'};
   var dateStr = today.toLocaleDateString('fr-FR',opts);
   document.getElementById('hdr-date').textContent = dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
-  document.getElementById('seance-badge').textContent = SEANCES[d2];
-  document.getElementById('seance-badge').style.color = SEANCE_COL[d2];
-  var _jn=document.getElementById('jour-note');if(_jn)_jn.style.display=d2===4?'block':'none';
+  document.getElementById('seance-badge').textContent = SEANCES[timelineD2]||SEANCES[d2];
+  document.getElementById('seance-badge').style.color = SEANCE_COL[timelineD2]||SEANCE_COL[d2];
+  var _jn=document.getElementById('jour-note');if(_jn)_jn.style.display=timelineD2===4?'block':'none';
   document.getElementById('jour-title').textContent = JOURS[d2];
-  document.getElementById('jour-sub').textContent = SEANCES[d2];
-  var _jn=document.getElementById('jour-note');if(_jn)_jn.style.display=d2===4?'block':'none';
+  document.getElementById('jour-sub').textContent = SEANCES[timelineD2]||SEANCES[d2];
 
   // Dimanche géré dans getTimelineBlocs (footing)
-  var blocs = getTimelineBlocs(d2);
+  var blocs = getTimelineBlocs(timelineD2);
   var html = '';
   blocs.forEach(function(b,i){
     var c = COL[b.type]||COL.sleep;
@@ -818,9 +838,12 @@ function calcSleep(){
   document.getElementById('sleep-bar').style.background = color;
   document.getElementById('sleep-dur-sub').textContent = label+' · optimal 8h–9h';
 
-  // Sauvegarder
+  // Sauvegarder sur J-1 (la nuit qui vient de se terminer = celle d'hier)
   var today = new Date(); today.setHours(0,0,0,0);
-  lss(LS_PRE+'sleep_'+dk(today), JSON.stringify({in:inVal,out:outVal,dur:dur,feel_soir:(JSON.parse(ls(LS_PRE+'sleep_'+dk(today))||'{}').feel_soir||0),feel_matin:(JSON.parse(ls(LS_PRE+'sleep_'+dk(today))||'{}').feel_matin||0)}));
+  var yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
+  var sleepKey = LS_PRE+'sleep_'+dk(yesterday);
+  var existing = JSON.parse(ls(sleepKey)||'{}');
+  lss(sleepKey, JSON.stringify({in:inVal,out:outVal,dur:dur,feel_soir:(existing.feel_soir||0),feel_matin:(existing.feel_matin||0)}));
 
   // Tips
   var tips = [];
@@ -829,6 +852,7 @@ function calcSleep(){
   if(inH>=23) tips.push({ico:'📱',txt:'Endormissement tardif. Éteins les écrans 1h avant et mets ton téléphone hors chambre.'});
   if(dur>=TARGET_MIN) tips.push({ico:'✅',txt:'Sommeil optimal ce soir. Testostérone, GH et synthèse protéique à leur max pendant la nuit.'});
   tips.push({ico:'🧲',txt:'Magnésium bisglycinate 200mg 30mn avant le coucher = endormissement accéléré.'});
+  tips.push({ico:'🥛',txt:'250g de fromage blanc 0% avant de dormir = apport caséine lente qui nourrit tes muscles toute la nuit.'});
   tips.push({ico:'❄️',txt:'Chambre à 18-19°C = sommeil profond 20% plus efficace.'});
 
   var tHtml = tips.map(function(t){
@@ -868,20 +892,22 @@ function renderSleepHistory(){
 
 // ── SWITCH VIEW ──────────────────────────────────────────────────
 function switchView(v){
-  ['semaine','journal','objectifs'].forEach(function(id){
+  ['trame','semaine','journal','objectifs'].forEach(function(id){
     var el=document.getElementById('view-'+id);
     if(el) el.style.display = v===id?'block':'none';
   });
   document.querySelectorAll('.tab-btn').forEach(function(b,i){
-    b.classList.toggle('active',['semaine','journal','objectifs'][i]===v);
+    b.classList.toggle('active',['trame','semaine','journal','objectifs'][i]===v);
   });
+  if(v==='trame') renderTrame();
   if(v==='semaine') renderSemaine();
   if(v==='objectifs') renderObjectifs();
   if(v==='journal'){
-    // Init sommeil
+    // Init sommeil — la nuit qui vient de se terminer = j-1
     var today = new Date(); today.setHours(0,0,0,0);
-    document.getElementById('sleep-date-lbl').textContent = today.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-    var raw = ls(LS_PRE+'sleep_'+dk(today));
+    var yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
+    document.getElementById('sleep-date-lbl').textContent = 'Nuit du '+yesterday.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    var raw = ls(LS_PRE+'sleep_'+dk(yesterday));
     if(raw){
       try{
         var s=JSON.parse(raw);
@@ -949,7 +975,7 @@ const FOCUS_JOUR={
   0:'Récupération · Qualité du sommeil',
   1:'Push · Intensité muscu · Protéines',
   2:'Pull · Dos & biceps · Hydratation',
-  3:'Lower · Natation soir · Glucides',
+  3:'Lower · Récupération · Glucides',
   4:'Repos complet · Récupération · Sommeil',
   5:'Chest/Back · Force · Nutrition post',
   6:'Shoulders/Arms · Pump · Récupération mentale'
@@ -1051,11 +1077,13 @@ function setSleepFeel(type, v){
     b.style.borderColor = active?'#333':'#1a1a1a';
   });
   var today = new Date(); today.setHours(0,0,0,0);
-  var raw = ls(LS_PRE+'sleep_'+dk(today));
+  var yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
+  var sleepDk = dk(yesterday);
+  var raw = ls(LS_PRE+'sleep_'+sleepDk);
   var data = {};
   try{if(raw)data=JSON.parse(raw);}catch(e){}
   data['feel_'+type] = v;
-  lss(LS_PRE+'sleep_'+dk(today), JSON.stringify(data));
+  lss(LS_PRE+'sleep_'+sleepDk, JSON.stringify(data));
   // Conseils contextuels selon ressenti soir
   if(type==='soir') addSleepFeelTips(v);
 }
@@ -1470,6 +1498,18 @@ function loadWeekCustom(){
 function saveWeekCustom(obj){localStorage.setItem('rt5_week_custom',JSON.stringify(obj));}
 function resetWeekCustom(){localStorage.removeItem('rt5_week_custom');renderSemaine();}
 
+function shiftWeekPlan(delta){
+  var custom = loadWeekCustom();
+  var shifted = {};
+  // Décaler toutes les étiquettes de delta jours
+  for(var d=0;d<7;d++){
+    var src = ((d - delta) % 7 + 7) % 7;
+    shifted[d] = custom[src] || SEANCES[src];
+  }
+  saveWeekCustom(shifted);
+  renderSemaine();
+}
+
 // ── MODULE PHYSIQUE ──────────────────────────────────────────────
 var _photoBase64 = null;
 var _photoMediaType = 'image/jpeg';
@@ -1800,8 +1840,19 @@ function deletePhysiqueEntry(dkStr){
 }
 
 // Init au chargement
-// Init direct — DOM déjà prêt à ce stade
-try { switchView("semaine"); } catch(e){ console.error("routine init:",e); }
+try {
+  renderSemaine();
+  renderObjectifs();
+  renderTrame();
+  ['trame','journal','objectifs'].forEach(function(id){
+    var el=document.getElementById('view-'+id);
+    if(el) el.style.display='none';
+  });
+  document.getElementById('view-semaine').style.display='block';
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.classList.toggle('active',['trame','semaine','journal','objectifs'][i]==='semaine');
+  });
+} catch(e){ console.error("routine init:",e); }
 </script>
 </body>
 </html>

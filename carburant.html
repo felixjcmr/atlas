@@ -454,12 +454,12 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 </div>
 
 <div class="tabs">
-  <div class="tab active" data-v="aliments" onclick="switchTab('aliments')">🌿 Aliments</div>
-  <div class="tab" data-v="plan" onclick="switchTab('plan')">📋 Plan alimentaire</div>
+  <div class="tab active" data-v="plan" onclick="switchTab('plan')">📋 Plan alimentaire</div>
   <div class="tab" data-v="micro" onclick="switchTab('micro')">🔬 Micro</div>
+  <div class="tab" data-v="aliments" onclick="switchTab('aliments')">🌿 Aliments</div>
 </div>
 
-<div class="view active" id="view-aliments">
+<div class="view" id="view-aliments">
 
   <!-- STOCKS ESSENTIELS -->
   <div style="margin:12px 14px 4px;">
@@ -485,7 +485,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
   <div id="foods-container"></div>
 </div>
 
-<div class="view" id="view-plan">
+<div class="view active" id="view-plan">
   <div class="plan-inner">
   <!-- Navigation de date -->
   <div id="carb-date-nav" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:8px 4px;"></div>
@@ -628,37 +628,37 @@ const FOODS=[
    quand:"Déjeuner avec legumes verts",
    comment:"Connetable au naturel UNIQUEMENT — pas a l'huile de tournesol qui ajoute des oméga-6 contrebalançant les oméga-3. Manger avec epinards crus + poivron rouge pour maximiser absorption du fer. La vitamine C du poivron triple le fer des sardines.",
    dose:"120g (1 boîte)",
-   combo:"Epinards crus + poivron rouge + sardines + huile d'olive = trio absorption maximum.",warn:"Sardines a l'huile de tournesol = oméga-6 parasites. Toujours au naturel ou a la tomate."},
+   combo:"Avec légumes verts crus + source de vitamine C = absorption fer maximale.",warn:"Sardines a l'huile de tournesol = oméga-6 parasites. Toujours au naturel ou a la tomate."},
   {id:"avoine",rank:3,tier:"S",name:"Avoine",cat:"Céréale",ico:"🌾",freq:"Quotidien",fq:"quotidien",
    ben:["IG 55 + bêta-glucanes — libération lente 3-4h · ectomorphe vide vite","Magnésium 60mg/100g — cofacteur 300+ enzymes dont synthèse protéique musculaire","Fibres solubles 4g/100g — microbiote — améliore absorption de tes 200g protéines/jour"],
    quand:"Petit-déjeuner post-street workout",
    comment:"150g a sec dans un bol, kefir + myrtilles + cannelle + cacao + banane. Ne pas trop cuire — l'avoine molle a un IG plus élevé que l'avoine al dente. Overnight oats = IG encore plus bas. Ne pas utiliser des flocons instantanes — trop transformes.",
    dose:"150g a sec",
-   combo:"Kefir + oeufs + myrtilles + cannelle + cacao + banane = repas optimal.",warn:null},
+   combo:"Avec protéine + fruits + épices anti-inflammatoires.",warn:null},
   {id:"kefir",rank:4,tier:"S",name:"Kéfir demi-écrémé",cat:"Probiotique",ico:"🥛",freq:"Quotidien",fq:"quotidien",
    ben:["30+ souches probiotiques vs 2-5 yaourt — microbiote diversifié — absorption protéines","Vitamine K2 (MK-7) — oriente calcium vers les os pas les artères · charges lourdes muscu","Fermentation — lactose quasi nul · toléré meme en sensibilité légère"],
    quand:"Matin avec le petit-dejeuner",
    comment:"Boire a température ambiante — pas glacé, pour préserver les bactéries vivantes. Oing est une bonne marque. Ne pas chauffer — détruit les probiotiques. Peut être versé sur l'avoine si tiède. Remplace définitivement le lait d'amande industriel qui n'n'apporte quasi rien.",
    dose:"200g",
-   combo:"Remplace le lait d'amande Bjorg definitvement.",warn:null},
+   combo:"Sur l'avoine ou en boisson seule à température ambiante.",warn:null},
   {id:"epinards",rank:5,tier:"S",name:"Épinards crus",cat:"Légume vert",ico:"🥬",freq:"Quotidien",fq:"quotidien",
    ben:["Nitrates — oxyde nitrique — vasodilatation — +3% performance mesurée (méta-analyse 2019)","Magnésium 87mg/100g cuits — cofacteur 300+ enzymes dont synthèse protéique","Vitamine K1 1000%+ AJR — santé articulaire sous charges lourdes muscu + street"],
    quand:"Déjeuner — manger en premier avant les glucides",
    comment:"Crus de préférence pour les nitrates (la cuisson les réduit). Manger EN PREMIER dans le repas — les fibres et l'eau des epinards ralentissent l'absorption du riz qui suit. Toujours avec poivron rouge cru : vitamine C triple l'absorption du fer des epinards.",
    dose:"100g crus",
-   combo:"Toujours avec poivron rouge cru + sardines + huile d'olive.",warn:null},
+   combo:"Avec poivron rouge cru pour maximiser l'absorption du fer.",warn:null},
   {id:"myrtilles",rank:6,tier:"S",name:"Myrtilles surgelées",cat:"Antioxydant",ico:"🫐",freq:"Quotidien",fq:"quotidien",
    ben:["Anthocyanines — DOMS (courbatures) -25% post-exercice excentrique (Howatson 2012)","Sensibilité insuline amélioree — meilleure captation glucose musculaire post-training","Anti-oxydant ORAC — neutralise les ROS générés par ton volume d'entraînement très élevé"],
    quand:"x3 moments : matin (avoine) + en-cas + collation soir",
    comment:"Surgelees aussi efficaces que fraîches — la congélation preserve les anthocyanines. Decongeler a température ambiante ou directement dans l'avoine. Ne PAS cuire — détruit les anthocyanines. 60g x3 = 180g quotidiens repartis stratégiquement pour un effet anti-inflammatoire continu.",
    dose:"60g x 3 moments = 180g total",
-   combo:"Matin dans avoine. En-cas avec fromage blanc. Soir dans collation pre-sommeil.",warn:null},
+   combo:"Dans l'avoine, avec fromage blanc, ou seules comme en-cas.",warn:null},
   {id:"patate",rank:7,tier:"S",name:"Patate douce",cat:"Glucide complexe",ico:"🍠",freq:"Quotidien",fq:"quotidien",
    ben:["IG 63 vs 73 riz blanc — recharge glycogène post-training sans pic insulinique excessif","Bêta-carotène 14000µg/100g — vitamine A naturelle · complément jours sans foie","Potassium 475mg/100g — électrolytes avec volume steps + marche inclinées"],
    quand:"250g au dejeuner + 250g au diner = 500g/jour",
    comment:"TOUJOURS cuite — crue elle contient des anti-nutriments et le bêta-carotène est quasi non biodisponible. Peser CRUE puis cuire (four 200 degres 40mn ou vapeur 25mn). Ajouter SYSTÉMATIQUEMENT huile d'olive ou beurre apres cuisson — bêta-carotène liposoluble, absorption ×4 avec matière grasse.",
    dose:"500g/jour — 250g midi + 250g soir",
-   combo:"Avec boeuf ou sardines + huile d'olive = repas de récupération optimal.",warn:"Toujours cuite. Toujours avec matière grasse. Peser crue pour précision."},
+   combo:"Avec protéine + huile d'olive post-cuisson = repas de récupération.",warn:"Toujours cuite. Toujours avec matière grasse. Peser crue pour précision."},
   {id:"ail",rank:8,tier:"S",name:"Ail cru ecrase",cat:"Condiment",ico:"🧄",freq:"Quotidien",fq:"quotidien",
    ben:["Allicine — vasodilatation + antimicrobien + potentiel soutien testostérone","Composés soufrés — métabolisme œstrogènes similaire au sulforaphane du brocoli","Zéro calorie · zero effort · dans tous les plats = meilleur ratio impact/contrainte"],
    quand:"Midi et soir dans les plats",
@@ -668,7 +668,7 @@ const FOODS=[
   {id:"olive",rank:9,tier:"S",name:"Huile d'olive extra-vierge",cat:"Lipide",ico:"🫒",freq:"Quotidien",fq:"quotidien",
    ben:["Oléocanthal — anti-inflammatoire similaire à l'ibuprofène à dose régulière · synergique EPA/DHA","Polyphénols — protection cardiovasculaire · volume cardio élevé (natation, corde, steps)","Vecteur vitamines liposolubles A/D/E/K — multiplie leur absorption dans le même repas"],
    quand:"Midi et soir sur legumes et plats",
-   comment:"Point de fumee 180 degres — ne jamais faire fumer l'huile d'olive. Sur les epinards froids, la patate douce cuite, le brocoli. Conservation dans placard sombre, jamais au frigo. C'est aussi le vecteur OBLIGATOIRE de la curcumine — toujours avec curcuma + poivre.",
+   comment:"Point de fumée 180°C — ne jamais faire fumer. Ajouter APRÈS cuisson sur les légumes et les glucides. Conservation dans placard sombre, jamais au frigo. Vecteur OBLIGATOIRE de la curcumine — toujours avec curcuma + poivre.",
    dose:"10g dejeuner + 10g diner = 20g/jour",
    combo:"Toujours avec curcuma + poivre noir — vecteur indispensable de la curcumine.",warn:null},
   {id:"fb",rank:10,tier:"S",name:"Fromage blanc 0%",cat:"Proteine lente",ico:"🥣",freq:"Quotidien",fq:"quotidien",
@@ -706,7 +706,7 @@ const FOODS=[
    quand:"Dîner post-training",
    comment:"Carrefour 5% MG — lipides deja couverts ailleurs. Ne pas trop cuire — saignant/a point preserve mieux creatine et acides amines. Ne PAS saler avant cuisson (desseche les fibres). Saler en fin de cuisson uniquement. Ne pas consommer de laitages dans les 2h autour du steak.",
    dose:"200g",
-   combo:"Riz blanc + patate douce + ail + huile d'olive = repas de récupération complet.",warn:"Ne pas consommer de calcium (lait, yaourt) dans les 2h — bloque l'absorption du zinc."},
+   combo:"Avec glucides complexes + légumes verts + huile d'olive.",warn:"Ne pas consommer de calcium (lait, yaourt) dans les 2h — bloque l'absorption du zinc."},
   {id:"poivron",rank:16,tier:"A",name:"Poivron rouge cru",cat:"Légume",ico:"🫑",freq:"Quotidien",fq:"quotidien",
    ben:["Vitamine C 190mg/100g — 2x le kiwi · triple absorption fer non-héminique des epinards","Lycopene + antioxydants — protection cardiovasculaire · synergique huile d'olive","Cru = zero preparation · volume sans calories significatives"],
    quand:"Déjeuner en crudite avec les epinards",
@@ -731,12 +731,12 @@ const FOODS=[
    comment:"Cuisson vapeur 5-7mn MAXIMUM — preserve le sulforaphane. Brocoli mou = sulforaphane détruit. Al dente = bonne texture + nutriments preserves. Mastication vigoureuse importante — active la myrosinase qui forme le sulforaphane. Ajouter huile d'olive APRES cuisson (pas pendant).",
    dose:"150g cuit al dente",
    combo:"Avec steak hache + patate douce + ail + huile d'olive = diner de récupération.",warn:null},
-  {id:"grenade",rank:20,tier:"B",name:"Jus de grenade pur",cat:"Antioxydant",ico:"🍷",freq:"Post-training",fq:"special",
-   ben:["Polyphénols très concentrès — reduction DOMS post-exercice mesurée sur etudes solides","Flux sanguin NO-dependant — synergique betterave et epinards · vasodilatation cumulee","Anthocyanines — récupération vasculaire apres effort intense · pertinent diner post-training"],
-   quand:"Post-training, avec le diner ou juste apres",
-   comment:"Jus pur 100% UNIQUEMENT — pas de cocktail ni grenadine. Verifier ingredients : doit etre 100% grenade sans sucres ajoutes. 100ml suffit — au-dela c'est du sucre inutile. Peut se combiner avec jus de betterave les jours ou tu fais betterave pre-training.",
-   dose:"100ml pur",
-   combo:"Avec le diner post-training.",warn:null},
+  {id:"grenade",rank:20,tier:"B",name:"Graines de grenade",cat:"Antioxydant",ico:"🍎",freq:"Quotidien",fq:"quotidien",
+   ben:["Polyphénols concentrés — réduction DOMS post-exercice mesurée sur études solides","Punicalagins — les antioxydants les plus puissants dans les fruits · ORAC très élevé","Anthocyanines + flavonoïdes — récupération vasculaire · effet cumulatif long terme"],
+   quand:"Le matin ou en collation",
+   comment:"40g de graines (arilles) = dose efficace. Les graines entières conservent plus de polyphénols que le jus. Pas de transformation nécessaire. Peuvent être ajoutées directement dans l'avoine, le fromage blanc ou mangées seules.",
+   dose:"40g",
+   combo:"Dans l'avoine ou avec le fromage blanc.",warn:null},
   {id:"gingembre",rank:21,tier:"B",name:"Gingembre frais",cat:"Épice",ico:"🫚",freq:"Quotidien",fq:"quotidien",
    ben:["Gingérol — DOMS -25% post-exercice excentrique (street + muscu quotidiens)","Améliore vidange gastrique — digestion plus rapide des repas volumineux","Anti-inflammatoire systémique complementaire des EPA/DHA des sardines"],
    quand:"Shot matinal + dans les plats du midi et soir",
@@ -755,11 +755,11 @@ const FOODS=[
    comment:"1 c.a.c dans l'avoine = glycemie matinale stabilisee, utile avec la banane (IG 62). S'assurer que c'est CEYLAN (fine, enroulee, douce, odeur delicate) et pas CASSIA (baton dur, piquante, coumarine élevée) que l'on trouve souvent en supermarche. Chercher 'Ceylon cinnamon' sur l'etiquette.",
    dose:"1 c.a.c (3g) dans l'avoine",
    combo:"Avoine + cannelle + cacao + myrtilles = petit-dejeuner anti-inflammatoire.",warn:"Ceylan uniquement — la Cassia contient trop de coumarine a dose régulière."},
-  {id:"chocolat",rank:24,tier:"B",name:"Chocolat noir 90%",cat:"Antioxydant",ico:"🍫",freq:"Quotidien",fq:"quotidien",
+  {id:"chocolat",rank:24,tier:"B",name:"Chocolat noir 85%",cat:"Antioxydant",ico:"🍫",freq:"Quotidien",fq:"quotidien",
    ben:["Flavonoïdes — vasodilatation NO-dependante — flux sanguin musculaire améliore","Magnésium 64mg/20g + fer 2mg — micronutriments récupération dans aliment plaisir","Théobromine — stimulant leger non-anxiogene · focus sans pic cortisol"],
    quand:"Dans l'avoine le matin · cacao en poudre dans la collation soir",
-   comment:"Lindt Excellence 90% — 16g le matin dans l'avoine. Cacao 100% non sucré en poudre separement pour la collation soir. Le cacao en poudre conserve plus de flavonoïdes que le chocolat fondu. Ne pas depasser 20g de chocolat/jour (lipides). Ne pas confondre cacao sucre type Van Houten.",
-   dose:"16g chocolat matin + 5-8g cacao poudre soir",
+   comment:"85% minimum — au-delà les flavonoïdes augmentent, le sucre diminue. Manger en carrés (8g/carré). Le cacao en poudre 100% conserve plus de flavonoïdes. Ne pas dépasser 20-25g/jour (lipides). Ne pas confondre avec cacao sucré.",
+   dose:"2-3 carrés (16-24g) + cacao poudre 5-8g",
    combo:"Cacao dans avoine + myrtilles = antioxydants cumules des le matin.",warn:null},
   {id:"vinaigre",rank:25,tier:"C",name:"Vinaigre de cidre",cat:"Acidifiant",ico:"🍶",freq:"Quotidien",fq:"quotidien",
    ben:["Acide acétique — activation AMPK — partition glucides vers muscle plutot qu'adipeux","Réduction pic glycémique -20-30% avant les repas riches en glucides","Prébiotique leger — soutien microbiote · synergique avec le kefir"],
@@ -859,7 +859,7 @@ const DB={
   pates:        {k:3.71, g:0.750,p:0.130,l:0.011},
   pates_comp:   {k:3.60, g:0.670,p:0.140,l:0.016},
   pain_complet: {k:2.47, g:0.450,p:0.090,l:0.030},
-  pain_seigle:  {k:2.59, g:0.480,p:0.088,l:0.017},
+  pain_seigle:  {k:2.41, g:0.406,p:0.068,l:0.018},
   pain_mie:     {k:2.65, g:0.510,p:0.090,l:0.040},
   lentilles:    {k:3.53, g:0.600,p:0.240,l:0.010},
   pois_chiche:  {k:3.64, g:0.610,p:0.190,l:0.060},
@@ -1268,7 +1268,7 @@ const DB_LABELS={
   miel:         {n:"Miel",                    cat:"Sucrant",   ico:"🍯"},
   myrtilles:    {n:"Myrtilles surgelées",      cat:"Fruit",     ico:"🫐"},
   banane:       {n:"Banane",                  cat:"Fruit",     ico:"🍌"},
-  choco90:      {n:"Chocolat 90%",            cat:"Lipide",    ico:"🍫"},
+  choco90:      {n:"Chocolat 90%",            cat:"Lipide",    ico:"🍫", defQty:8,   unit:"carré"},
   cacao:        {n:"Cacao 100%",              cat:"Lipide",    ico:"🤎"},
   sardines:     {n:"Sardines huile d'olive",   cat:"Protéine",  ico:"🐟"},
   epinards:     {n:"Épinards crus",           cat:"Légume",    ico:"🥬"},
@@ -1315,7 +1315,7 @@ const DB_LABELS={
   pates:        {n:"Pâtes blanches crues",    cat:"Glucide",   ico:"🍝"},
   pates_comp:   {n:"Pâtes complètes crues",   cat:"Glucide",   ico:"🍝"},
   pain_complet: {n:"Pain complet",            cat:"Glucide",   ico:"🍞"},
-  pain_seigle:  {n:"Pain de seigle",          cat:"Glucide",   ico:"🍞"},
+  pain_seigle:  {n:"Pain de seigle",          cat:"Glucide",   ico:"🍞", defQty:35,  unit:"tranche"},
   pain_mie:     {n:"Pain de mie",             cat:"Glucide",   ico:"🍞"},
   lentilles:    {n:"Lentilles sèches",        cat:"Glucide",   ico:"🫘"},
   pois_chiche:  {n:"Pois chiches secs",       cat:"Glucide",   ico:"🫘"},
@@ -1419,8 +1419,8 @@ const DB_LABELS={
   dattes:       {n:"Dattes",                      cat:"Fruit",     ico:"🟤"},
   abricot_sec:  {n:"Abricots secs",              cat:"Fruit",     ico:"🍑"},
   compote_p:    {n:"Compote pomme sans sucre",   cat:"Fruit",     ico:"🍎"},
-  choco85:      {n:"Chocolat noir 85%",          cat:"Lipide",    ico:"🍫"},
-  choco70:      {n:"Chocolat noir 70%",          cat:"Lipide",    ico:"🍫"},
+  choco85:      {n:"Chocolat noir 85%",          cat:"Lipide",    ico:"🍫", defQty:8,  unit:"carré"},
+  choco70:      {n:"Chocolat noir 70%",          cat:"Lipide",    ico:"🍫", defQty:10,  unit:"carré"},
   choco_lait:   {n:"Chocolat au lait",           cat:"Lipide",    ico:"🍫"},
   mangue_surg:  {n:"Mangue surgelée",            cat:"Fruit",     ico:"🥭"},
   epinards_surg:{n:"Épinards surgelés",          cat:"Légume",    ico:"🥬"},
@@ -2346,7 +2346,7 @@ function switchTab(t){
   document.querySelectorAll(".bn")[2]?.classList.add("active"); // 🌿 Carburant = index 2
   window.scrollTo(0,0);
   if(t==="plan"){lastDep=null;renderPlan();renderCarbDateNav();}
-  if(t==="micro") renderMicro();
+  if(t==="micro"){if(!planQties){lastDep=null;renderPlan();}renderMicro();}
 }
 
 let activeTier="ALL";
@@ -2658,7 +2658,8 @@ function renderRecipeEdit(){
   el.innerHTML=rec.items.map(function(it,i){
     const qty=_editRecipeQties[i]!==undefined?_editRecipeQties[i]:it.qty;
     const kcal=DB[it.id]?Math.round(DB[it.id].k*qty):0;
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #111;">'+
+    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:0.5px solid #111;">'+
+      '<button onclick="deleteRecipeItem('+i+')" style="background:none;border:none;color:#2a2a2a;font-size:16px;cursor:pointer;flex-shrink:0;padding:0 2px;">🗑️</button>'+
       '<div style="flex:1;font-size:12px;color:#c0c0c0;">'+it.n+'</div>'+
       '<div style="display:flex;align-items:center;gap:6px;">'+
         '<input type="number" min="0" max="2000" step="5" value="'+qty+'" data-eidx="'+i+'" '+
@@ -2668,7 +2669,6 @@ function renderRecipeEdit(){
       '<div id="ekcal-'+i+'" style="font-size:12px;font-weight:600;color:#7B72E9;min-width:50px;text-align:right;">'+kcal+' kcal</div>'+
     '</div>';
   }).join('');
-  // Event delegation
   el.oninput = function(e){
     const inp = e.target.closest('input[data-eidx]');
     if(!inp) return;
@@ -2685,6 +2685,38 @@ function renderRecipeEdit(){
     },0);
     document.getElementById('recipe-edit-total').textContent = Math.round(tot) + ' kcal';
   };
+}
+
+function deleteRecipeItem(itemIdx){
+  const recipes=loadRecipes();
+  const rec=recipes[_editRecipeIdx];
+  if(!rec)return;
+  rec.items.splice(itemIdx,1);
+  // Renuméroter les qtés
+  const newQties={};
+  Object.keys(_editRecipeQties).forEach(function(k){
+    const ki=parseInt(k);
+    if(ki<itemIdx) newQties[ki]=_editRecipeQties[ki];
+    else if(ki>itemIdx) newQties[ki-1]=_editRecipeQties[ki];
+  });
+  _editRecipeQties=newQties;
+  recipes[_editRecipeIdx]=rec;
+  saveRecipes(recipes);
+  renderRecipeEdit();
+}
+
+function saveRecipeChanges(){
+  const recipes=loadRecipes();
+  const rec=recipes[_editRecipeIdx];
+  if(!rec)return;
+  rec.items=rec.items.map(function(it,i){
+    return{id:it.id,n:it.n,qty:_editRecipeQties[i]!==undefined?_editRecipeQties[i]:it.qty};
+  });
+  rec.ts=Date.now();
+  recipes[_editRecipeIdx]=rec;
+  saveRecipes(recipes);
+  const btn=document.querySelector('[onclick="saveRecipeChanges()"]');
+  if(btn){const orig=btn.textContent;btn.textContent='✓ Recette mise à jour !';btn.style.color='#22C55E';setTimeout(function(){btn.textContent=orig;btn.style.color='';},1500);}
 }
 
 function confirmApplyRecipe(mode){
@@ -2800,8 +2832,8 @@ function addExtraItem(ri, id, name, qty){
   if(!ex[ri]) ex[ri]=[];
   ex[ri].push({id, n:name, qty:qty||100});
   saveExtras(ex);
-  _extraPickerOpen=-1;
-  renderRepasAll();
+  // Mise à jour inline sans fermer le repas ni fermer le picker
+  _refreshRepas(ri);
   const auto=computeAuto();
   saveSnap(auto);renderTotalCard(auto);
 }
@@ -2811,7 +2843,8 @@ function removeExtraItem(ri, idx){
   ex[ri].splice(idx,1);
   if(!ex[ri].length) delete ex[ri];
   saveExtras(ex);
-  renderRepasAll();
+  // Mise à jour inline sans fermer le repas
+  _refreshRepas(ri);
   const auto=computeAuto();
   saveSnap(auto);renderTotalCard(auto);
 }
@@ -2964,6 +2997,10 @@ function saveSnap(auto){
   }
 }
 
+function loadSnap(){
+  try{return JSON.parse(localStorage.getItem("carb_"+TDK()+"_plan")||'null');}catch(e){return null;}
+}
+
 // ── renderPlan ────────────────────────────────────────────────────────────
 
 // ── REPAS DONE / HIDDEN ──────────────────────────────────────
@@ -3010,6 +3047,31 @@ function resetSwaps(){
   itemSwaps={};
   localStorage.removeItem(SWAP_KEY);
   renderPlan();
+}
+
+// Mise à jour inline d'un repas sans re-render complet (garde l'état ouvert)
+function _refreshRepas(ri){
+  const ex=loadExtras();
+  const items=ex[ri]||[];
+  const rm=repasMac(ri);
+  const done=isRepasDone(ri);
+  const hasItems=items.length>0;
+  const body=document.getElementById('rb_'+ri);
+  if(!body) { renderRepasAll(); return; }
+  // Mettre à jour le contenu du body sans le fermer
+  const emptyHtml=!hasItems?`<div class="repas-empty"><div class="repas-empty-ico">🍽️</div><div class="repas-empty-txt">Repas vide · applique une recette<br>ou ajoute un aliment</div></div>`:'';
+  const macHtml=hasItems?`<div class="repas-macros" id="rm_${ri}">${macRow(rm)}</div>`:'';
+  body.innerHTML=`<div class="repas-action-bar" onclick="event.stopPropagation()">
+    <button class="repas-done-btn${done?' done':''}" onclick="toggleRepasDone(${ri})">${done?'✓ Validé':'○ Valider'}</button>
+    <button class="recipe-btn" onclick="openRecipeModal(${ri})">📖 Recettes</button>
+    <button class="repas-hide-btn" onclick="hideRepasToday(${ri})">✕</button>
+  </div>${emptyHtml}${extrasHTML(ri)}${macHtml}
+  <button class="add-food-btn" onclick="openExtraPicker(${ri})">＋ Ajouter un aliment</button>`;
+  // Màj header kcal et sous-titre
+  const rhKcal=document.getElementById('rh-kcal-'+ri);
+  if(rhKcal) rhKcal.innerHTML=rm.k>0?`<span class="repas-kcal">${Math.round(rm.k)}</span><span class="repas-kcal-unit"> kcal</span>`:'';
+  const rtime=document.querySelector('#rh_'+ri+' .repas-time');
+  if(rtime) rtime.textContent=done?'✓ Validé':hasItems?items.length+' aliment'+(items.length>1?'s':''):'Vide';
 }
 
 function renderRepasAll(){
@@ -3371,11 +3433,12 @@ function renderStocks(){
   }catch(e){}
 })();
 renderFoods();updateProgress();renderPlan();renderStocks();renderCarbDateNav();
-// Auto-switch vers l'onglet demandé via le hash
+// Auto-switch vers l'onglet demandé via le hash, sinon Plan par défaut
 (function(){
   var hash=location.hash;
-  if(hash==="#plan"){switchTab("plan");history.replaceState(null,"",location.pathname);}
-  else if(hash==="#micro"){switchTab("micro");history.replaceState(null,"",location.pathname);}
+  if(hash==="#micro"){switchTab("micro");history.replaceState(null,"",location.pathname);}
+  else if(hash==="#aliments"){switchTab("aliments");history.replaceState(null,"",location.pathname);}
+  else{switchTab("plan");}
 })();
 
 // ── ALIMENTS MANUELS ─────────────────────────────────────────────
@@ -3642,13 +3705,15 @@ function renderAddList(){
     return true;
   }).map(id=>{
     const lbl=DB_LABELS[id];const d=DB[id];
+    const portionInfo = lbl.defQty ? `<span style="color:#F59E0B;font-size:8px;">1 ${lbl.unit||'portion'} = ${lbl.defQty}g</span>` : `<span style="font-size:9px;color:#2a2a2a;">/ 100g</span>`;
+    const kcalPortion = lbl.defQty ? `${Math.round(d.k*lbl.defQty)} kcal` : `${Math.round(d.k*100)} kcal`;
     return`<div class="swap-item" onclick="selectAdd('${id}')">
       <div class="swap-ico">${lbl.ico}</div>
       <div class="swap-info">
         <div class="swap-name">${lbl.n}</div>
         <div class="swap-macros"><span class="p">${Math.round(d.p*100)}g P</span> · <span class="l">${Math.round(d.l*100)}g L</span> · <span class="g">${Math.round(d.g*100)}g G</span></div>
       </div>
-      <div class="swap-kcal">${Math.round(d.k*100)} kcal<br><span style="font-size:9px;color:#2a2a2a;">/ 100g</span></div>
+      <div class="swap-kcal">${kcalPortion}<br>${portionInfo}</div>
     </div>`;
   });
   // Résultats Open Food Facts
@@ -3710,7 +3775,12 @@ var _addedCount = 0; // compteur aliments ajoutés en mode multi
 function selectAdd(foodId){
   const lbl=DB_LABELS[foodId];
   if(!lbl)return;
-  const qty=parseInt(document.getElementById('add-qty').value)||100;
+  // Auto-remplir avec la portion de référence si elle existe
+  const qtyInp = document.getElementById('add-qty');
+  const currentQty = qtyInp ? parseInt(qtyInp.value) : 100;
+  const defaultQty = lbl.defQty || 100;
+  // Utiliser defQty seulement si l'utilisateur n'a pas changé la valeur manuellement
+  const qty = (currentQty===100 && lbl.defQty) ? lbl.defQty : currentQty;
   // Builder mode
   if(_extraPickerOpen===-99){
     _builderItems.push({id:foodId,n:lbl.n,qty:qty});
@@ -3867,12 +3937,13 @@ document.addEventListener('click', function(e){
       </div>
       <button onclick="document.getElementById('recipe-edit-overlay').classList.remove('open')" style="background:none;border:none;color:#444;font-size:18px;cursor:pointer;">✕</button>
     </div>
-    <div style="font-size:10px;color:#333;margin-bottom:10px;flex-shrink:0;">Ajuste les quantités avant d'appliquer</div>
+    <div style="font-size:10px;color:#333;margin-bottom:10px;flex-shrink:0;">Ajuste les quantités · tape sur un aliment pour le supprimer</div>
     <div id="recipe-edit-items" style="overflow-y:auto;flex:1;"></div>
     <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;" id="recipe-apply-btns">
-      <button onclick="confirmApplyRecipe('replace')" style="flex:1;padding:14px;background:#7B72E9;color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;">↺ Remplacer</button>
-      <button onclick="confirmApplyRecipe('add')" style="flex:1;padding:14px;background:#0d1f17;border:0.5px solid #22C55E;color:#22C55E;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;">＋ Ajouter</button>
+      <button onclick="confirmApplyRecipe('replace')" style="flex:1;padding:12px;background:#7B72E9;color:#fff;border:none;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;">↺ Appliquer</button>
+      <button onclick="confirmApplyRecipe('add')" style="flex:1;padding:12px;background:#0d1f17;border:0.5px solid #22C55E;color:#22C55E;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;">＋ Ajouter</button>
     </div>
+    <button onclick="saveRecipeChanges()" style="width:100%;margin-top:8px;padding:11px;background:#0a0820;border:0.5px solid #2e2b6e;color:#7B72E9;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;">💾 Sauvegarder les grammages dans la recette</button>
   </div>
 </div>
 

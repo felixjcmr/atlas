@@ -157,6 +157,20 @@ button,input,textarea{font-family:inherit;}
 .exo-body.collapsed{display:none;}
 .exo-block{transition:border-color 0.2s;}
 @keyframes prog-spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.exo-chrono{font-size:11px;font-weight:600;color:#F59E0B;min-width:44px;text-align:center;padding:3px 6px;border:0.5px solid #3a2800;border-radius:8px;background:#1c1000;cursor:pointer;letter-spacing:0.02em;}
+.exo-chrono.running{color:#22C55E;border-color:#166534;background:#071a0a;}
+.exo-rest-wrap{display:flex;align-items:center;gap:6px;padding:6px 14px;border-top:0.5px solid #0f0f0f;background:#080808;}
+.exo-rest-lbl{font-size:9px;color:#2a2a2a;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;}
+.exo-rest-inp{width:46px;background:#111;border:0.5px solid #1a1a1a;border-radius:6px;color:#c0c0c0;font-size:12px;font-weight:600;text-align:center;padding:3px 5px;font-family:inherit;}
+.exo-rest-inp:focus{outline:none;border-color:#3a2800;color:#F59E0B;}
+.exo-rest-unit{font-size:9px;color:#2a2a2a;}
+.exo-rest-btn{font-size:10px;font-weight:600;padding:4px 10px;border-radius:12px;background:#1c1000;border:0.5px solid #3a2800;color:#F59E0B;cursor:pointer;}
+.exo-rest-btn.running{background:#071a0a;border-color:#166534;color:#22C55E;}
+.exo-rest-btn.done{color:#22C55E;border-color:#22C55E;}
+.exo-rest-count{font-size:16px;font-weight:700;color:#F59E0B;min-width:28px;text-align:center;}
+.exo-rest-count.low{color:#EF4444;}
+.exo-rest-count.done{color:#22C55E;}
+.mini-val{font-size:8px;color:#444;text-align:center;min-height:10px;}
 </style>
 </head>
 <body>
@@ -244,13 +258,14 @@ button,input,textarea{font-family:inherit;}
 <script>
 // ── PROGRAMME ──────────────────────────────────────────────────
 const SEANCES = {
-  0: {id:'footing',       label:'Footing',          color:'#34D399', emoji:'🏃'},  // Dimanche
-  1: {id:'chestback',     label:'Chest / Back',     color:'#EF4444', emoji:'🔥'},  // Lundi
-  2: {id:'shoulderarms',  label:'Shoulders / Arms', color:'#E879F9', emoji:'⚡'},  // Mardi
-  3: {id:'lower',         label:'Lower',            color:'#F59E0B', emoji:'🦵'},  // Mercredi
-  4: {id:'push',          label:'Push',             color:'#7B72E9', emoji:'💪'},  // Jeudi
-  5: {id:'pull',          label:'Pull',             color:'#22C55E', emoji:'🔗'},  // Vendredi
-  6: {id:'sprint',        label:'Sprint & Plio',    color:'#555',    emoji:'💨'},  // Samedi
+  // clés = getDay() : 0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam
+  0: {id:'footing',      label:'Footing',          color:'#34D399', emoji:'🏃'},  // Dimanche
+  1: {id:'chestback',    label:'Chest / Back',     color:'#EF4444', emoji:'🔥'},  // Lundi
+  2: {id:'shoulderarms', label:'Shoulders / Arms', color:'#E879F9', emoji:'⚡'},  // Mardi
+  3: {id:'lower',        label:'Lower',            color:'#F59E0B', emoji:'🦵'},  // Mercredi
+  4: {id:'push',         label:'Push',             color:'#7B72E9', emoji:'💪'},  // Jeudi
+  5: {id:'pull',         label:'Pull',             color:'#22C55E', emoji:'🔗'},  // Vendredi
+  6: {id:'sprint',       label:'Sprint & Plio',    color:'#F59E0B', emoji:'💨'},  // Samedi
 };
 
 const PROGRAM = {
@@ -264,13 +279,13 @@ const PROGRAM = {
     {id:'pushdown',     name:'Pushdown Triceps',            muscle:'Triceps',    sets:2, repsTarget:'↑ échec', kgRef:'20/10', deg:false, link:'https://vm.tiktok.com/ZNRX68JLV/'},
   ],
   pull: [
-    {id:'lat_pulldown', name:'Lat Pulldown',                muscle:'Dos',        sets:3, repsTarget:'6-8',  kgRef:85,  deg:false, note:'Sangles', link:'https://vm.tiktok.com/ZNRXjwr6p/'},
-    {id:'uni_high_row', name:'Unilatéral High Row',         muscle:'Dos',        sets:3, repsTarget:'8-10', kgRef:50,  deg:false, link:'https://vm.tiktok.com/ZNRX619pL/'},
-    {id:'one_arm_row',  name:'One Arm Cable Row',           muscle:'Dos',        sets:3, repsTarget:'10-12',kgRef:50,  deg:false, link:'https://vm.tiktok.com/ZNRX6e2wj/'},
-    {id:'chest_row_rd', name:'Chest Supported Row (rear delt 90°)', muscle:'Delts post.', sets:2, repsTarget:'6-8', kgRef:'20-30', deg:false, link:'https://vm.tiktok.com/ZNRXjw8Jd/'},
-    {id:'rear_delt_fly',name:'Cable Rear Delt Fly',         muscle:'Delts post.',sets:3, repsTarget:'12-15 (2 câbles)', kgRef:5, deg:true, link:'https://vm.tiktok.com/ZNRXjEapN/'},
-    {id:'face_away_curl',name:'Face Away Cable Curl',       muscle:'Biceps',     sets:2, repsTarget:'↑ échec', kgRef:25, deg:false, link:'https://vm.tiktok.com/ZNRX6FqvC/'},
-    {id:'alt_curl',     name:'Sit Alternating Biceps Curl', muscle:'Biceps',     sets:2, repsTarget:'—',    kgRef:20,  deg:false, link:'https://vm.tiktok.com/ZNRXj3p5u/'},
+    {id:'lat_pulldown',  name:'Lat Pulldown',               muscle:'Dos large',   sets:3, repsTarget:'6-8',    kgRef:85,  deg:false, note:'Sangles', link:'https://vm.tiktok.com/ZNRXjwr6p/'},
+    {id:'rdl',           name:'Romanian Deadlift',          muscle:'Lombaires / Ischio', sets:3, repsTarget:'8-10', kgRef:80, deg:false, link:'https://vm.tiktok.com/ZNRXjVpej/'},
+    {id:'uni_high_row',  name:'Unilatéral High Row',        muscle:'Dos',         sets:3, repsTarget:'8-10',   kgRef:50,  deg:false, link:'https://vm.tiktok.com/ZNRX619pL/'},
+    {id:'lumb_ext_pull', name:'Lumbar Extension',           muscle:'Lombaires',   sets:3, repsTarget:'↑ échec',kgRef:60,  deg:false, link:'https://vm.tiktok.com/ZNRX6V7ro/'},
+    {id:'chest_row_rd',  name:'Chest Supported Row (rear delt 90°)', muscle:'Delts post.', sets:2, repsTarget:'6-8', kgRef:'20-30', deg:false, link:'https://vm.tiktok.com/ZNRXjw8Jd/'},
+    {id:'rear_delt_fly', name:'Cable Rear Delt Fly',        muscle:'Delts post.', sets:2, repsTarget:'12-15',  kgRef:5,   deg:true,  link:'https://vm.tiktok.com/ZNRXjEapN/'},
+    {id:'face_away_curl',name:'Face Away Cable Curl',       muscle:'Biceps',      sets:2, repsTarget:'↑ échec',kgRef:25,  deg:false, link:'https://vm.tiktok.com/ZNRX6FqvC/'},
   ],
   lower: [
     {id:'squat_smith',  name:'Squat Smith',                 muscle:'Quadriceps', sets:3, repsTarget:'↑ échec', kgRef:140, deg:false},
@@ -307,30 +322,23 @@ const PROGRAM = {
 
 const STREET_WO = {
   // clés = getDay() : 0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam
-  0: { // Dimanche — Footing
+  0: { // Dimanche — Footing 10km
     type: 'footing',
     items: [
-      {ico:'🏃', name:'Footing — 10km', detail:'Allure confortable, zone 2 — conversation possible\nSem 1-3 : 8km · Sem 4-6 : 10km'},
+      {ico:'🏃', name:'Footing — 10km', detail:'Allure confortable, zone 2 — conversation possible'},
       {ico:'🧘', name:'Retour au calme — 5min', detail:'Marche lente · Étirements ischio · quadriceps · mollets'},
     ]
   },
   1: null, // Lundi — Chest/Back (pas de street)
   2: null, // Mardi — Shoulders/Arms (pas de street)
-  3: { // Mercredi — Corde + Sac
-    type: 'corde_sac',
-    items: [
-      {ico:'🪢', name:'Corde à sauter — 15min', detail:'4×3min · 1min repos · rythme modéré'},
-      {ico:'🥊', name:'Sac de frappe — 15min', detail:'4×3min · 1min repos · combos libres'},
-    ]
-  },
+  3: null, // Mercredi — Lower (pas de street le soir)
   4: { // Jeudi — Street Push (après Push gym)
     type: 'street_push',
     items: [
-      {ico:'🏋️', name:'Élévations latérales', detail:'4×20 · 45s repos · haltères 2-4kg'},
-      {ico:'🤸', name:'Dips', detail:'4×10 · 60s repos · barres parallèles tower'},
       {ico:'💪', name:'Pompes larges', detail:'4×8 · 60s repos'},
       {ico:'📐', name:'Pompes déclinées', detail:'4×8 · 60s repos · pieds sur chaise'},
       {ico:'💎', name:'Pompes diamant', detail:'4×8 · 60s repos · mains en triangle'},
+      {ico:'🪢', name:'Corde à sauter', detail:'4×3min · 1min repos · rythme modéré'},
     ]
   },
   5: { // Vendredi — Street Pull (après Pull gym)
@@ -338,17 +346,17 @@ const STREET_WO = {
     items: [
       {ico:'🔝', name:'Tractions pronation large', detail:'4×6 · 90s repos'},
       {ico:'🔙', name:'Tractions supination serrée', detail:'4×6 · 90s repos'},
-      {ico:'📊', name:'Australiennes sur table', detail:'4×6 · 90s repos'},
+      {ico:'🤲', name:'Tractions prise neutre', detail:'4×6 · 90s repos · prise parallèle ou neutre'},
       {ico:'⏸️', name:'Isométrique mi-parcours', detail:'4×10s maintien · 60s repos'},
     ]
   },
   6: { // Samedi — Sprint & Pliométrie
     type: 'sprint',
     items: [
-      {ico:'🔥', name:'Échauffement — 10min', detail:'5min footing léger\nMontées de genoux 2×20m · Talons-fesses 2×20m\nFentes marchées 2×10 pas · Jambes tendues 2×20m\nAccélérations progressives 3×30m à 60/75/90%'},
+      {ico:'🔥', name:'Échauffement — 10min', detail:'5min footing léger\nMontées de genoux 2×20m · Talons-fesses 2×20m\nFentes marchées 2×10 pas · Accélérations 3×30m'},
       {ico:'⚡', name:'Pliométrie — 20min', detail:'Squat jumps 3×8 (45s récup)\nFrog jumps 3×6 (45s récup)\nBounding 3×20m (45s récup)\nLateral bounds 3×10 (45s récup)'},
-      {ico:'💨', name:'Sprints — 30min', detail:'8 sprints × 60m intensité maximale · 3min récup marche active entre chaque'},
-      {ico:'🧘', name:'Retour au calme — 5min', detail:'3min footing très lent\nÉtirements statiques : ischio · quadriceps · mollets'},
+      {ico:'💨', name:'6 Sprints × 60m', detail:'Intensité maximale · 3min récup marche active entre chaque'},
+      {ico:'🧘', name:'Retour au calme — 5min', detail:'Marche · Étirements ischio · quadriceps · mollets'},
     ]
   },
 };
@@ -387,14 +395,6 @@ function saveSeance(dateStr,seanceId,data){
   }
 }
 function loadSeance(dateStr,seanceId){try{return JSON.parse(localStorage.getItem(keySeance(dateStr,seanceId))||'null');}catch(e){return null;}}
-function loadNote(dateStr,seanceId,exoId){
-  const d=loadSeance(dateStr,seanceId);
-  return d&&d[exoId]?d[exoId].note||'':'';
-}
-function loadSets(dateStr,seanceId,exoId){
-  const d=loadSeance(dateStr,seanceId);
-  return d&&d[exoId]?d[exoId].sets||[]:'';
-}
 
 // Historique : toutes les sessions d'un exercice
 function getHistory(seanceId, exoId){
@@ -541,7 +541,7 @@ function editKgRef(seanceId,exoId,el){
 
 // ── ÉTAT ───────────────────────────────────────────────────────
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-let curSeanceId = SEANCES[TODAY.getDay()]?.id || 'push';
+let curSeanceId = SEANCES[TODAY.getDay()]?.id || 'chestback';
 let curDateStr  = dk(TODAY);
 let curView     = 'seance'; // 'seance' | 'hist'
 let openExos    = {};
@@ -750,8 +750,22 @@ function renderSeance(){
           <span style="font-size:10px;color:#444;min-width:60px;">Lien 2 :</span>
           <a href="${exo.link2}" target="_blank" style="font-size:18px;text-decoration:none;">▶️</a>
         </div>`:''}
-        <textarea class="exo-note" id="note_${exo.id}" placeholder="Note : réglage, position, ressenti…"
-          rows="2" oninput="saveNote('${exo.id}')" onblur="saveNote('${exo.id}')">${exoData.note||''}</textarea>
+        <div style="position:relative;">
+          <textarea class="exo-note" id="note_${exo.id}" placeholder="Note : réglage, position, ressenti…"
+            rows="2" oninput="saveNote('${exo.id}')" onblur="saveNote('${exo.id}')">${loadNote(exo.id)}</textarea>
+          <span id="note_saved_${exo.id}" style="position:absolute;bottom:4px;right:6px;font-size:9px;color:#22C55E;opacity:0;transition:opacity 0.3s;pointer-events:none;">✓ sauvegardé</span>
+        </div>
+      </div>
+      <div class="exo-rest-wrap">
+        <span class="exo-rest-lbl">Repos</span>
+        <input class="exo-rest-inp" type="number" inputmode="numeric" id="restinp_${exo.id}"
+          placeholder="—" min="5" max="600"
+          value="${loadRestTime(exo.id)||''}"
+          onchange="saveRestTime('${exo.id}',this.value)"
+          oninput="saveRestTime('${exo.id}',this.value);resetRestTimer('${exo.id}')">
+        <span class="exo-rest-unit">sec</span>
+        <span class="exo-rest-count" id="restcount_${exo.id}"></span>
+        <button class="exo-rest-btn" id="restbtn_${exo.id}" onclick="toggleRestTimer('${exo.id}')">▶</button>
       </div>
       </div><!-- /exo-body -->
     </div><!-- /exo-block -->`;
@@ -827,11 +841,11 @@ function renderSeance(){
 
   // Bloc mobilité matinale (toujours en haut)
   const mobiHtml=`<div style="margin:12px 14px 6px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px 14px;border-left:3px solid #6b7280;">
-    <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">🧘 Mobilité matinale — 20 min</div>
+    <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">🧘 Routine matinale — 20 min</div>
     <div style="font-size:11px;color:#555;line-height:1.8;">
       <b style="color:#888;">Mobilité 10mn</b> — Cat-cow · Thoracic rotation · Lunge stretch · Wall angel · Around the world · Shoulder stretch<br>
-      <b style="color:#888;">Abdos 5mn</b> — 50 crunchs · 2mn planche<br>
-      <b style="color:#888;">Cou 5mn</b> — Neck curl 2×15 · Chin tuck 2×20
+      <b style="color:#888;">Cou 5mn</b> — Neck curl 2×15 · Chin tuck 2×20<br>
+      <b style="color:#888;">Abdos 5mn</b> — 50 crunchs · 2mn planche
     </div>
   </div>`;
 
@@ -912,10 +926,38 @@ function _writeSet(exoId,setIdx,data){
 function saveNote(exoId){
   const el=document.getElementById('note_'+exoId);
   if(!el)return;
-  const saved=loadSeance(curDateStr,curSeanceId)||{};
-  if(!saved[exoId]) saved[exoId]={sets:[],note:'',link:''};
-  saved[exoId].note=el.value;
-  saveSeance(curDateStr,curSeanceId,saved);
+  try{
+    const notes=JSON.parse(localStorage.getItem('train_notes')||'{}');
+    notes[exoId]=el.value;
+    localStorage.setItem('train_notes',JSON.stringify(notes));
+    // Feedback visuel
+    const lbl=document.getElementById('note_saved_'+exoId);
+    if(lbl){lbl.textContent='✓';lbl.style.opacity='1';setTimeout(()=>{lbl.style.opacity='0';},1500);}
+  }catch(e){}
+}
+
+function loadNote(exoId){
+  try{
+    const notes=JSON.parse(localStorage.getItem('train_notes')||'{}');
+    if(notes[exoId]) return notes[exoId];
+    // Fallback : chercher dans les données de séance récentes et migrer
+    const today=new Date();
+    for(let i=0;i<30;i++){
+      const d=new Date(today);d.setDate(d.getDate()-i);
+      const dStr=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      const sids=['chestback','shoulderarms','lower','push','pull','footing','repos','sprint'];
+      for(const sid of sids){
+        const data=loadSeance(dStr,sid);
+        if(data&&data[exoId]&&data[exoId].note){
+          // Migrer vers le store global
+          notes[exoId]=data[exoId].note;
+          localStorage.setItem('train_notes',JSON.stringify(notes));
+          return notes[exoId];
+        }
+      }
+    }
+    return '';
+  }catch(e){return '';}
 }
 
 // ── ORDRE CUSTOM DES EXERCICES ───────────────────────────────────
@@ -976,16 +1018,32 @@ function getExoName(exoId, fallback){
   try{const r=JSON.parse(localStorage.getItem('train_names')||'{}');return r[exoId]||fallback;}catch(e){return fallback;}
 }
 function deleteExo(seanceId, exoId){
-  if(!confirm('Supprimer cet exercice de la séance ?')) return;
-  // Supprimer de l ordre
-  const defaultOrder = (PROGRAM[seanceId]||[]).map(e=>e.id);
-  const order = getExoOrder(seanceId, defaultOrder);
-  const newOrder = order.filter(id => id !== exoId);
-  saveExoOrder(seanceId, newOrder);
-  // Supprimer les données de l exercice
-  const o = loadExoOverrides(); delete o[seanceId+'_'+exoId]; saveExoOverrides(o);
-  renderSeance();
+  const block=document.getElementById('eb_'+exoId);
+  if(!block)return;
+  const existing=block.querySelector('.delete-confirm');
+  if(existing){existing.remove();return;}
+  const conf=document.createElement('div');
+  conf.className='delete-confirm';
+  conf.style.cssText='padding:8px 14px;background:#1a0808;border-top:0.5px solid #3a0000;display:flex;align-items:center;justify-content:space-between;gap:8px;';
+  conf.innerHTML='<span style="font-size:11px;color:#EF4444;">Supprimer ?</span>'
+    +'<div style="display:flex;gap:6px;">'
+    +'<button class="dcyes" style="background:#EF4444;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">Oui</button>'
+    +'<button class="dcno" style="background:#1a1a1a;color:#555;border:0.5px solid #2a2a2a;border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;">Non</button>'
+    +'</div>';
+  block.appendChild(conf);
+  conf.querySelector('.dcyes').addEventListener('click',function(e){
+    e.stopPropagation();
+    const def=(PROGRAM[seanceId]||[]).map(function(e){return e.id;});
+    const ord=getExoOrder(seanceId,def);
+    saveExoOrder(seanceId,ord.filter(function(id){return id!==exoId;}));
+    const ov=loadExoOverrides();delete ov[seanceId+'_'+exoId];saveExoOverrides(ov);
+    renderSeance();
+  });
+  conf.querySelector('.dcno').addEventListener('click',function(e){
+    e.stopPropagation();conf.remove();
+  });
 }
+
 
 function saveExoName(exoId, name){
   try{const r=JSON.parse(localStorage.getItem('train_names')||'{}');r[exoId]=name;localStorage.setItem('train_names',JSON.stringify(r));}catch(e){}
@@ -1577,13 +1635,126 @@ Ton : coach expert, direct, chiffres précis. Zéro conseil générique.`;
   btn.disabled=false;btn.style.opacity='1';
 }
 
+// ── CHRONO PAR EXERCICE ──────────────────────────────────────────
+const _chronos = {}; // {exoId: {start, interval, elapsed}}
+
+function toggleChrono(exoId){
+  const el = document.getElementById('chrono_'+exoId);
+  if(!el) return;
+  if(_chronos[exoId] && _chronos[exoId].interval){
+    // Arrêt
+    clearInterval(_chronos[exoId].interval);
+    _chronos[exoId].interval = null;
+    el.classList.remove('running');
+  } else {
+    // Démarrage
+    const elapsed = (_chronos[exoId] && _chronos[exoId].elapsed) || 0;
+    _chronos[exoId] = {start: Date.now() - elapsed*1000, interval: null, elapsed: 0};
+    _chronos[exoId].interval = setInterval(()=>{
+      const sec = Math.floor((Date.now() - _chronos[exoId].start)/1000);
+      _chronos[exoId].elapsed = sec;
+      const m = Math.floor(sec/60);
+      const s = sec%60;
+      const el2 = document.getElementById('chrono_'+exoId);
+      if(el2) el2.textContent = m+':'+(s<10?'0':'')+s;
+    }, 1000);
+    el.classList.add('running');
+    el.textContent = '0:00';
+  }
+}
+
+function resetChrono(exoId){
+  if(_chronos[exoId]){
+    if(_chronos[exoId].interval) clearInterval(_chronos[exoId].interval);
+    delete _chronos[exoId];
+  }
+  const el = document.getElementById('chrono_'+exoId);
+  if(el){el.textContent='⏱';el.classList.remove('running');}
+}
+
+// ── REST TIMER PAR EXERCICE ─────────────────────────────────────
+const _restTimers = {}; // {exoId: {interval, remain, total}}
+
+function loadRestTime(exoId){
+  try{
+    const r=JSON.parse(localStorage.getItem('train_rest_times')||'{}');
+    if(r[exoId]) return r[exoId];
+    // Fallback : chercher dans données de séance récentes
+    const today=new Date();
+    for(let i=0;i<30;i++){
+      const d=new Date(today);d.setDate(d.getDate()-i);
+      const dStr=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      const sids=['chestback','shoulderarms','lower','push','pull','footing','repos','sprint'];
+      for(const sid of sids){
+        const data=loadSeance(dStr,sid);
+        if(data&&data[exoId]&&data[exoId].restTime){
+          r[exoId]=data[exoId].restTime;
+          localStorage.setItem('train_rest_times',JSON.stringify(r));
+          return r[exoId];
+        }
+      }
+    }
+    return '';
+  }catch(e){return '';}
+}
+function saveRestTime(exoId, val){
+  try{const r=JSON.parse(localStorage.getItem('train_rest_times')||'{}');r[exoId]=parseInt(val)||0;localStorage.setItem('train_rest_times',JSON.stringify(r));}catch(e){}
+}
+
+function toggleRestTimer(exoId){
+  if(_restTimers[exoId]&&_restTimers[exoId].interval){ stopRestTimer(exoId); return; }
+  const inp = document.getElementById('restinp_'+exoId);
+  const sec = inp ? (parseInt(inp.value)||0) : 0;
+  if(sec <= 0) return;
+  startRestTimer(exoId, sec);
+}
+
+function startRestTimer(exoId, total){
+  if(_restTimers[exoId]&&_restTimers[exoId].interval) clearInterval(_restTimers[exoId].interval);
+  _restTimers[exoId] = {interval:null, remain:total, total};
+  const btn = document.getElementById('restbtn_'+exoId);
+  const cnt = document.getElementById('restcount_'+exoId);
+  if(btn){ btn.textContent='⏹'; btn.className='exo-rest-btn running'; }
+  if(cnt){ cnt.textContent=total; cnt.className='exo-rest-count'; }
+  _restTimers[exoId].interval = setInterval(()=>{
+    _restTimers[exoId].remain--;
+    const r = _restTimers[exoId].remain;
+    const c = document.getElementById('restcount_'+exoId);
+    const b = document.getElementById('restbtn_'+exoId);
+    if(c) c.textContent = r;
+    if(r <= 5 && c) c.className = 'exo-rest-count low';
+    if(r <= 0){
+      clearInterval(_restTimers[exoId].interval);
+      _restTimers[exoId].interval = null;
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      if(c){ c.textContent='✓'; c.className='exo-rest-count done'; }
+      if(b){ b.textContent='▶'; b.className='exo-rest-btn done'; }
+      setTimeout(()=>{
+        if(c){ c.textContent=''; c.className='exo-rest-count'; }
+        if(b){ b.className='exo-rest-btn'; }
+      }, 2000);
+    }
+  }, 1000);
+}
+
+function stopRestTimer(exoId){
+  if(_restTimers[exoId]&&_restTimers[exoId].interval){ clearInterval(_restTimers[exoId].interval); _restTimers[exoId].interval=null; }
+  const btn = document.getElementById('restbtn_'+exoId);
+  const cnt = document.getElementById('restcount_'+exoId);
+  if(btn){ btn.textContent='▶'; btn.className='exo-rest-btn'; }
+  if(cnt){ cnt.textContent=''; cnt.className='exo-rest-count'; }
+}
+
+function resetRestTimer(exoId){
+  stopRestTimer(exoId);
+}
+
 // ── INIT ───────────────────────────────────────────────────────
 (function(){
   renderHeader();
   renderPicker();
   renderSeance();
-
-  })();
+})();
 </script>
 </body>
 </html>

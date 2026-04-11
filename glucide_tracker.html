@@ -186,7 +186,7 @@ button{cursor:pointer;font-family:inherit;}input,textarea{font-family:inherit;}
 .right-col{display:flex;flex-direction:column;gap:12px;}
 .w-error{font-size:10px;color:#EF4444;margin-top:4px;min-height:14px;display:none;}
 .w-inp-row{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px;}
-.w-stepper{display:flex;align-items:center;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;background:#0d0d0d;}
+.w-stepper{display:flex;align-items:center;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;background:#0d0d0d;width:100%;}
 .w-step-btn{width:48px;height:52px;background:transparent;border:none;color:#555;font-size:22px;transition:background 0.15s,color 0.15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .w-step-btn:hover{background:#161616;color:#c0c0c0;}
 .w-step-btn:active{background:#1e1e1e;}
@@ -296,8 +296,8 @@ button{cursor:pointer;font-family:inherit;}input,textarea{font-family:inherit;}
     <button class="btn-menu" onclick="location.href='dashboard.html'">⊞ Menu</button>
     <button class="btn" onclick="showCal()">📅 Agenda</button>
     <button class="btn" onclick="showWeightView()">⚖️ Poids</button>
-    <button class="btn acc" onclick="copyDay()">Copier <span class="ctxt" id="ctxt">✓</span></button>
-    <button class="btn acc" onclick="exportWeek()">Semaine</button>
+    <button class="btn acc" onclick="copyDay()" title="Copier le résumé du jour dans le presse-papier">📋 Copier jour</button>
+    <button class="btn acc" onclick="exportWeek()" title="Copier le résumé de la semaine dans le presse-papier">📋 Copier semaine</button>
     <button class="btn red" onclick="resetCurDay()">Reset</button>
   </div>
 </div>
@@ -431,17 +431,6 @@ button{cursor:pointer;font-family:inherit;}input,textarea{font-family:inherit;}
         </div>
         <div style="font-size:10px;color:#333;" id="week-avg-sub">— jours trackés cette semaine</div>
       </div>
-      <div class="card">
-        <div class="note-header">
-          <div class="card-title" style="margin-bottom:0;">Note du jour</div>
-          <div class="note-dot" id="note-dot"></div>
-        </div>
-        <textarea class="note-ta" id="note-ta" placeholder="Ressenti, récup, qualité séance..."></textarea>
-        <div class="note-footer">
-          <button class="btn" onclick="saveNote()">Sauvegarder</button>
-          <span class="saved-lbl" id="note-saved">Sauvegardé ✓</span>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -529,7 +518,7 @@ function updateBMRDisplay(){
   if(bmrEl)bmrEl.textContent=bmr.toLocaleString('fr-FR')+' kcal'+(_pw?' · '+_pw+'kg':' · poids non renseigné');
 }
 function invalidateBMRCache(){_cachedBMR=null;}
-const FIXED=1790,FLOOR=3200;
+const FIXED=1700,FLOOR=3200;
 function getLip(dep){return 100;}
 const START=new Date(2026,2,28);
 const TODAY=new Date();TODAY.setHours(0,0,0,0);
@@ -560,7 +549,7 @@ const PRESETS=[
   // 3=Jeudi=Push, 4=Vendredi=Pull, 5=Samedi=Sprint, 6=Dimanche=Footing
   {name:"Chest / Back",    acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
   {name:"Shoulders / Arms",acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
-  {name:"Lower",           acts:{muscu:{c:1,v:90},corde:{c:1,v:15},sac:{c:1,v:15},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
+  {name:"Lower",           acts:{muscu:{c:1,v:90},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
   {name:"Push",            acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},street:{c:1,v:30},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
   {name:"Pull",            acts:{muscu:{c:1,v:90},marche_incl:{c:1,v:20},street:{c:1,v:30},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
   {name:"Sprint",          acts:{plio:{c:1,v:20},sprint:{c:1,v:30},steps_neat:{c:1,v:12},gestes_quotidien:{c:1,v:200}}},
@@ -571,7 +560,7 @@ const PRESETS=[
 function getPresetRefDep(date){
   var d2 = dow(date||curDate);
   var presetName = getCurrentPresetName(date||curDate);
-  var preset = PRESETS[d2];
+  var preset = PRESETS.find(function(p){return p.name===presetName;}) || PRESETS[d2];
   if(!preset) return getBMR();
   var actK = 0;
   ACTS.forEach(function(a){
@@ -1248,8 +1237,8 @@ function saveWeight(){
   const delBtn=document.getElementById("w-del-btn");if(delBtn)delBtn.style.display="block";
   if(document.getElementById("view-weight").classList.contains("active"))renderWeightFull();
   renderCal();
-  const b=document.getElementById("note-saved");b.textContent="Poids "+val.toString().replace(".",",")+"kg ✓";b.style.opacity="1";
-  setTimeout(()=>{b.style.opacity="0";b.textContent="Sauvegardé ✓";},2500);
+  const b=document.getElementById("note-saved");if(b){b.textContent="Poids "+val.toString().replace(".",",")+"kg ✓";b.style.opacity="1";
+  setTimeout(()=>{b.style.opacity="0";b.textContent="Sauvegardé ✓";},2500);}
 }
 
 function updateWeightSummaryCard(){
@@ -1470,14 +1459,18 @@ function toggleDetail(){
 }
 
 function saveNote(){
-  localStorage.setItem("rt5_note_"+dk(curDate),document.getElementById("note-ta").value);
-  const s=document.getElementById("note-saved");s.style.opacity="1";
+  const _ta=document.getElementById("note-ta");
+  if(!_ta) return;
+  localStorage.setItem("rt5_note_"+dk(curDate),_ta.value);
+  const s=document.getElementById("note-saved");if(s){s.style.opacity="1";}
   const dot=document.getElementById("note-dot");if(dot)dot.style.opacity="1";
-  setTimeout(()=>s.style.opacity="0",2000);
+  setTimeout(()=>{const s2=document.getElementById("note-saved");if(s2)s2.style.opacity="0";},2000);
 }
 function loadNote(){
   const ta=document.getElementById("note-ta");
+  if(!ta) return;
   const existing=localStorage.getItem("rt5_note_"+dk(curDate))||"";
+  ta.value=existing;
   ta.value=existing;
   const dot=document.getElementById("note-dot");if(dot)dot.style.opacity=existing?"1":"0";
   // #1 — retirer l'ancien listener avant d'en ajouter un nouveau
