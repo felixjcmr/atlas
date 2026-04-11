@@ -742,9 +742,9 @@ function renderSeance(){
     html+=`<div class="exo-note-wrap">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
           <input type="url" class="exo-note" id="link_${exo.id}" placeholder="🔗 Lien tutoriel (YouTube, TikTok…)"
-            value="${exoData.link||exo.link||''}" style="font-size:11px;padding:6px 10px;"
+            value="${loadExoLink(exo.id)||exo.link||''}" style="font-size:11px;padding:6px 10px;"
             onchange="saveLink('${exo.id}')" oninput="saveLink('${exo.id}')">
-          ${(exoData.link||exo.link)?`<a href="${exoData.link||exo.link}" target="_blank" style="font-size:18px;text-decoration:none;flex-shrink:0;">▶️</a>`:''}
+          ${(loadExoLink(exo.id)||exo.link)?`<a href="${loadExoLink(exo.id)||exo.link}" target="_blank" style="font-size:18px;text-decoration:none;flex-shrink:0;">▶️</a>`:''}
         </div>
         ${exo.link2?`<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
           <span style="font-size:10px;color:#444;min-width:60px;">Lien 2 :</span>
@@ -772,54 +772,78 @@ function renderSeance(){
   });
 
   // Bouton ajouter un exercice libre
-  const customExos = loadCustomExos(curDateStr, curSeanceId);
+  const customExos = loadCustomExos(curSeanceId);
   customExos.forEach(function(cexo, cidx){
-    const cData = saved['_custom_'+cidx]||{sets:[],note:'',link:''};
+    const cid = cexo.id || ('_c'+cidx);
+    const cData = saved['_custom_'+cid]||{sets:[]};
     const cSets = cData.sets||[];
     const cNb = cexo.sets||3;
-    const cDone = cSets.slice(0,cNb).filter(s=>s.done).length >= cNb;
-    html+=`<div class="exo-block${cDone?' done-all':''}" id="eb__custom_${cidx}" style="border-color:#2a2a2a;">
-      <div class="exo-hdr" onclick="toggleExo('_custom_${cidx}')">
-        <div>
+    const cDone = cSets.slice(0,cNb).filter(function(s){return s.done;}).length >= cNb;
+    const doneSetsC = cSets.filter(function(s){return s.done;}).length;
+
+    html+=`<div class="exo-block${cDone?' done-all':''}" id="eb__custom_${cid}" style="border-color:#2a2a2a;">
+      <div class="exo-hdr" onclick="toggleExo('_custom_${cid}')">
+        <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
             <input type="text" value="${cexo.name}" placeholder="Nom de l'exercice"
-              style="background:none;border:none;border-bottom:0.5px solid #2a2a2a;color:#e8e8e8;font-size:13px;font-weight:500;width:180px;padding:2px 0;"
-              onclick="event.stopPropagation()" onchange="renameCustomExo('${curDateStr}','${curSeanceId}',${cidx},this.value)">
-            <span style="font-size:9px;color:#444;padding:2px 6px;border:0.5px solid #1a1a1a;border-radius:8px;">perso</span>
+              style="background:none;border:none;border-bottom:0.5px solid #2a2a2a;color:#e8e8e8;font-size:13px;font-weight:500;min-width:0;width:100%;max-width:200px;padding:2px 0;"
+              onclick="event.stopPropagation()" onchange="renameCustomExo('${curSeanceId}','${cid}',this.value)">
+            <span style="font-size:9px;color:#444;padding:2px 6px;border:0.5px solid #1a1a1a;border-radius:8px;flex-shrink:0;">perso</span>
           </div>
-          <div class="exo-meta" style="margin-top:4px;">
-            <span style="color:#F59E0B;cursor:pointer;" onclick="event.stopPropagation();editCustomReps('${curDateStr}','${curSeanceId}',${cidx})">${cexo.repsTarget||'—'}</span>
-            · ${cNb} séries
+          <div class="exo-meta" style="margin-top:4px;display:flex;align-items:center;gap:8px;">
+            <span style="color:#F59E0B;cursor:pointer;" onclick="event.stopPropagation();editCustomReps('${curSeanceId}','${cid}')">${cexo.repsTarget||'—'}</span>
+            <span style="color:#333;">·</span>
+            <button onclick="event.stopPropagation();adjustCustomSets('${curSeanceId}','${cid}',-1)" style="background:none;border:0.5px solid #1a1a1a;border-radius:4px;color:#555;font-size:10px;padding:0 5px;cursor:pointer;line-height:16px;">−</button>
+            <span style="font-size:10px;color:#555;">${cNb} séries</span>
+            <button onclick="event.stopPropagation();adjustCustomSets('${curSeanceId}','${cid}',1)" style="background:none;border:0.5px solid #1a1a1a;border-radius:4px;color:#555;font-size:10px;padding:0 5px;cursor:pointer;line-height:16px;">+</button>
           </div>
         </div>
-        <div style="display:flex;gap:5px;align-items:center;">
-          <button onclick="event.stopPropagation();deleteCustomExo('${curDateStr}','${curSeanceId}',${cidx})" style="color:#333;font-size:12px;background:none;border:none;cursor:pointer;padding:4px;">✕</button>
-          <span class="exo-tag${cDone?' done':''}">${cDone?'✓':cSets.filter(s=>s.done).length+'/'+cNb}</span>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <button onclick="event.stopPropagation();moveCustomExo('${curSeanceId}','${cid}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:12px;cursor:pointer;padding:2px 3px;">↑</button>
+          <button onclick="event.stopPropagation();moveCustomExo('${curSeanceId}','${cid}',1)" style="background:none;border:none;color:#2a2a2a;font-size:12px;cursor:pointer;padding:2px 3px;">↓</button>
+          <button onclick="event.stopPropagation();deleteCustomExo('${curSeanceId}','${cid}')" style="background:none;border:none;color:#2a2a2a;font-size:14px;cursor:pointer;padding:2px 3px;">🗑️</button>
+          <span class="exo-tag${cDone?' done':''}">${cDone?'✓':doneSetsC+'/'+cNb}</span>
         </div>
       </div>
-      <div class="exo-body${openExos['_custom_'+cidx]===false?' collapsed':''}" id="body__custom_${cidx}">
+      <div class="exo-body${openExos['_custom_'+cid]===false?' collapsed':''}" id="body__custom_${cid}">
         <div class="sets-header"><span>Set</span><span>Kg</span><span>Reps</span><span>Cible</span><span></span></div>`;
     for(let i=0;i<cNb;i++){
       const cs=cSets[i]||{kg:'',reps:'',done:false};
       html+=`<div class="set-row">
         <span class="set-num">${i+1}</span>
-        <input class="set-input${cs.kg?' filled':''}" type="number" inputmode="decimal" placeholder="—" value="${cs.kg||''}" id="kg__custom_${cidx}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}',${cidx},${i})">
-        <input class="set-input${cs.reps?' filled':''}" type="number" inputmode="numeric" placeholder="—" value="${cs.reps||''}" id="reps__custom_${cidx}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}',${cidx},${i})">
+        <input class="set-input${cs.kg?' filled':''}" type="number" inputmode="decimal" placeholder="—" value="${cs.kg||''}" id="kg__custom_${cid}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">
+        <input class="set-input${cs.reps?' filled':''}" type="number" inputmode="numeric" placeholder="—" value="${cs.reps||''}" id="reps__custom_${cid}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">
         <span class="set-target">${cexo.repsTarget||'—'}</span>
-        <button class="set-check${cs.done?' done':''}" id="chk__custom_${cidx}_${i}" onclick="toggleCustomSet('${curDateStr}','${curSeanceId}',${cidx},${i})">${cs.done?'✓':''}</button>
+        <button class="set-check${cs.done?' done':''}" id="chk__custom_${cid}_${i}" onclick="toggleCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">${cs.done?'✓':''}</button>
       </div>`;
     }
     html+=`<div class="exo-note-wrap">
-      <input type="url" class="exo-note" placeholder="🔗 Lien tutoriel" value="${cData.link||''}"
-        style="font-size:11px;padding:6px 10px;margin-bottom:6px;"
-        onchange="saveCustomLink('${curDateStr}','${curSeanceId}',${cidx},this.value)">
-      <textarea class="exo-note" placeholder="Note…" rows="1"
-        oninput="saveCustomNote('${curDateStr}','${curSeanceId}',${cidx},this.value)">${cData.note||''}</textarea>
-    </div>
-    </div></div>`;
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <input type="url" class="exo-note" id="link_${cid}" placeholder="🔗 Lien tutoriel (YouTube, TikTok…)"
+            value="${loadExoLink(cid)}" style="font-size:11px;padding:6px 10px;"
+            onchange="saveLink('${cid}')" oninput="saveLink('${cid}')">
+        </div>
+        <div style="position:relative;">
+          <textarea class="exo-note" id="note_${cid}" placeholder="Note : réglage, position, ressenti…"
+            rows="2" oninput="saveNote('${cid}')" onblur="saveNote('${cid}')">${loadNote(cid)}</textarea>
+          <span id="note_saved_${cid}" style="position:absolute;bottom:4px;right:6px;font-size:9px;color:#22C55E;opacity:0;transition:opacity 0.3s;pointer-events:none;">✓ sauvegardé</span>
+        </div>
+      </div>
+      <div class="exo-rest-wrap">
+        <span class="exo-rest-lbl">Repos</span>
+        <input class="exo-rest-inp" type="number" inputmode="numeric" id="restinp_${cid}"
+          placeholder="—" min="5" max="600"
+          value="${loadRestTime(cid)||''}"
+          onchange="saveRestTime('${cid}',this.value)"
+          oninput="saveRestTime('${cid}',this.value);resetRestTimer('${cid}')">
+        <span class="exo-rest-unit">sec</span>
+        <span class="exo-rest-count" id="restcount_${cid}"></span>
+        <button class="exo-rest-btn" id="restbtn_${cid}" onclick="toggleRestTimer('${cid}')">▶</button>
+      </div>
+      </div></div>`;
   });
 
-  html+=`<button onclick="addCustomExo('${curDateStr}','${curSeanceId}')" style="display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 28px);margin:6px 14px 8px;padding:10px;border:0.5px dashed #2a2a2a;border-radius:10px;background:none;color:#444;font-size:11px;cursor:pointer;">
+  html+=`<button onclick="addCustomExo('${curSeanceId}')" style="display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 28px);margin:6px 14px 8px;padding:10px;border:0.5px dashed #2a2a2a;border-radius:10px;background:none;color:#444;font-size:11px;cursor:pointer;">
     + Ajouter un exercice
   </button>`;
 
@@ -1113,93 +1137,122 @@ function renderVolumeTable(){
   el.innerHTML = `<div style="font-size:8px;color:#333;margin-bottom:6px;letter-spacing:0.06em;text-transform:uppercase;">Séries totales · semaine · muscu uniquement</div>${html}`;
 }
 
+function loadExoLink(exoId){
+  try{const r=JSON.parse(localStorage.getItem('train_links')||'{}');return r[exoId]||'';}catch(e){return'';}
+}
 function saveLink(exoId){
   const el=document.getElementById('link_'+exoId);
   if(!el)return;
-  const saved=loadSeance(curDateStr,curSeanceId)||{};
-  if(!saved[exoId]) saved[exoId]={sets:[],note:'',link:''};
-  saved[exoId].link=el.value;
-  saveSeance(curDateStr,curSeanceId,saved);
-  // Refresh pour afficher le bouton play si lien ajouté
+  // Sauvegarder globalement par exoId
+  try{const r=JSON.parse(localStorage.getItem('train_links')||'{}');r[exoId]=el.value;localStorage.setItem('train_links',JSON.stringify(r));}catch(e){}
   if(el.value) renderSeance();
 }
 
 // ── EXERCICES CUSTOM ─────────────────────────────────────────────
-function loadCustomExos(dateStr,seanceId){
-  try{return JSON.parse(localStorage.getItem('train_custom_exos_'+dateStr+'_'+seanceId)||'[]');}catch(e){return[];}
+// ── CUSTOM EXERCICES (persistants par séance, pas par date) ──────
+function loadCustomExos(seanceId){
+  // Migration ancienne clé date+seance
+  try{
+    const key='train_custom_exos_'+seanceId;
+    const existing=JSON.parse(localStorage.getItem(key)||'[]');
+    return existing.map(function(e){if(!e.id)e.id='_c'+Math.random().toString(36).substr(2,8);return e;});
+  }catch(e){return[];}
 }
-function saveCustomExos(dateStr,seanceId,exos){
-  localStorage.setItem('train_custom_exos_'+dateStr+'_'+seanceId,JSON.stringify(exos));
+function saveCustomExos(seanceId,exos){
+  localStorage.setItem('train_custom_exos_'+seanceId,JSON.stringify(exos));
 }
 
-function addCustomExo(dateStr,seanceId){
-  const exos=loadCustomExos(dateStr,seanceId);
-  exos.push({name:'Nouvel exercice',sets:3,repsTarget:'8-12'});
-  saveCustomExos(dateStr,seanceId,exos);
+function addCustomExo(seanceId){
+  const exos=loadCustomExos(seanceId);
+  const uid='_c'+Date.now().toString(36);
+  exos.push({id:uid,name:'Nouvel exercice',sets:3,repsTarget:'8-12'});
+  saveCustomExos(seanceId,exos);
   renderSeance();
-  // Focus sur le nom
   setTimeout(function(){
     var inputs=document.querySelectorAll('[id^="eb__custom_"] input[type=text]');
     if(inputs.length) inputs[inputs.length-1].select();
   },100);
 }
 
-function deleteCustomExo(dateStr,seanceId,idx){
-  if(!confirm('Supprimer cet exercice ?')) return;
-  const exos=loadCustomExos(dateStr,seanceId);
-  exos.splice(idx,1);
-  saveCustomExos(dateStr,seanceId,exos);
+function deleteCustomExo(seanceId,cid){
+  const block=document.getElementById('eb__custom_'+cid);
+  if(!block)return;
+  const existing=block.querySelector('.delete-confirm');
+  if(existing){existing.remove();return;}
+  const conf=document.createElement('div');
+  conf.className='delete-confirm';
+  conf.style.cssText='padding:8px 14px;background:#1a0808;border-top:0.5px solid #3a0000;display:flex;align-items:center;justify-content:space-between;gap:8px;';
+  conf.innerHTML='<span style="font-size:11px;color:#EF4444;">Supprimer ?</span>'
+    +'<div style="display:flex;gap:6px;">'
+    +'<button class="dcyes" style="background:#EF4444;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">Oui</button>'
+    +'<button class="dcno" style="background:#1a1a1a;color:#555;border:0.5px solid #2a2a2a;border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;">Non</button>'
+    +'</div>';
+  block.appendChild(conf);
+  conf.querySelector('.dcyes').addEventListener('click',function(e){
+    e.stopPropagation();
+    const exos=loadCustomExos(seanceId);
+    const newExos=exos.filter(function(ex){return ex.id!==cid;});
+    saveCustomExos(seanceId,newExos);
+    renderSeance();
+  });
+  conf.querySelector('.dcno').addEventListener('click',function(e){
+    e.stopPropagation();conf.remove();
+  });
+}
+
+function renameCustomExo(seanceId,cid,name){
+  const exos=loadCustomExos(seanceId);
+  const ex=exos.find(function(e){return e.id===cid;});
+  if(ex){ex.name=name;saveCustomExos(seanceId,exos);}
+}
+
+function editCustomReps(seanceId,cid){
+  const exos=loadCustomExos(seanceId);
+  const ex=exos.find(function(e){return e.id===cid;});
+  if(!ex)return;
+  const val=prompt('Fourchette de reps :',ex.repsTarget||'8-12');
+  if(val!==null){ex.repsTarget=val;saveCustomExos(seanceId,exos);renderSeance();}
+}
+
+function adjustCustomSets(seanceId,cid,delta){
+  const exos=loadCustomExos(seanceId);
+  const ex=exos.find(function(e){return e.id===cid;});
+  if(!ex)return;
+  ex.sets=Math.max(1,Math.min(10,(ex.sets||3)+delta));
+  saveCustomExos(seanceId,exos);
   renderSeance();
 }
 
-function renameCustomExo(dateStr,seanceId,idx,name){
-  const exos=loadCustomExos(dateStr,seanceId);
-  if(exos[idx]) exos[idx].name=name;
-  saveCustomExos(dateStr,seanceId,exos);
+function moveCustomExo(seanceId,cid,dir){
+  const exos=loadCustomExos(seanceId);
+  const idx=exos.findIndex(function(e){return e.id===cid;});
+  if(idx===-1)return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=exos.length)return;
+  const tmp=exos[idx];exos[idx]=exos[newIdx];exos[newIdx]=tmp;
+  saveCustomExos(seanceId,exos);
+  renderSeance();
 }
 
-function editCustomReps(dateStr,seanceId,idx){
-  const exos=loadCustomExos(dateStr,seanceId);
-  if(!exos[idx]) return;
-  const val=prompt('Fourchette de reps :',exos[idx].repsTarget||'8-12');
-  if(val!==null){exos[idx].repsTarget=val;saveCustomExos(dateStr,seanceId,exos);renderSeance();}
-}
-
-function saveCustomSet(dateStr,seanceId,idx,setIdx){
+function saveCustomSet(dateStr,seanceId,cid,setIdx){
   const saved=loadSeance(dateStr,seanceId)||{};
-  const key='_custom_'+idx;
-  if(!saved[key]) saved[key]={sets:[],note:'',link:''};
-  if(!saved[key].sets) saved[key].sets=[];
-  const kg=document.getElementById('kg__custom_'+idx+'_'+setIdx);
-  const reps=document.getElementById('reps__custom_'+idx+'_'+setIdx);
+  const key='_custom_'+cid;
+  if(!saved[key])saved[key]={sets:[]};
+  if(!saved[key].sets)saved[key].sets=[];
+  const kg=document.getElementById('kg__custom_'+cid+'_'+setIdx);
+  const reps=document.getElementById('reps__custom_'+cid+'_'+setIdx);
   saved[key].sets[setIdx]={kg:kg?kg.value:'',reps:reps?reps.value:'',done:saved[key].sets[setIdx]?.done||false};
   saveSeance(dateStr,seanceId,saved);
 }
 
-function toggleCustomSet(dateStr,seanceId,idx,setIdx){
+function toggleCustomSet(dateStr,seanceId,cid,setIdx){
   const saved=loadSeance(dateStr,seanceId)||{};
-  const key='_custom_'+idx;
-  if(!saved[key]) saved[key]={sets:[],note:'',link:''};
-  if(!saved[key].sets[setIdx]) saved[key].sets[setIdx]={kg:'',reps:'',done:false};
+  const key='_custom_'+cid;
+  if(!saved[key])saved[key]={sets:[]};
+  if(!saved[key].sets[setIdx])saved[key].sets[setIdx]={kg:'',reps:'',done:false};
   saved[key].sets[setIdx].done=!saved[key].sets[setIdx].done;
   saveSeance(dateStr,seanceId,saved);
   renderSeance();
-}
-
-function saveCustomNote(dateStr,seanceId,idx,val){
-  const saved=loadSeance(dateStr,seanceId)||{};
-  const key='_custom_'+idx;
-  if(!saved[key]) saved[key]={sets:[],note:'',link:''};
-  saved[key].note=val;
-  saveSeance(dateStr,seanceId,saved);
-}
-
-function saveCustomLink(dateStr,seanceId,idx,val){
-  const saved=loadSeance(dateStr,seanceId)||{};
-  const key='_custom_'+idx;
-  if(!saved[key]) saved[key]={sets:[],note:'',link:''};
-  saved[key].link=val;
-  saveSeance(dateStr,seanceId,saved);
 }
 
 function updateFinishBtn(){
