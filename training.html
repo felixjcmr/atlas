@@ -419,7 +419,25 @@ function getHistory(seanceId, exoId){
 
 
 // ── CHARGES DE RÉFÉRENCE (éditables) ─────────────────────────
-function getKgRefs(){try{return JSON.parse(localStorage.getItem('train_kgRefs')||'{}');}catch(e){return{};}}
+function getKgRefs(){try{return JSON.parse(localStorage.getItem('train_kgRefs')||'{}');}catch(e){return{};}
+}
+function getMuscleOverrides(){try{return JSON.parse(localStorage.getItem('train_muscles')||'{}');}catch(e){return{};}
+}
+function getExoMuscle(exoId, defaultMuscle){
+  const o=getMuscleOverrides();
+  return o[exoId]||defaultMuscle||'—';
+}
+function editExoMuscle(exoId, defaultMuscle){
+  const MUSCLES=['Pectoraux','Dos large','Dos','Delts','Delts lat.','Delts post.','Biceps','Triceps','Quadriceps','Ischio','Fessiers','Lombaires','Trapèzes','Abdos','Bi/Tri','Autre'];
+  const current=getExoMuscle(exoId, defaultMuscle);
+  const val=prompt('Groupe musculaire :\n'+MUSCLES.join(' · '), current);
+  if(val!==null){
+    const o=getMuscleOverrides();
+    o[exoId]=val.trim()||defaultMuscle;
+    localStorage.setItem('train_muscles',JSON.stringify(o));
+    renderSeance();
+  }
+}
 function saveKgRefs(o){localStorage.setItem('train_kgRefs',JSON.stringify(o));}
 // ── OVERRIDES PAR EXERCICE (sets, dégressive) ────────────────
 function getExoOverrides(){try{return JSON.parse(localStorage.getItem('train_exoOv')||'{}');}catch(e){return{};}}
@@ -695,7 +713,7 @@ function renderSeance(){
             ${lastDeg?'<span class="deg-badge">↘ Dég.</span>':''}
           </div>
           <div class="exo-meta">
-            ${exo.muscle} ·
+            <span style="color:#888;cursor:pointer;border-bottom:0.5px dashed #333;" onclick="event.stopPropagation();editExoMuscle('${exo.id}','${exo.muscle}')">${getExoMuscle(exo.id,exo.muscle)}</span> ·
             <span class="ref-sets" onclick="event.stopPropagation();editNbSets('${curSeanceId}','${exo.id}',${nbSets},this)" style="color:#E879F9;cursor:pointer;border-bottom:0.5px dashed #E879F944;" title="Tap pour modifier le nombre de séries">${nbSets}</span>×<span class="ref-reps" onclick="event.stopPropagation();editRepsRef('${curSeanceId}','${exo.id}',this)" style="color:#F59E0B;cursor:pointer;border-bottom:0.5px dashed #F59E0B44;" title="Tap pour modifier">${getRepsRef(curSeanceId,exo.id,exo.repsTarget)}</span>
             ${(()=>{const kr=getKgRef(curSeanceId,exo.id,exo.kgRef);const display=kr||'—';return ` · <span class="ref-kg" onclick="event.stopPropagation();editKgRef('${curSeanceId}','${exo.id}',this)" style="color:${kr?'#7B72E9':'#2a2a2a'};cursor:pointer;border-bottom:0.5px dashed ${kr?'#7B72E9':'#2a2a2a'};" title="Tap pour définir">ref ${display}</span>`;})()}
           </div>
@@ -777,43 +795,48 @@ function renderSeance(){
     const cid = cexo.id || ('_c'+cidx);
     const cData = saved['_custom_'+cid]||{sets:[]};
     const cSets = cData.sets||[];
-    const cNb = cexo.sets||3;
-    const cDone = cSets.slice(0,cNb).filter(function(s){return s.done;}).length >= cNb;
-    const doneSetsC = cSets.filter(function(s){return s.done;}).length;
+    const cNbSets = getNbSets(curSeanceId, cid, cexo.sets||3);
+    const cRepsRef = getRepsRef(curSeanceId, cid, cexo.repsTarget||'8-12');
+    const cKgRef = getKgRef(curSeanceId, cid, cexo.kgRef||'');
+    const cDone = cSets.slice(0,cNbSets).filter(function(s){return s.done;}).length >= cNbSets;
+    const cDoneSets = cSets.filter(function(s){return s.done;}).length;
+    const cMuscle = cexo.muscle||'—';
+    const isOpenC = openExos['_custom_'+cid]!==false;
 
-    html+=`<div class="exo-block${cDone?' done-all':''}" id="eb__custom_${cid}" style="border-color:#2a2a2a;">
+    html+=`<div class="exo-block${cDone?' done-all':''}" id="eb__custom_${cid}">
       <div class="exo-hdr" onclick="toggleExo('_custom_${cid}')">
-        <div style="flex:1;min-width:0;">
+        <div>
           <div style="display:flex;align-items:center;gap:6px;">
+            <div style="display:flex;flex-direction:column;gap:1px;" onclick="event.stopPropagation()">
+              <button onclick="moveCustomExo('${curSeanceId}','${cid}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;">▲</button>
+              <button onclick="moveCustomExo('${curSeanceId}','${cid}',1)" style="background:none;border:none;color:#2a2a2a;font-size:10px;line-height:1;padding:0 3px;cursor:pointer;touch-action:manipulation;">▼</button>
+            </div>
             <input type="text" value="${cexo.name}" placeholder="Nom de l'exercice"
-              style="background:none;border:none;border-bottom:0.5px solid #2a2a2a;color:#e8e8e8;font-size:13px;font-weight:500;min-width:0;width:100%;max-width:200px;padding:2px 0;"
-              onclick="event.stopPropagation()" onchange="renameCustomExo('${curSeanceId}','${cid}',this.value)">
+              class="exo-name" onclick="event.stopPropagation()"
+              onchange="renameCustomExo('${curSeanceId}','${cid}',this.value)"
+              style="background:none;border:none;color:#e8e8e8;font-size:13px;font-weight:500;padding:0;min-width:0;width:160px;font-family:inherit;">
             <span style="font-size:9px;color:#444;padding:2px 6px;border:0.5px solid #1a1a1a;border-radius:8px;flex-shrink:0;">perso</span>
           </div>
-          <div class="exo-meta" style="margin-top:4px;display:flex;align-items:center;gap:8px;">
-            <span style="color:#F59E0B;cursor:pointer;" onclick="event.stopPropagation();editCustomReps('${curSeanceId}','${cid}')">${cexo.repsTarget||'—'}</span>
-            <span style="color:#333;">·</span>
-            <button onclick="event.stopPropagation();adjustCustomSets('${curSeanceId}','${cid}',-1)" style="background:none;border:0.5px solid #1a1a1a;border-radius:4px;color:#555;font-size:10px;padding:0 5px;cursor:pointer;line-height:16px;">−</button>
-            <span style="font-size:10px;color:#555;">${cNb} séries</span>
-            <button onclick="event.stopPropagation();adjustCustomSets('${curSeanceId}','${cid}',1)" style="background:none;border:0.5px solid #1a1a1a;border-radius:4px;color:#555;font-size:10px;padding:0 5px;cursor:pointer;line-height:16px;">+</button>
+          <div class="exo-meta">
+            <span style="color:#888;cursor:pointer;border-bottom:0.5px dashed #333;" onclick="event.stopPropagation();editCustomMuscle('${curSeanceId}','${cid}')">${cMuscle}</span> ·
+            <span class="ref-sets" onclick="event.stopPropagation();editNbSets('${curSeanceId}','${cid}',${cNbSets},this)" style="color:#E879F9;cursor:pointer;border-bottom:0.5px dashed #E879F944;">${cNbSets}</span>×<span class="ref-reps" onclick="event.stopPropagation();editRepsRef('${curSeanceId}','${cid}',this)" style="color:#F59E0B;cursor:pointer;border-bottom:0.5px dashed #F59E0B44;">${cRepsRef}</span>
+            · <span class="ref-kg" onclick="event.stopPropagation();editKgRef('${curSeanceId}','${cid}',this)" style="color:${cKgRef?'#7B72E9':'#2a2a2a'};cursor:pointer;border-bottom:0.5px dashed ${cKgRef?'#7B72E9':'#2a2a2a'};">ref ${cKgRef||'—'}</span>
           </div>
         </div>
-        <div style="display:flex;gap:4px;align-items:center;">
-          <button onclick="event.stopPropagation();moveCustomExo('${curSeanceId}','${cid}',-1)" style="background:none;border:none;color:#2a2a2a;font-size:12px;cursor:pointer;padding:2px 3px;">↑</button>
-          <button onclick="event.stopPropagation();moveCustomExo('${curSeanceId}','${cid}',1)" style="background:none;border:none;color:#2a2a2a;font-size:12px;cursor:pointer;padding:2px 3px;">↓</button>
-          <button onclick="event.stopPropagation();deleteCustomExo('${curSeanceId}','${cid}')" style="background:none;border:none;color:#2a2a2a;font-size:14px;cursor:pointer;padding:2px 3px;">🗑️</button>
-          <span class="exo-tag${cDone?' done':''}">${cDone?'✓':doneSetsC+'/'+cNb}</span>
+        <div style="display:flex;gap:5px;align-items:center;">
+          <button onclick="event.stopPropagation();deleteCustomExo('${curSeanceId}','${cid}')" style="background:none;border:none;color:#2a2a2a;font-size:14px;cursor:pointer;padding:2px 4px;">🗑️</button>
+          <span class="exo-tag${cDone?' done':''}">${cDone?'✓':cDoneSets+'/'+cNbSets}</span>
         </div>
       </div>
-      <div class="exo-body${openExos['_custom_'+cid]===false?' collapsed':''}" id="body__custom_${cid}">
+      <div class="exo-body${isOpenC?'':' collapsed'}" id="body__custom_${cid}">
         <div class="sets-header"><span>Set</span><span>Kg</span><span>Reps</span><span>Cible</span><span></span></div>`;
-    for(let i=0;i<cNb;i++){
+    for(let i=0;i<cNbSets;i++){
       const cs=cSets[i]||{kg:'',reps:'',done:false};
-      html+=`<div class="set-row">
+      html+=`<div class="set-row" id="sr__custom_${cid}_${i}">
         <span class="set-num">${i+1}</span>
-        <input class="set-input${cs.kg?' filled':''}" type="number" inputmode="decimal" placeholder="—" value="${cs.kg||''}" id="kg__custom_${cid}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">
-        <input class="set-input${cs.reps?' filled':''}" type="number" inputmode="numeric" placeholder="—" value="${cs.reps||''}" id="reps__custom_${cid}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">
-        <span class="set-target">${cexo.repsTarget||'—'}</span>
+        <input class="set-input${cs.kg?' filled':''}" type="number" inputmode="decimal" placeholder="—" value="${cs.kg||''}" id="kg__custom_${cid}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})" oninput="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">
+        <input class="set-input${cs.reps?' filled':''}" type="number" inputmode="numeric" placeholder="—" value="${cs.reps||''}" id="reps__custom_${cid}_${i}" onchange="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})" oninput="saveCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">
+        <span class="set-target" onclick="event.stopPropagation();editSetReps('${curSeanceId}','${cid}',${i},this)" style="cursor:pointer;border-bottom:0.5px dashed #2a2a2a;">${getSetReps(curSeanceId,cid,i,cRepsRef)}</span>
         <button class="set-check${cs.done?' done':''}" id="chk__custom_${cid}_${i}" onclick="toggleCustomSet('${curDateStr}','${curSeanceId}','${cid}',${i})">${cs.done?'✓':''}</button>
       </div>`;
     }
@@ -822,6 +845,7 @@ function renderSeance(){
           <input type="url" class="exo-note" id="link_${cid}" placeholder="🔗 Lien tutoriel (YouTube, TikTok…)"
             value="${loadExoLink(cid)}" style="font-size:11px;padding:6px 10px;"
             onchange="saveLink('${cid}')" oninput="saveLink('${cid}')">
+          ${loadExoLink(cid)?`<a href="${loadExoLink(cid)}" target="_blank" style="font-size:18px;text-decoration:none;flex-shrink:0;">▶️</a>`:''}
         </div>
         <div style="position:relative;">
           <textarea class="exo-note" id="note_${cid}" placeholder="Note : réglage, position, ressenti…"
@@ -832,15 +856,14 @@ function renderSeance(){
       <div class="exo-rest-wrap">
         <span class="exo-rest-lbl">Repos</span>
         <input class="exo-rest-inp" type="number" inputmode="numeric" id="restinp_${cid}"
-          placeholder="—" min="5" max="600"
-          value="${loadRestTime(cid)||''}"
-          onchange="saveRestTime('${cid}',this.value)"
-          oninput="saveRestTime('${cid}',this.value);resetRestTimer('${cid}')">
+          placeholder="—" min="5" max="600" value="${loadRestTime(cid)||''}"
+          onchange="saveRestTime('${cid}',this.value)" oninput="saveRestTime('${cid}',this.value);resetRestTimer('${cid}')">
         <span class="exo-rest-unit">sec</span>
         <span class="exo-rest-count" id="restcount_${cid}"></span>
         <button class="exo-rest-btn" id="restbtn_${cid}" onclick="toggleRestTimer('${cid}')">▶</button>
       </div>
-      </div></div>`;
+      </div><!-- /exo-body -->
+    </div><!-- /exo-block -->`;
   });
 
   html+=`<button onclick="addCustomExo('${curSeanceId}')" style="display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 28px);margin:6px 14px 8px;padding:10px;border:0.5px dashed #2a2a2a;border-radius:10px;background:none;color:#444;font-size:11px;cursor:pointer;">
@@ -1119,7 +1142,15 @@ function renderVolumeTable(){
       const exo = exoMap[id];
       if(!exo) return;
       const nb = getNbSets(seanceId, exo.id, exo.sets);
-      if(totals[exo.muscle] !== undefined) totals[exo.muscle] += nb;
+      const muscle = getExoMuscle(exo.id, exo.muscle);
+      if(totals[muscle] !== undefined) totals[muscle] += nb;
+    });
+    // Inclure les custom exos dans le volume
+    loadCustomExos(seanceId).forEach(function(cexo){
+      const cid=cexo.id||cexo.name;
+      const nb=getNbSets(seanceId,cid,cexo.sets||3);
+      const muscle=getExoMuscle(cid,cexo.muscle);
+      if(muscle&&totals[muscle]!==undefined) totals[muscle]+=nb;
     });
   });
 
@@ -1206,6 +1237,15 @@ function renameCustomExo(seanceId,cid,name){
   if(ex){ex.name=name;saveCustomExos(seanceId,exos);}
 }
 
+function editCustomMuscle(seanceId,cid){
+  const exos=loadCustomExos(seanceId);
+  const ex=exos.find(function(e){return e.id===cid;});
+  if(!ex)return;
+  const MUSCLES=['Pectoraux','Dos large','Dos','Delts','Delts lat.','Delts post.','Biceps','Triceps','Quadriceps','Ischio','Fessiers','Lombaires','Trapèzes','Abdos','Bi/Tri'];
+  const val=prompt('Groupe musculaire :\n'+MUSCLES.join(' · '),ex.muscle||'');
+  if(val!==null){ex.muscle=val.trim();saveCustomExos(seanceId,exos);renderSeance();}
+}
+
 function editCustomReps(seanceId,cid){
   const exos=loadCustomExos(seanceId);
   const ex=exos.find(function(e){return e.id===cid;});
@@ -1283,13 +1323,15 @@ function finishSeance(){
 function renderHist(){
   const container=document.getElementById('hist-content');
   const exos=PROGRAM[curSeanceId]||[];
-  if(!exos.length){container.innerHTML='<div class="empty"><div class="empty-ico">📊</div>Aucun exercice</div>';return;}
+  const customExos=loadCustomExos(curSeanceId);
+  const allExos=[...exos.map(e=>({id:e.id,name:e.name,isCustom:false})),...customExos.map(c=>({id:c.id||c.name,name:c.name,isCustom:true}))];
+  if(!allExos.length){container.innerHTML='<div class="empty"><div class="empty-ico">📊</div>Aucun exercice</div>';return;}
 
   let html=`<div style="font-size:10px;color:#333;margin-bottom:10px;padding:0 0 6px;border-bottom:0.5px solid #0f0f0f;">
     Tap sur un exercice pour voir sa progression
   </div>`;
 
-  exos.forEach(exo=>{
+  allExos.forEach(exo=>{
     const hist=getHistory(curSeanceId,exo.id);
     const last=hist.length?hist[hist.length-1]:null;
     const lastStr=last?last.sets.filter(s=>s.kg||s.reps).map(s=>(s.kg?s.kg+'kg':'')+(s.reps?' × '+s.reps+'r':'')).join(' | '):'—';
@@ -1297,7 +1339,7 @@ function renderHist(){
 
     html+=`<button class="hist-exo-btn" onclick="toggleHistExo('${exo.id}')">
       <div>
-        <div class="hist-exo-name">${getExoName(exo.id,exo.name)}</div>
+        <div class="hist-exo-name">${getExoName(exo.id,exo.name)}${exo.isCustom?'<span style="font-size:8px;color:#444;margin-left:4px;">perso</span>':''}</div>
         <div class="hist-exo-last">${last?fmtDate(last.date)+' · ':''} ${lastStr}</div>
       </div>
       <span style="color:#333;font-size:12px;">${isOpen?'▲':'▼'}</span>
@@ -1510,7 +1552,7 @@ function renderProg(){
 
       sectionHtml+=`<div class="${cardClass}">
         <div class="prog-exo-name">${getExoName(exo.id,exo.name)}</div>
-        <div class="prog-exo-muscle">${exo.muscle} · ${hist.length} session${hist.length>1?'s':''}</div>
+        <div class="prog-exo-muscle">${getExoMuscle(exo.id, exo.muscle)} · ${hist.length} session${hist.length>1?'s':''}</div>
         <div class="prog-metrics">
           <div class="prog-metric">
             <div class="prog-metric-val best">${pr>0?pr+'kg':'—'}</div>
@@ -1587,7 +1629,7 @@ async function analyserPlateaux(){
 
       exosData.push({
         nom:getExoName(exo.id,exo.name),
-        muscle:exo.muscle,
+        muscle:getExoMuscle(exo.id, exo.muscle),
         seance:sid,
         sessions:hist.length,
         pr:pr>0?pr+'kg':'—',
