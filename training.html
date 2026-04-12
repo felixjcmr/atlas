@@ -86,9 +86,9 @@ button,input,textarea{font-family:inherit;}
 .deg-badge{font-size:8px;background:#1c1400;border:0.5px solid #3a2800;color:#F59E0B;border-radius:10px;padding:1px 6px;margin-left:6px;}
 
 /* Bouton terminer */
-.btn-finish{margin:16px 14px 8px;width:calc(100% - 28px);background:#0d1f17;border:0.5px solid #166534;color:#22C55E;border-radius:12px;padding:14px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-finish{margin:8px 14px 4px;width:calc(100% - 28px);background:#071a0a;border:0.5px solid #166534;color:#22C55E;border-radius:8px;padding:7px;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;opacity:0.7;}
 .btn-finish:active{transform:scale(0.98);}
-.btn-finish.saved{background:#071a0a;color:#555;}
+.btn-finish.saved{background:#071a0a;color:#555;border-color:#1a1a1a;}
 
 /* Timer repos */
 .rest-timer{text-align:center;font-size:11px;color:#F59E0B;padding:4px 0 2px;display:none;}
@@ -616,11 +616,11 @@ function renderHeader(){
 // ── SÉLECTEUR SÉANCE ───────────────────────────────────────────
 function renderPicker(){
   const picker=document.getElementById('seance-picker');
-  // Séance native du jour en cours (jeudi=natation, dimanche=footing, etc.)
   const _dayDate=new Date(curDateStr.split('-')[0],curDateStr.split('-')[1]-1,curDateStr.split('-')[2]);
   const _nativeSid=SEANCES[_dayDate.getDay()]?.id;
   const _nativeLabel=SEANCES[_dayDate.getDay()]?.label;
-  const _isNonMuscu=_nativeSid&&!['push','pull','lower','chestback','shoulderarms'].includes(_nativeSid);
+  const _isNonMuscu=_nativeSid&&!['push','pull','lower','chestback','shoulderarms','sprint_lower'].includes(_nativeSid);
+  const _isSat=_dayDate.getDay()===6;
   const seances=[
     {id:'push',label:'Push'},
     {id:'pull',label:'Pull'},
@@ -628,13 +628,11 @@ function renderPicker(){
     {id:'chestback',label:'Chest/Back'},
     {id:'shoulderarms',label:'Shoulders/Arms'},
   ];
-  const dayHasMuscu = !!(PROGRAM[curSeanceId]&&PROGRAM[curSeanceId].length);
-  // Bouton retour séance native si on est sur un jour non-muscu
-  const nativeBtn=_isNonMuscu?`<button class="sp-btn ${curSeanceId===_nativeSid?'active':''}" onclick="switchSeance('${_nativeSid}')" style="order:-1;">${_nativeLabel}</button>`:'';
-  // Bouton Natation supplémentaire le mercredi (Lower + Natation soir)
-  const _isWed=_dayDate.getDay()===3;
-  const nataBtn='';
-  picker.innerHTML=nataBtn+nativeBtn+seances.map(s=>
+  const dayHasMuscu=!!(PROGRAM[curSeanceId]&&PROGRAM[curSeanceId].length)||_isSat;
+  // Samedi : un seul bouton "Sprint + Lower" qui affiche les deux
+  const satBtn=_isSat?`<button class="sp-btn ${curSeanceId==='sprint'?'active':''}" onclick="switchSeance('sprint')" style="order:-1;border-color:#F59E0B44;color:${curSeanceId==='sprint'?'#F59E0B':'#888'};">💨 Sprint + Lower</button>`:'';
+  const nativeBtn=(!_isSat&&_isNonMuscu)?`<button class="sp-btn ${curSeanceId===_nativeSid?'active':''}" onclick="switchSeance('${_nativeSid}')" style="order:-1;">${_nativeLabel}</button>`:'';
+  picker.innerHTML=satBtn+nativeBtn+seances.map(s=>
     `<button class="sp-btn ${curSeanceId===s.id?'active':''}" onclick="switchSeance('${s.id}')">${s.label}</button>`
   ).join('')+(dayHasMuscu?'':'<span style="font-size:10px;color:#252525;margin-left:8px;">Pas de muscu</span>');
 }
@@ -653,6 +651,12 @@ function renderSeance(){
   if(!container) return;
   const baseExos=PROGRAM[curSeanceId]||[];
   const saved=loadSeance(curDateStr,curSeanceId)||{};
+
+  // Samedi : si sprint sélectionné, afficher Sprint + Lower ensemble
+  const _dayDate2=new Date(curDateStr.split('-')[0],curDateStr.split('-')[1]-1,curDateStr.split('-')[2]);
+  const _isSatRender=_dayDate2.getDay()===6 && curSeanceId==='sprint';
+  const _lowerExos=_isSatRender?(PROGRAM['lower']||[]):[];
+  const _savedLower=_isSatRender?(loadSeance(curDateStr,'lower')||{}):{};
 
   // Appliquer l'ordre custom
   const defaultOrder=baseExos.map(e=>e.id);
@@ -895,10 +899,67 @@ function renderSeance(){
     </div>
   </div>`;
 
-  // Ordre : mobilité → muscu → btn finish → street/cardio soir
-  container.innerHTML=mobiHtml+html+swHtml;
+  // Bloc Lower le samedi (après Sprint)
+  let lowerHtml='';
+  if(_isSatRender && _lowerExos.length){
+    lowerHtml+=`<div style="margin:12px 14px 4px;font-size:9px;color:#F59E0B;text-transform:uppercase;letter-spacing:0.06em;">🦵 Lower — Muscu salle</div>`;
+    _lowerExos.forEach(exo=>{
+      const exoData=_savedLower[exo.id]||{sets:[]};
+      const sets=exoData.sets||[];
+      const nbSets=getNbSets('lower',exo.id,exo.sets);
+      const doneSets=sets.slice(0,nbSets).filter(s=>s.done).length;
+      const allDone=doneSets>=nbSets;
+      const isOpen=openExos['lower_'+exo.id]!==false;
+      const kgRef=getKgRef('lower',exo.id,exo.kgRef);
+      lowerHtml+=`<div class="exo-block${allDone?' done-all':''}" id="eb_lower_${exo.id}">
+        <div class="exo-hdr" onclick="toggleExo('lower_${exo.id}')">
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="exo-name">${getExoName(exo.id,exo.name)}</span>
+            </div>
+            <div class="exo-meta">${getExoMuscle(exo.id,exo.muscle)} · ${nbSets}×<span style="color:#F59E0B;">${getRepsRef('lower',exo.id,exo.repsTarget)}</span>${kgRef?` · <span style="color:#7B72E9;">ref ${kgRef}</span>`:''}
+            </div>
+          </div>
+          <span class="exo-tag${allDone?' done':''}">${allDone?'✓':doneSets+'/'+nbSets}</span>
+        </div>
+        <div class="exo-body${isOpen?'':' collapsed'}" id="body_lower_${exo.id}">
+          <div class="sets-header"><span>Set</span><span>Kg</span><span>Reps</span><span>Cible</span><span></span></div>`;
+      for(let i=0;i<nbSets;i++){
+        const s=sets[i]||{kg:'',reps:'',done:false};
+        lowerHtml+=`<div class="set-row">
+          <span class="set-num">${i+1}</span>
+          <input class="set-input${s.kg?' filled':''}" type="number" inputmode="decimal" placeholder="—" value="${s.kg||''}" id="kg_lower_${exo.id}_${i}" onchange="saveLowerSet('${exo.id}',${i})" oninput="saveLowerSet('${exo.id}',${i})">
+          <input class="set-input${s.reps?' filled':''}" type="number" inputmode="numeric" placeholder="—" value="${s.reps||''}" id="reps_lower_${exo.id}_${i}" onchange="saveLowerSet('${exo.id}',${i})" oninput="saveLowerSet('${exo.id}',${i})">
+          <span class="set-target">${getRepsRef('lower',exo.id,exo.repsTarget)}</span>
+          <button class="set-check${s.done?' done':''}" id="chk_lower_${exo.id}_${i}" onclick="toggleLowerSet('${exo.id}',${i})">${s.done?'✓':''}</button>
+        </div>`;
+      }
+      lowerHtml+=`</div></div>`;
+    });
+  }
+
+  // Ordre : mobilité → muscu → btn finish → lower samedi → street/cardio soir
+  container.innerHTML=mobiHtml+html+lowerHtml+swHtml;
 }
 
+// ── SAMEDI : LOWER SETS ────────────────────────────────────────
+function saveLowerSet(exoId, setIdx){
+  const saved=loadSeance(curDateStr,'lower')||{};
+  if(!saved[exoId]) saved[exoId]={sets:[]};
+  if(!saved[exoId].sets) saved[exoId].sets=[];
+  const kg=document.getElementById('kg_lower_'+exoId+'_'+setIdx);
+  const reps=document.getElementById('reps_lower_'+exoId+'_'+setIdx);
+  saved[exoId].sets[setIdx]={kg:kg?kg.value:'',reps:reps?reps.value:'',done:saved[exoId].sets[setIdx]?.done||false};
+  saveSeance(curDateStr,'lower',saved);
+}
+function toggleLowerSet(exoId, setIdx){
+  const saved=loadSeance(curDateStr,'lower')||{};
+  if(!saved[exoId]) saved[exoId]={sets:[]};
+  if(!saved[exoId].sets[setIdx]) saved[exoId].sets[setIdx]={kg:'',reps:'',done:false};
+  saved[exoId].sets[setIdx].done=!saved[exoId].sets[setIdx].done;
+  saveSeance(curDateStr,'lower',saved);
+  renderSeance();
+}
 // ── TOGGLE EXOS ────────────────────────────────────────────────
 function toggleExo(id){
   openExos[id]=openExos[id]===false?true:false;
