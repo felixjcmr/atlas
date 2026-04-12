@@ -132,7 +132,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
   </div>
   <div class="hdr-right">
     <div class="streak-chip" id="streak-chip">🔥 <span id="streak-n">0</span>j validés</div>
-    <button onclick="openApiModal()" style="background:none;border:0.5px solid #1a1a1a;color:#333;border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer;" title="Configuration API">⚙️</button>
   </div>
 </div>
 
@@ -235,47 +234,8 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;}
 </div>
 
 
-<!-- CLÉ API -->
-<div style="margin:0 18px 10px;">
-  <div style="background:#080820;border:0.5px solid #2e2b6e;border-radius:13px;padding:13px 16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:600;color:#7B72E9;">🔑 Clé API Anthropic</div>
-      <div id="api-status-dot" style="font-size:10px;color:#555;"></div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input id="api-key-inline" type="password" placeholder="sk-ant-api03-..." 
-        style="flex:1;background:#0d0d0d;border:0.5px solid #2a2a2a;border-radius:8px;padding:9px 12px;color:#e8e8e8;font-size:12px;font-family:monospace;outline:none;"
-        oninput="updateApiStatusDot()">
-      <button onclick="saveApiKeyInline()" style="background:#7B72E9;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">Enregistrer</button>
-    </div>
-    <div style="margin-top:6px;font-size:10px;color:#333;">console.anthropic.com → API Keys → Create Key</div>
-  </div>
-</div>
 
 <!-- MODAL CONFIG API -->
-<div id="api-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeApiModal()">
-  <div style="background:#111;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:24px 20px 40px;border-top:0.5px solid #2a2a2a;">
-    <div style="font-size:14px;font-weight:500;color:#e8e8e8;margin-bottom:6px;">Clé API Anthropic</div>
-    <div style="font-size:11px;color:#444;margin-bottom:16px;line-height:1.6;">Crée ton compte sur <span style="color:#7B72E9;">console.anthropic.com</span> → API Keys → Create Key. Colle ta clé ci-dessous.</div>
-    <input id="api-key-input" type="password" placeholder="sk-ant-..." style="width:100%;background:#0d0d0d;border:0.5px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#e8e8e8;font-size:13px;font-family:monospace;outline:none;margin-bottom:12px;">
-    <div style="display:flex;gap:8px;">
-      <button onclick="saveApiKey()" style="flex:1;padding:13px;background:#7B72E9;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:500;cursor:pointer;">Enregistrer</button>
-      <button onclick="closeApiModal()" style="padding:13px 16px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;color:#555;font-size:13px;cursor:pointer;">Annuler</button>
-    </div>
-    <div id="api-key-status" style="margin-top:10px;font-size:11px;text-align:center;min-height:16px;"></div>
-    <div style="margin-top:16px;padding-top:16px;border-top:0.5px solid #141414;">
-      <div style="font-size:11px;color:#444;margin-bottom:10px;">Sauvegarde & restauration</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="exportData()" style="flex:1;padding:10px;background:#071a0a;border:0.5px solid #166534;border-radius:10px;color:#22C55E;font-size:11px;cursor:pointer;">⬇ Exporter mes données</button>
-        <label style="flex:1;padding:10px;background:#0d0d0d;border:0.5px solid #1a1a1a;border-radius:10px;color:#555;font-size:11px;cursor:pointer;text-align:center;">
-          ⬆ Importer
-          <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
-        </label>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 <!-- BOTTOM NAV -->
 <div class="bnav">
@@ -632,44 +592,6 @@ document.addEventListener('visibilitychange', function(){
   }
   el.innerHTML=parts.join(' ');
 })();
-// ── CLÉ API ─────────────────────────────────────────────────────
-function getApiKey(){return localStorage.getItem('anthropic_api_key')||'';}
-
-function updateApiStatusDot(){
-  const inp=document.getElementById('api-key-inline');
-  const dot=document.getElementById('api-status-dot');
-  if(!dot)return;
-  const v=inp?inp.value.trim():'';
-  dot.textContent=v.startsWith('sk-ant-')?'✓ Valide':'';
-  dot.style.color='#22C55E';
-}
-
-function saveApiKeyInline(){
-  const inp=document.getElementById('api-key-inline');
-  if(!inp)return;
-  const k=inp.value.trim();
-  if(!k){return;}
-  if(!k.startsWith('sk-ant-')){
-    const dot=document.getElementById('api-status-dot');
-    if(dot){dot.textContent='⚠ Invalide';dot.style.color='#EF4444';}
-    return;
-  }
-  localStorage.setItem('anthropic_api_key',k);
-  const dot=document.getElementById('api-status-dot');
-  if(dot){dot.textContent='✓ Enregistrée';dot.style.color='#22C55E';}
-  inp.value=k;
-  // Masquer après 2s
-  setTimeout(()=>{if(dot)dot.textContent='✓ Active';},2000);
-}
-function openApiModal(){
-  document.getElementById('api-modal-overlay').style.display='flex';
-  const k=getApiKey();
-  document.getElementById('api-key-input').value=k?k:'';
-  document.getElementById('api-key-status').textContent=k?'✓ Clé enregistrée':'Aucune clé configurée';
-  document.getElementById('api-key-status').style.color=k?'#22C55E':'#555';
-}
-function closeApiModal(){document.getElementById('api-modal-overlay').style.display='none';}
-
 
 // ── GITHUB SYNC ──────────────────────────────────────────────────────────────
 function getGHToken(){ return localStorage.getItem('atlas_gh_token')||''; }
@@ -880,15 +802,4 @@ if("serviceWorker" in navigator){
 </div>
 
 </body>
-<script>
-// Pré-remplir la clé API inline au chargement
-(function(){
-  const k=localStorage.getItem('anthropic_api_key');
-  const inp=document.getElementById('api-key-inline');
-  const dot=document.getElementById('api-status-dot');
-  if(inp&&k){inp.value=k;}
-  if(dot&&k){dot.textContent='✓ Active';dot.style.color='#22C55E';}
-  else if(dot){dot.textContent='Non configurée';dot.style.color='#333';}
-})();
-</script>
 </html>
